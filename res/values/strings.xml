@@ -152,6 +152,12 @@
     <string name="pref_camera_mode_entry_hq">High Quality</string>
     <string name="pref_camera_mode_entry_zsl">ZSL</string>
 
+    <string name="pref_camera_gbce_title">Contrast Enhancement</string>
+    <string name="pref_camera_gbce_default">off</string>
+    <string name="pref_camera_gbce_entry_off">Off</string>
+    <string name="pref_camera_gbce_entry_gbce">GBCE</string>
+    <string name="pref_camera_gbce_entry_glbce">GLBCE</string>
+
     <!-- Default focus mode setting.-->
     <string name="pref_camera_focusmode_default" translatable="false">continuous-picture</string>
 

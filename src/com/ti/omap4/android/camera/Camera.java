@@ -227,6 +227,11 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private final ZoomListener mZoomListener = new ZoomListener();
     private final CameraErrorCallback mErrorCallback = new CameraErrorCallback();
 
+    private static final String PARM_GBCE = "gbce";
+    private static final String PARM_GLBCE = "glbce";
+    private static final String PARM_GBCE_OFF = "off";
+    private static final String PARM_BCE_ENABLE = "enable";
+    private static final String PARM_BCE_DISABLE = "disable";
     private static final String PARM_MODE = "mode";
     private static final String PARM_HS_MODE = "high-performance";
     private static final String PARM_HQ_MODE = "high-quality";
@@ -236,6 +241,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final String PARM_IPP_NONE = "off";
 
     private String mCaptureMode = "high-quality";
+    private String mGBCE = "off";
 
     private long mFocusStartTime;
     private long mCaptureStartTime;
@@ -1165,6 +1171,13 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         }
     }
 
+    private void overrideCameraGBCE(final String gbce) {
+        if (mIndicatorControlContainer != null) {
+            mIndicatorControlContainer.overrideSettings(
+                    CameraSettings.KEY_GBCE, gbce);
+        }
+    }
+
     private void updateSceneModeUI() {
         // If scene mode is set, we cannot set flash mode, white balance, and
         // focus mode, instead, we read it from driver
@@ -1173,6 +1186,13 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                     mParameters.getWhiteBalance(), mParameters.getFocusMode());
         } else {
             overrideCameraSettings(null, null, null);
+        }
+
+        // GBCE/GLBCE is only available when in HQ mode
+        if ( !PARM_HQ_MODE.equals(mCaptureMode) ) {
+            overrideCameraGBCE(PARM_GBCE_OFF);
+        } else {
+            overrideCameraGBCE(null);
         }
     }
 
@@ -1197,6 +1217,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_RECORD_LOCATION,
                 CameraSettings.KEY_FOCUS_MODE,
                 CameraSettings.KEY_MODE,
+                CameraSettings.KEY_GBCE,
                 CameraSettings.KEY_PICTURE_SIZE};
 
         CameraPicker.setImageResourceId(R.drawable.ic_switch_photo_facing_holo_light);
@@ -1989,6 +2010,21 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mParameters.setFocusMode(mFocusManager.getFocusMode());
         } else {
             mFocusManager.overrideFocusMode(mParameters.getFocusMode());
+        }
+
+        // GBCE/GLBCE
+        String gbce = mPreferences.getString(
+                CameraSettings.KEY_GBCE, PARM_GBCE_OFF);
+
+        if ( PARM_GLBCE.equals(gbce) ) {
+            mParameters.set(PARM_GBCE, PARM_BCE_DISABLE);
+            mParameters.set(PARM_GLBCE, PARM_BCE_ENABLE);
+        } else if ( PARM_GBCE.equals(gbce) ) {
+            mParameters.set(PARM_GBCE, PARM_BCE_ENABLE);
+            mParameters.set(PARM_GLBCE, PARM_BCE_DISABLE);
+        } else {
+            mParameters.set(PARM_GBCE, PARM_BCE_DISABLE);
+            mParameters.set(PARM_GLBCE, PARM_BCE_DISABLE);
         }
 
         // Capture mode
