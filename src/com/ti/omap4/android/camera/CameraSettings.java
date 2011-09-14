@@ -59,6 +59,8 @@ public class CameraSettings {
     public static final String KEY_TAP_TO_FOCUS_PROMPT_SHOWN = "pref_tap_to_focus_prompt_shown_key";
     public static final String KEY_MODE = "pref_camera_mode_key";
     public static final String KEY_GBCE = "pref_camera_gbce_key";
+    public static final String KEY_BRACKET_RANGE = "pref_camera_bracketrange_key";
+    public static final String KEY_BURST = "pref_camera_burst_key";
 
     public static final String EXPOSURE_DEFAULT_VALUE = "0";
 
