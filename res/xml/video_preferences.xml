@@ -31,7 +31,43 @@
             camera:largeIcons="@array/video_timelapse_largeicons"
             camera:entries="@array/pref_video_time_lapse_frame_interval_entries"
             camera:entryValues="@array/pref_video_time_lapse_frame_interval_entryvalues"/>
-    <IconListPreference
+    <ListPreference
+            camera:key="pref_camera_audioencoder_key"
+           camera:defaultValue="@string/pref_camera_audioencoder_default"
+            camera:title="@string/pref_camera_audioencoder_title"
+            camera:entries="@array/pref_camera_audioencoder_entries"
+            camera:entryValues="@array/pref_camera_audioencoder_entryvalues" />
+    <ListPreference
+            camera:key="pref_camera_videoencoder_key"
+            camera:defaultValue="@string/pref_camera_videoencoder_default"
+            camera:title="@string/pref_camera_videoencoder_title"
+            camera:entries="@array/pref_camera_videoencoder_entries"
+            camera:entryValues="@array/pref_camera_videoencoder_entryvalues"/>
+   <ListPreference
+            camera:key="pref_camera_videoframerate_key"
+            camera:defaultValue="@string/pref_camera_videoframerate_default"
+            camera:title="@string/pref_camera_videoframerate_title"
+            camera:entries="@array/pref_camera_videoframerate_entries"
+            camera:entryValues="@array/pref_camera_videoframerate_entryvalues"/>
+    <ListPreference
+            camera:key="pref_camera_videominframerate_key"
+            camera:defaultValue="@string/pref_camera_videominframerate_default"
+            camera:title="@string/pref_camera_videominframerate_title"
+            camera:entries="@array/pref_camera_videominframerate_entries"
+            camera:entryValues="@array/pref_camera_videominframerate_entryvalues"/>
+   <ListPreference
+            camera:key="pref_camera_videobitrate_key"
+            camera:defaultValue="@string/pref_camera_videobitrate_default"
+            camera:title="@string/pref_camera_videobitrate_title"
+            camera:entries="@array/pref_camera_videobitrate_entries"
+            camera:entryValues="@array/pref_camera_videobitrate_entryvalues" />
+    <ListPreference
+            camera:key="pref_camera_video_format_key"
+            camera:defaultValue="@string/pref_camera_video_format_default"
+            camera:title="@string/pref_camera_video_format_title"
+            camera:entries="@array/pref_camera_video_format_entries"
+            camera:entryValues="@array/pref_camera_video_format_entryvalues" />
+   <IconListPreference
             camera:key="pref_camera_video_flashmode_key"
             camera:defaultValue="@string/pref_camera_video_flashmode_default"
             camera:title="@string/pref_camera_flashmode_title"

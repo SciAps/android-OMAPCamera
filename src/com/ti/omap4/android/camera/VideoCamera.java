@@ -492,7 +492,13 @@ public class VideoCamera extends ActivityBase
                     CameraSettings.KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL,
                     CameraSettings.KEY_VIDEO_QUALITY};
         final String[] OTHER_SETTING_KEYS = {
-                    CameraSettings.KEY_RECORD_LOCATION};
+                    CameraSettings.KEY_VIDEO_FORMAT,
+                    CameraSettings.KEY_AUDIO_ENCODER,
+                    CameraSettings.KEY_VIDEO_ENCODER,
+                    CameraSettings.KEY_VIDEO_BITRATE,
+                    //CameraSettings.KEY_VIDEO_FRAMERATE,
+                    //CameraSettings.KEY_VIDEO_MINFRAMERATE,
+                    CameraSettings.KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL};
 
         CameraPicker.setImageResourceId(R.drawable.ic_switch_video_facing_holo_light);
         mIndicatorControlContainer.initialize(this, mPreferenceGroup,
@@ -687,7 +693,14 @@ public class VideoCamera extends ActivityBase
                 mPreferences.getString(CameraSettings.KEY_VIDEO_QUALITY,
                         defaultQuality);
         int quality = Integer.valueOf(videoQuality);
-
+        int mVideoEncoder = 0;
+        int mVideoFramerate = 0;
+        int mVideoBitrate = 0;
+        int mAudioEncoder = 0;
+        int mVideoFormat = 0;
+        int mVideoDurationInSec = 0;
+        mVideoFormat = getIntPreference(CameraSettings.KEY_VIDEO_FORMAT,
+                            CameraSettings.DEFAULT_VIDEO_FORMAT_VALUE);
         // Set video quality.
         Intent intent = getIntent();
         if (intent.hasExtra(MediaStore.EXTRA_VIDEO_QUALITY)) {
@@ -744,6 +757,16 @@ public class VideoCamera extends ActivityBase
         // TODO: This should be checked instead directly +1000.
         if (mCaptureTimeLapse) quality += 1000;
         mProfile = CamcorderProfile.get(mCameraId, quality);
+
+        mVideoEncoder = getIntPreference(CameraSettings.KEY_VIDEO_ENCODER,CameraSettings.DEFAULT_VIDEO_ENCODER_VALUE);
+        mVideoFramerate = getIntPreference(CameraSettings.KEY_VIDEO_FRAMERATE,CameraSettings.DEFAULT_VIDEO_FRAMERATE_VALUE);
+        mVideoBitrate = getIntPreference(CameraSettings.KEY_VIDEO_BITRATE,CameraSettings.DEFAULT_VIDEO_BITRATE_VALUE);
+        mAudioEncoder = getIntPreference(CameraSettings.KEY_AUDIO_ENCODER,CameraSettings.DEFAULT_AUDIO_ENCODER_VALUE);
+       mProfile.videoFrameRate = mVideoFramerate;
+        mProfile.videoBitRate = mVideoBitrate;
+        mProfile.videoCodec = mVideoEncoder;
+        mProfile.audioCodec = mAudioEncoder;
+        updateVideoFormat(mVideoFormat);
         getDesiredPreviewSize();
     }
 
@@ -1170,12 +1193,9 @@ public class VideoCamera extends ActivityBase
             mMediaRecorder.setCaptureRate((1000 / (double) mTimeBetweenTimeLapseFrameCaptureMs));
         }
 
-        Location loc = mLocationManager.getCurrentLocation();
-        if (loc != null) {
-            mMediaRecorder.setLocation((float) loc.getLatitude(),
-                    (float) loc.getLongitude());
-        }
-
+	mMediaRecorder.setVideoFrameRate(mProfile.videoFrameRate);
+        mMediaRecorder.setVideoSize(mProfile.videoFrameWidth, mProfile.videoFrameHeight);
+        mMediaRecorder.setVideoEncodingBitRate(mProfile.videoBitRate);
 
         // Set output file.
         // Try Uri in the intent first. If it doesn't exist, use our own
@@ -1833,8 +1853,14 @@ public class VideoCamera extends ActivityBase
     private void setCameraParameters() {
         mParameters = mCameraDevice.getParameters();
 
-        mParameters.setPreviewSize(mDesiredPreviewWidth, mDesiredPreviewHeight);
-        mParameters.setPreviewFrameRate(mProfile.videoFrameRate);
+	//Set Video Resolution
+
+	String vidFormat = mPreferences.getString(CameraSettings.KEY_VIDEO_FORMAT, (getString(R.string.pref_camera_video_format_default)));
+        int optVideoFormat = Integer.parseInt(vidFormat);
+        updateVideoFormat(optVideoFormat);
+
+        mParameters.setPreviewSize(mProfile.videoFrameWidth, mProfile.videoFrameHeight);
+        //mParameters.setPreviewFrameRate(mProfile.videoFrameRate);
 
         // Set flash mode.
         String flashMode = mPreferences.getString(
@@ -1903,6 +1929,53 @@ public class VideoCamera extends ActivityBase
         int jpegQuality = CameraProfile.getJpegEncodingQualityParameter(mCameraId,
                 CameraProfile.QUALITY_HIGH);
         mParameters.setJpegQuality(jpegQuality);
+
+        //Set FrameRate
+	String framerate = mPreferences.getString(CameraSettings.KEY_VIDEO_FRAMERATE, (getString(R.string.pref_camera_videoframerate_default)));
+        int maxFrameRate = Integer.parseInt(framerate);
+        Log.i(TAG,"Framerate is set to "+ mProfile.videoFrameRate);
+
+       // Set MIN FrameRate
+        String minframerate = mPreferences.getString(CameraSettings.KEY_VIDEO_MINFRAMERATE, (getString(R.string.pref_camera_videominframerate_default)));
+        Log.v(TAG,"MIN Framerate is set to "+ minframerate);
+        int minFrameRate = Integer.parseInt(minframerate);
+
+        /* Check max FPS in case of Secondary Camera.
+         *  Secondary Camera supports a MAx Fps of 27
+         */
+        /*(if (info.facing == CameraInfo.CAMERA_FACING_FRONT){
+            if(minFrameRate > 27){
+                   minFrameRate = 27;
+            }
+            if(maxFrameRate > 27){
+                   maxFrameRate = 27;
+            }
+        }   TODO : FPS check for Secondary camera - will be enabled after Secondary Camera is up*/
+
+        if (minFrameRate > maxFrameRate)
+        {
+            Log.v(TAG,"MIN Framerate greater than MAX Framerate Setting MAX=MIN");
+            maxFrameRate = minFrameRate;
+        }
+       mProfile.videoFrameRate = maxFrameRate;
+       mParameters.setPreviewFpsRange(minFrameRate*1000, maxFrameRate*1000);
+        try {
+            mCameraDevice.setParameters(mParameters);
+       } catch (Throwable ex) {
+            throw new RuntimeException("setParameters failed", ex);
+        }
+        // Set Bitrate
+        String bitrate = mPreferences.getString(CameraSettings.KEY_VIDEO_BITRATE, (getString(R.string.pref_camera_videobitrate_default)));
+       mProfile.videoBitRate = Integer.parseInt(bitrate);
+        Log.i(TAG,"Bitrate is set to "+ mProfile.videoBitRate);
+
+        // Set Video Fncoder
+        String vidEncoder = mPreferences.getString(CameraSettings.KEY_VIDEO_ENCODER, (getString(R.string.pref_camera_videoencoder_default)));
+        mProfile.videoCodec = Integer.parseInt(vidEncoder);
+
+       // Set Audio encoder
+        String audioEncoder = mPreferences.getString(CameraSettings.KEY_AUDIO_ENCODER, (getString(R.string.pref_camera_audioencoder_default)));
+        mProfile.audioCodec = Integer.parseInt(audioEncoder);
 
         mCameraDevice.setParameters(mParameters);
         // Keep preview size up to date.
@@ -2402,5 +2475,53 @@ public class VideoCamera extends ActivityBase
             }
             mVideoFileDescriptor = null;
         }
+
+    }
+
+    private void updateVideoFormat(int vidQuality) {
+        if (vidQuality == 0) {
+            mProfile.videoFrameWidth = 128;
+            mProfile.videoFrameHeight = 96;
+        } else if (vidQuality == 1) {
+            mProfile.videoFrameWidth  = 176;
+            mProfile.videoFrameHeight = 144;
+        } else if (vidQuality == 2) {
+           mProfile.videoFrameWidth  = 352;
+            mProfile.videoFrameHeight = 288;
+        } else if (vidQuality == 3) {
+            mProfile.videoFrameWidth  = 320;
+           mProfile.videoFrameHeight = 240;
+        } else if (vidQuality == 4) {
+            mProfile.videoFrameWidth  = 640;
+            mProfile.videoFrameHeight = 480;
+        } else if (vidQuality == 5) {
+            mProfile.videoFrameWidth  = 720;
+            mProfile.videoFrameHeight = 480;
+        } else if (vidQuality == 6) {
+            mProfile.videoFrameWidth  = 720;
+            mProfile.videoFrameHeight = 576;
+        } else if (vidQuality == 7) {
+            // WVGA resolution
+            mProfile.videoFrameWidth  = 800;
+            mProfile.videoFrameHeight = 480;
+        } else if (vidQuality == 8) {
+           // 720P resolution
+            mProfile.videoFrameWidth  = 1280;
+            mProfile.videoFrameHeight = 720;
+       } else if (vidQuality == 9) {
+            // 1080P resolution
+            mProfile.videoFrameWidth  = 1920;
+            mProfile.videoFrameHeight = 1080;
+        }
+    }
+
+    private int getIntPreference(String key, int defaultValue) {
+       String s = mPreferences.getString(key, "");
+        int result = defaultValue;
+        try {
+            result = Integer.parseInt(s);
+        } catch (NumberFormatException e) {
+        }
+        return result;
     }
 }

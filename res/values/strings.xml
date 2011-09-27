@@ -133,6 +133,115 @@
 
     <!-- Settings screen, Camcorder setting category title -->
     <string name="pref_camcorder_settings_category">Camcorder settings</string>
+    <!-- Settings screen, Video FrameRate category title -->
+    <string name="pref_camera_videoframerate_category">Video FrameRate</string>
+
+    <!-- Default Video FrameRate setting. A numerical value. Do not translate. -->
+    <string name="pref_camera_videoframerate_default">30</string>
+
+    <!-- Settings screen, Select Video FrameRate title -->
+    <string name="pref_camera_videoframerate_title">Select Video FrameRate</string>
+
+    <!-- Settings screen, Video FrameRate dialog radio button choices -->
+    <string name="pref_camera_videoframerate_entry_1">15</string>
+    <string name="pref_camera_videoframerate_entry_2">27</string>
+    <string name="pref_camera_videoframerate_entry_3">30</string>
+
+    <!-- Settings screen, Videomin FrameRate category title -->
+    <string name="pref_camera_videominframerate_category">VideoMINFrameRate</string>
+
+    <!-- Default Video FrameRate setting. A numerical value. Do not translate. -->
+    <string name="pref_camera_videominframerate_default">30</string>
+
+    <!-- Settings screen, Select Video FrameRate title -->
+    <string name="pref_camera_videominframerate_title">Select Video MIN FrameRate</string>
+
+    <!-- Settings screen, Video FrameRate dialog radio button choices -->
+    <string name="pref_camera_videominframerate_entry_1">15</string>
+    <string name="pref_camera_videominframerate_entry_2">24</string>
+    <string name="pref_camera_videominframerate_entry_3">30</string>
+
+    <!-- Settings screen, Video BitRate category title -->
+    <string name="pref_camera_videobitrate_category">Video BitRate</string>
+
+    <!-- Default Video bitRate setting. A numerical value. Do not translate. -->
+    <string name="pref_camera_videobitrate_default">4000000</string>
+
+    <!-- Settings screen, Select Video bitRate title -->
+    <string name="pref_camera_videobitrate_title">Select Video bitRate</string>
+    <!-- Settings screen, Video bitRate dialog radio button choices -->
+    <string name="pref_camera_videobitrate_entry_0">Auto</string>
+    <string name="pref_camera_videobitrate_entry_1">64K</string>
+    <string name="pref_camera_videobitrate_entry_2">128K</string>
+    <string name="pref_camera_videobitrate_entry_3">192K</string>
+    <string name="pref_camera_videobitrate_entry_4">240K</string>
+    <string name="pref_camera_videobitrate_entry_5">320K</string>
+    <string name="pref_camera_videobitrate_entry_6">360K</string>
+    <string name="pref_camera_videobitrate_entry_7">384K</string>
+    <string name="pref_camera_videobitrate_entry_8">420K</string>
+    <string name="pref_camera_videobitrate_entry_9">768K</string>
+    <string name="pref_camera_videobitrate_entry_10">1M</string>
+    <string name="pref_camera_videobitrate_entry_11">1.5M</string>
+    <string name="pref_camera_videobitrate_entry_12">2M</string>
+    <string name="pref_camera_videobitrate_entry_13">4M</string>
+    <string name="pref_camera_videobitrate_entry_14">6M</string>
+    <string name="pref_camera_videobitrate_entry_15">8M</string>
+    <string name="pref_camera_videobitrate_entry_16">10M</string>
+    <string name="pref_camera_videobitrate_entry_17">12M</string>
+    <string name="pref_camera_videobitrate_entry_18">14M</string>
+    <string name="pref_camera_videobitrate_entry_19">16M</string>
+    <string name="pref_camera_videobitrate_entry_20">18M</string>
+    <string name="pref_camera_videobitrate_entry_21">20M</string>
+
+    <!-- Settings screen, Audio Encoder category title -->
+    <string name="pref_camera_audioencoder_category">Audio Encoder</string>
+
+    <!-- Default Audio Encoder setting. A numerical value. Do not translate. -->
+    <string name="pref_camera_audioencoder_default">3</string>
+
+    <!-- Settings screen, Select Audio Encoder title -->
+    <string name="pref_camera_audioencoder_title">Select Audio Encoder</string>
+
+    <!-- Settings screen, Audio Encoder dialog radio button choices -->
+    <string name="pref_camera_audioencoder_entry_1">AMR-NB</string>
+    <string name="pref_camera_audioencoder_entry_3">AAC</string>
+
+    <!-- Settings screen, Audio Encoder dialog title -->
+    <string name="pref_camera_audioencoder_dialogtitle">Audio Encoder</string>
+
+    <!-- Settings screen, Video Encoder category title -->
+    <string name="pref_camera_videoencoder_category">Video Encoder</string>
+    <!-- Default Video Encoder setting. A numerical value. Do not translate. -->
+    <string name="pref_camera_videoencoder_default">2</string>
+
+    <!-- Settings screen, Select Video Encoder title -->
+    <string name="pref_camera_videoencoder_title">Select Video Encoder</string>
+
+    <!-- Settings screen, Video Encoder dialog radio button choices -->
+    <string name="pref_camera_videoencoder_entry_1">H263</string>
+    <string name="pref_camera_videoencoder_entry_2">H264</string>
+    <string name="pref_camera_videoencoder_entry_3">MPEG4</string>
+
+    <!-- Default video format setting. A numerical value. -->
+    <string name="pref_camera_video_format_default" translatable="false">5</string>
+
+    <!-- Settings screen, Video format title -->
+    <string name="pref_camera_video_format_title">Video format</string>
+
+    <!-- Settings screen, Video format dialog radio button choices -->
+    <string name="pref_camera_video_format_entry_0_sqcif">SQCIF 128x96</string>
+    <string name="pref_camera_video_format_entry_1_qcif">QCIF 176x144</string>
+    <string name="pref_camera_video_format_entry_2_cif">CIF 352x288</string>
+    <string name="pref_camera_video_format_entry_3_qvga">QVGA 320x240</string>
+    <string name="pref_camera_video_format_entry_4_vga">VGA 640x480</string>
+    <string name="pref_camera_video_format_entry_5_ntsc">DVD-Video NTSC 720x480</string>
+    <string name="pref_camera_video_format_entry_6_pal">DVD-Video PAL 720x576</string>
+    <string name="pref_camera_video_format_entry_7_wvga">WVGA 800x480</string>
+    <string name="pref_camera_video_format_entry_8_720p">1280x720</string>
+    <string name="pref_camera_video_format_entry_9_1080p">1920x1080</string>
+
+    <!-- Settings screen, Video format dialog title -->
+    <string name="pref_camera_video_format_dialogtitle">Video format</string>
 
     <!-- Settings screen, Picture size title -->
     <string name="pref_camera_picturesize_title">Picture size</string>

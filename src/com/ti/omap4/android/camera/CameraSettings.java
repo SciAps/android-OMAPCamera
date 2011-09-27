@@ -40,6 +40,12 @@ public class CameraSettings {
     public static final String KEY_RECORD_LOCATION = RecordLocationPreference.KEY;
     public static final String KEY_VIDEO_QUALITY = "pref_video_quality_key";
     public static final String KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL = "pref_video_time_lapse_frame_interval_key";
+    public static final String KEY_AUDIO_ENCODER = "pref_camera_audioencoder_key";
+    public static final String KEY_VIDEO_ENCODER = "pref_camera_videoencoder_key";
+    public static final String KEY_VIDEO_FRAMERATE = "pref_camera_videoframerate_key";
+    public static final String KEY_VIDEO_MINFRAMERATE = "pref_camera_videominframerate_key";
+    public static final String KEY_VIDEO_BITRATE = "pref_camera_videobitrate_key";
+    public static final String KEY_VIDEO_FORMAT = "pref_camera_video_format_key";
     public static final String KEY_PICTURE_SIZE = "pref_camera_picturesize_key";
     public static final String KEY_JPEG_QUALITY = "pref_camera_jpegquality_key";
     public static final String KEY_FOCUS_MODE = "pref_camera_focusmode_key";
@@ -60,7 +66,11 @@ public class CameraSettings {
     public static final int CURRENT_LOCAL_VERSION = 2;
 
     public static final int DEFAULT_VIDEO_DURATION = 0; // no limit
-
+    public static final int DEFAULT_VIDEO_FORMAT_VALUE = 5; // NTSC 720x480
+    public static final int DEFAULT_AUDIO_ENCODER_VALUE = 3; // AAC
+    public static final int DEFAULT_VIDEO_ENCODER_VALUE = 2; // H264
+    public static final int DEFAULT_VIDEO_FRAMERATE_VALUE = 30;
+    public static final int DEFAULT_VIDEO_BITRATE_VALUE = 4000000;
     private static final String TAG = "CameraSettings";
 
     private final Context mContext;
