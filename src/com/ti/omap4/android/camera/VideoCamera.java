@@ -1853,7 +1853,8 @@ public class VideoCamera extends ActivityBase
     private void setCameraParameters() {
         mParameters = mCameraDevice.getParameters();
 
-	//Set Video Resolution
+	CameraInfo info = CameraHolder.instance().getCameraInfo()[mCameraId];
+        //Set Video Resolution
 
 	String vidFormat = mPreferences.getString(CameraSettings.KEY_VIDEO_FORMAT, (getString(R.string.pref_camera_video_format_default)));
         int optVideoFormat = Integer.parseInt(vidFormat);
@@ -1943,14 +1944,14 @@ public class VideoCamera extends ActivityBase
         /* Check max FPS in case of Secondary Camera.
          *  Secondary Camera supports a MAx Fps of 27
          */
-        /*(if (info.facing == CameraInfo.CAMERA_FACING_FRONT){
+        if (info.facing == CameraInfo.CAMERA_FACING_FRONT){
             if(minFrameRate > 27){
                    minFrameRate = 27;
             }
             if(maxFrameRate > 27){
                    maxFrameRate = 27;
             }
-        }   TODO : FPS check for Secondary camera - will be enabled after Secondary Camera is up*/
+        }
 
         if (minFrameRate > maxFrameRate)
         {
