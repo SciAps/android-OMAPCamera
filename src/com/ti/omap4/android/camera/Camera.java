@@ -117,6 +117,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
     private int mZoomState = ZOOM_STOPPED;
     private boolean mSmoothZoomSupported = false;
+    private boolean mBurstRunning = false;
     private int mZoomValue;  // The current zoom value.
     private int mZoomMax;
     private int mTargetZoomValue;
@@ -752,7 +753,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 enableCameraControls(true);
 
                 if ((!mCaptureMode.equals(PARM_TEMPORAL_BRACKETING)) &&
-                      !mCaptureMode.equals(PARM_EXPOSURE_BRACKETING)) {
+                      !mCaptureMode.equals(PARM_EXPOSURE_BRACKETING) &&
+                      !mBurstRunning == true) {
                 // We want to show the taken picture for a while, so we wait
                 // for at least 0.5 second before restarting the preview.
                     long delay = 500 - mPictureDisplayedToJpegCallbackTime;
@@ -810,6 +812,20 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 if (mBurstImages == 0 ) {
                     mHandler.sendEmptyMessageDelayed(RESTART_PREVIEW, 0);
                     mTempBracketingEnabled = true;
+                }
+            }
+
+            if (mBurstRunning) {
+                mBurstImages --;
+                if (mBurstImages == 0) {
+                    mParameters.set(PARM_BURST, 0);
+                    mCameraDevice.setParameters(mParameters);
+                    Editor editor = mPreferences.edit();
+                    editor.putString(CameraSettings.KEY_BURST, "0");
+                    editor.apply();
+                    mIndicatorControlContainer.reloadPreferences();
+                    mBurstRunning = false;
+                    mHandler.sendEmptyMessageDelayed(RESTART_PREVIEW, 0);
                 }
             }
         }
@@ -1220,6 +1236,13 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         }
     }
 
+    private void overrideCameraBurst(final String burst) {
+        if (mIndicatorControlContainer != null) {
+            mIndicatorControlContainer.overrideSettings(
+                    CameraSettings.KEY_BURST, burst);
+        }
+    }
+
     private void updateSceneModeUI() {
         // If scene mode is set, we cannot set flash mode, white balance, and
         // focus mode, instead, we read it from driver
@@ -1236,6 +1259,17 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         } else {
             overrideCameraGBCE(null);
         }
+
+        if ( !PARM_HS_MODE.equals(mCaptureMode) ) {
+            Editor editor = mPreferences.edit();
+            editor.putString(CameraSettings.KEY_BURST, "0");
+            editor.apply();
+            mIndicatorControlContainer.reloadPreferences();
+
+            overrideCameraBurst(getString(R.string.pref_camera_burst_default));
+            } else {
+            overrideCameraBurst(null);
+            }
     }
 
     private void loadCameraPreferences() {
@@ -2092,6 +2126,19 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mParameters.set(PARM_TEMPORAL_BRACKETING_RANGE_NEG, Integer.parseInt(bracketRange) );
             mBracketRange = bracketRange;
             mBurstImages = Integer.parseInt(mBracketRange) * 2 + 1;
+        }
+
+        int burst = Integer.parseInt(mPreferences.getString(
+                CameraSettings.KEY_BURST,
+                getString(R.string.pref_camera_burst_default)));
+
+        if (( burst != mBurstImages ) &&
+                ( mode.equals(PARM_HS_MODE) ) ) {
+              mBurstImages = burst;
+              if ( 0 < mBurstImages ) {
+                  mParameters.set(PARM_BURST, mBurstImages);
+                  mBurstRunning = true;
+              }
         }
 
         if ( !mCaptureMode.equals(mode) ) {
