@@ -61,6 +61,7 @@ public class CameraSettings {
     public static final String KEY_GBCE = "pref_camera_gbce_key";
     public static final String KEY_BRACKET_RANGE = "pref_camera_bracketrange_key";
     public static final String KEY_BURST = "pref_camera_burst_key";
+    public static final String KEY_ISO = "pref_camera_iso_key";
 
     public static final String EXPOSURE_DEFAULT_VALUE = "0";
 

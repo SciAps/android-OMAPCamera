@@ -250,6 +250,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final int EXPOSURE_BRACKETING_COUNT = 3;
     private static final String PARM_TEMPORAL_BRACKETING_RANGE_POS = "temporal-bracketing-range-positive";
     private static final String PARM_TEMPORAL_BRACKETING_RANGE_NEG = "temporal-bracketing-range-negative";
+    private static final String PARM_ISO = "iso";
 
     private int mBurstImages = 0;
     private boolean mTempBracketingEnabled = false;
@@ -257,6 +258,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mCaptureMode = "high-quality";
     private String mGBCE = "off";
     private String mBracketRange;
+    private String mISO;
 
     private long mFocusStartTime;
     private long mCaptureStartTime;
@@ -1295,6 +1297,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_MODE,
                 CameraSettings.KEY_GBCE,
                 CameraSettings.KEY_BURST,
+                CameraSettings.KEY_ISO,
                 CameraSettings.KEY_BRACKET_RANGE,
                 CameraSettings.KEY_PICTURE_SIZE};
 
@@ -2110,6 +2113,15 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         } else {
             mParameters.set(PARM_GBCE, PARM_BCE_DISABLE);
             mParameters.set(PARM_GLBCE, PARM_BCE_DISABLE);
+        }
+
+        // ISO
+        String iso = mPreferences.getString(
+                    CameraSettings.KEY_ISO, getString(R.string.pref_camera_iso_default));
+
+        if ( !iso.equals(mISO) ) {
+            mParameters.set(PARM_ISO, iso);
+            mISO = iso;
         }
 
         // Capture mode
