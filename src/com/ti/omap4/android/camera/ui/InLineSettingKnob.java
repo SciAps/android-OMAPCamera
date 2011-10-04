@@ -113,6 +113,11 @@ public class InLineSettingKnob extends InLineSettingItem {
     }
 
     protected void updateView() {
+
+        if ( null == mPreference ) {
+            return;
+        }
+
         if (mOverrideValue == null) {
             mEntry.setText(mPreference.getEntry());
             mNextButton.setVisibility(mIndex == 0 ? View.INVISIBLE : View.VISIBLE);
