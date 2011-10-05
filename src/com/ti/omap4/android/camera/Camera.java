@@ -259,6 +259,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mGBCE = "off";
     private String mBracketRange;
     private String mISO;
+    private String mColorEffect;
 
     private long mFocusStartTime;
     private long mCaptureStartTime;
@@ -1299,6 +1300,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_BURST,
                 CameraSettings.KEY_ISO,
                 CameraSettings.KEY_BRACKET_RANGE,
+                CameraSettings.KEY_COLOR_EFFECT,
                 CameraSettings.KEY_PICTURE_SIZE};
 
         CameraPicker.setImageResourceId(R.drawable.ic_switch_photo_facing_holo_light);
@@ -1989,6 +1991,17 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mParameters.setMeteringAreas(mFocusManager.getMeteringAreas());
         }
 
+        // Color Effects
+        String colorEffect = mPreferences.getString(
+                CameraSettings.KEY_COLOR_EFFECT,
+                getString(R.string.pref_camera_coloreffect_default));
+
+        if (isSupported(colorEffect, mParameters.getSupportedColorEffects()) &&
+             !colorEffect.equals(mColorEffect) ) {
+            mParameters.setColorEffect(colorEffect);
+            mColorEffect = colorEffect;
+        }
+
         // Set picture size.
         String pictureSize = mPreferences.getString(
                 CameraSettings.KEY_PICTURE_SIZE, null);
@@ -2096,8 +2109,18 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             // Set focus mode.
             mFocusManager.overrideFocusMode(null);
             mParameters.setFocusMode(mFocusManager.getFocusMode());
+
         } else {
             mFocusManager.overrideFocusMode(mParameters.getFocusMode());
+            // Set Color Effects to None.
+            Editor editor = mPreferences.edit();
+            editor.putString(CameraSettings.KEY_COLOR_EFFECT, Parameters.EFFECT_NONE);
+            editor.apply();
+            mParameters.setColorEffect(Parameters.EFFECT_NONE);
+
+            if (mIndicatorControlContainer != null) {
+                mIndicatorControlContainer.reloadPreferences();
+            }
         }
 
         // GBCE/GLBCE

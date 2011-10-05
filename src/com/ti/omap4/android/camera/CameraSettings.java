@@ -62,6 +62,7 @@ public class CameraSettings {
     public static final String KEY_BRACKET_RANGE = "pref_camera_bracketrange_key";
     public static final String KEY_BURST = "pref_camera_burst_key";
     public static final String KEY_ISO = "pref_camera_iso_key";
+    public static final String KEY_COLOR_EFFECT = "pref_camera_coloreffect_key";
 
     public static final String EXPOSURE_DEFAULT_VALUE = "0";
 
@@ -155,6 +156,7 @@ public class CameraSettings {
         ListPreference flashMode = group.findPreference(KEY_FLASH_MODE);
         ListPreference focusMode = group.findPreference(KEY_FOCUS_MODE);
         ListPreference exposure = group.findPreference(KEY_EXPOSURE);
+        ListPreference colorEffect = group.findPreference(KEY_COLOR_EFFECT);
         IconListPreference cameraIdPref =
                 (IconListPreference) group.findPreference(KEY_CAMERA_ID);
         ListPreference videoFlashMode =
@@ -182,6 +184,10 @@ public class CameraSettings {
         if (flashMode != null) {
             filterUnsupportedOptions(group,
                     flashMode, mParameters.getSupportedFlashModes());
+        }
+        if (colorEffect != null) {
+            filterUnsupportedOptions(group,
+                    colorEffect, mParameters.getSupportedColorEffects());
         }
         if (focusMode != null) {
             if (mParameters.getMaxNumFocusAreas() == 0) {
