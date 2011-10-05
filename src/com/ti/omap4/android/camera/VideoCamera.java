@@ -489,8 +489,8 @@ public class VideoCamera extends ActivityBase
                     CameraSettings.KEY_VIDEOCAMERA_FLASH_MODE,
                     CameraSettings.KEY_WHITE_BALANCE,
                     CameraSettings.KEY_VIDEO_EFFECT,
-                    CameraSettings.KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL,
-                    CameraSettings.KEY_VIDEO_QUALITY};
+                    CameraSettings.KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL};
+                    //CameraSettings.KEY_VIDEO_QUALITY}; //Disabling redundant Video Qualily Menu
         final String[] OTHER_SETTING_KEYS = {
                     CameraSettings.KEY_VIDEO_FORMAT,
                     CameraSettings.KEY_AUDIO_ENCODER,
