@@ -218,7 +218,7 @@
 
     <string-array name="pref_camera_videoframerate_entryvalues">
         <item>15</item>
-        <item>27</item>
+        <item>24</item>
         <item>30</item>
     </string-array>
 

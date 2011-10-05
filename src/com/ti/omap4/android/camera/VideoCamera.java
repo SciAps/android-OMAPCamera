@@ -496,9 +496,10 @@ public class VideoCamera extends ActivityBase
                     CameraSettings.KEY_AUDIO_ENCODER,
                     CameraSettings.KEY_VIDEO_ENCODER,
                     CameraSettings.KEY_VIDEO_BITRATE,
-                    //CameraSettings.KEY_VIDEO_FRAMERATE,
-                    //CameraSettings.KEY_VIDEO_MINFRAMERATE,
-                    CameraSettings.KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL};
+                    CameraSettings.KEY_VIDEO_FRAMERATE,
+                    CameraSettings.KEY_VIDEO_MINFRAMERATE,
+                    CameraSettings.KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL,
+                    CameraSettings.KEY_RECORD_LOCATION};
 
         CameraPicker.setImageResourceId(R.drawable.ic_switch_video_facing_holo_light);
         mIndicatorControlContainer.initialize(this, mPreferenceGroup,
