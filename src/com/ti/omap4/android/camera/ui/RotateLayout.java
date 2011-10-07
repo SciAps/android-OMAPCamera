@@ -16,8 +16,6 @@
 
 package com.ti.omap4.android.camera.ui;
 
-import com.ti.omap4.android.camera.ui.Rotatable;
-
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
