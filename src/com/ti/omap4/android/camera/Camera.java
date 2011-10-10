@@ -251,6 +251,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final String PARM_TEMPORAL_BRACKETING_RANGE_POS = "temporal-bracketing-range-positive";
     private static final String PARM_TEMPORAL_BRACKETING_RANGE_NEG = "temporal-bracketing-range-negative";
     private static final String PARM_ISO = "iso";
+    private static final String PARM_CONTRAST = "contrast";
 
     private int mBurstImages = 0;
     private boolean mTempBracketingEnabled = false;
@@ -260,6 +261,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mBracketRange;
     private String mISO;
     private String mColorEffect;
+    private String mContrast;
 
     private long mFocusStartTime;
     private long mCaptureStartTime;
@@ -1150,6 +1152,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mThumbnailView.setVisibility(View.VISIBLE);
         }
 
+        mContrast = getString(R.string.pref_camera_contrast_default);
+
         mPreferences.setLocalId(this, mCameraId);
         CameraSettings.upgradeLocalPreferences(mPreferences.getLocal());
 
@@ -1297,6 +1301,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_FOCUS_MODE,
                 CameraSettings.KEY_MODE,
                 CameraSettings.KEY_GBCE,
+                CameraSettings.KEY_CONTRAST,
                 CameraSettings.KEY_BURST,
                 CameraSettings.KEY_ISO,
                 CameraSettings.KEY_BRACKET_RANGE,
@@ -2000,6 +2005,15 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
              !colorEffect.equals(mColorEffect) ) {
             mParameters.setColorEffect(colorEffect);
             mColorEffect = colorEffect;
+        }
+
+        String contrast = mPreferences.getString(
+                    CameraSettings.KEY_CONTRAST,
+                    getString(R.string.pref_camera_contrast_default));
+
+        if ( !contrast.equals(mContrast) ) {
+            mParameters.set(PARM_CONTRAST, Integer.parseInt(contrast) );
+            mContrast = contrast;
         }
 
         // Set picture size.
