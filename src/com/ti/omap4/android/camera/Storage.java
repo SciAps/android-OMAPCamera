@@ -67,6 +67,8 @@ public class Storage {
             }
         }
 
+        Log.e(TAG, "PPM: StoreImage: " + (System.currentTimeMillis() - date) + " ms");
+
         // Insert into MediaStore.
         ContentValues values = new ContentValues(9);
         values.put(ImageColumns.TITLE, title);
