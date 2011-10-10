@@ -1855,6 +1855,24 @@ public class VideoCamera extends ActivityBase
         return supported == null ? false : supported.indexOf(value) >= 0;
     }
 
+    private int getMaxSupportedFPS(Parameters params) {
+        Integer res = -1;
+
+        if ( null != params) {
+
+            List<Integer> supportedFPS = params.getSupportedPreviewFrameRates();
+            if ( 0 < supportedFPS.size() ) {
+                for ( int i = 0 ; i < supportedFPS.size() ; i++ ) {
+                    if ( res < supportedFPS.get(i) ) {
+                        res = supportedFPS.get(i);
+                    }
+                }
+            }
+        }
+
+        return res;
+    }
+
     private void setCameraParameters() {
         mParameters = mCameraDevice.getParameters();
 
@@ -1946,16 +1964,17 @@ public class VideoCamera extends ActivityBase
         Log.v(TAG,"MIN Framerate is set to "+ minframerate);
         int minFrameRate = Integer.parseInt(minframerate);
 
-        /* Check max FPS in case of Secondary Camera.
-         *  Secondary Camera supports a MAx Fps of 27
-         */
-        if (info.facing == CameraInfo.CAMERA_FACING_FRONT){
-            if(minFrameRate > 27){
-                   minFrameRate = 27;
+        int maxFPS = getMaxSupportedFPS(mParameters);
+        if ( 0 < maxFPS) {
+            if(minFrameRate > maxFPS){
+                   minFrameRate = maxFPS;
             }
-            if(maxFrameRate > 27){
-                   maxFrameRate = 27;
+            if(maxFrameRate > maxFPS){
+                   maxFrameRate = maxFPS;
             }
+        } else {
+            Log.e(TAG, "Camera does not support any valid framerates");
+            throw new RuntimeException("Invalid camera parameters");
         }
 
         if (minFrameRate > maxFrameRate)
