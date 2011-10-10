@@ -253,6 +253,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     public static  final String PARM_SUPPORTED_ISO_MODES = "iso-mode-values";
     private static final String PARM_ISO = "iso";
     private static final String PARM_CONTRAST = "contrast";
+    private static final String PARM_BRIGHTNESS = "brightness";
 
     private int mBurstImages = 0;
     private boolean mTempBracketingEnabled = false;
@@ -263,6 +264,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mISO;
     private String mColorEffect;
     private String mContrast;
+    private String mBrightness;
 
     private long mFocusStartTime;
     private long mCaptureStartTime;
@@ -1154,6 +1156,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         }
 
         mContrast = getString(R.string.pref_camera_contrast_default);
+        mBrightness = getString(R.string.pref_camera_brightness_default);
 
         mPreferences.setLocalId(this, mCameraId);
         CameraSettings.upgradeLocalPreferences(mPreferences.getLocal());
@@ -1303,6 +1306,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_MODE,
                 CameraSettings.KEY_GBCE,
                 CameraSettings.KEY_CONTRAST,
+                CameraSettings.KEY_BRIGHTNESS,
                 CameraSettings.KEY_BURST,
                 CameraSettings.KEY_ISO,
                 CameraSettings.KEY_BRACKET_RANGE,
@@ -2015,6 +2019,15 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         if ( !contrast.equals(mContrast) ) {
             mParameters.set(PARM_CONTRAST, Integer.parseInt(contrast) );
             mContrast = contrast;
+        }
+
+        String brightness = mPreferences.getString(
+                    CameraSettings.KEY_BRIGHTNESS,
+                    getString(R.string.pref_camera_brightness_default));
+
+        if ( !brightness.equals(mBrightness) ) {
+            mParameters.set(PARM_BRIGHTNESS, Integer.parseInt(brightness) );
+            mBrightness = brightness;
         }
 
         // Set picture size.

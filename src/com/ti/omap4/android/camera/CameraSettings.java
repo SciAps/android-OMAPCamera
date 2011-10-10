@@ -67,6 +67,7 @@ public class CameraSettings {
     public static final String KEY_ISO = "pref_camera_iso_key";
     public static final String KEY_COLOR_EFFECT = "pref_camera_coloreffect_key";
     public static final String KEY_CONTRAST = "pref_camera_contrast_key";
+    public static final String KEY_BRIGHTNESS = "pref_camera_brightness_key";
 
     public static final String EXPOSURE_DEFAULT_VALUE = "0";
 
