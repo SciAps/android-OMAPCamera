@@ -250,6 +250,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final int EXPOSURE_BRACKETING_COUNT = 3;
     private static final String PARM_TEMPORAL_BRACKETING_RANGE_POS = "temporal-bracketing-range-positive";
     private static final String PARM_TEMPORAL_BRACKETING_RANGE_NEG = "temporal-bracketing-range-negative";
+    public static  final String PARM_SUPPORTED_ISO_MODES = "iso-mode-values";
     private static final String PARM_ISO = "iso";
     private static final String PARM_CONTRAST = "contrast";
 

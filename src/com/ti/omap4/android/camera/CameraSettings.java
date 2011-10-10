@@ -28,6 +28,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 /**
  *  Provides utilities and keys for Camera settings.
@@ -160,6 +161,7 @@ public class CameraSettings {
         ListPreference focusMode = group.findPreference(KEY_FOCUS_MODE);
         ListPreference exposure = group.findPreference(KEY_EXPOSURE);
         ListPreference colorEffect = group.findPreference(KEY_COLOR_EFFECT);
+        ListPreference iso = group.findPreference(KEY_ISO);
         IconListPreference cameraIdPref =
                 (IconListPreference) group.findPreference(KEY_CAMERA_ID);
         ListPreference videoFlashMode =
@@ -191,6 +193,10 @@ public class CameraSettings {
         if (colorEffect != null) {
             filterUnsupportedOptions(group,
                     colorEffect, mParameters.getSupportedColorEffects());
+        }
+        if ( iso  != null) {
+            filterUnsupportedOptions(group, iso,
+                    parseToList(mParameters.get(Camera.PARM_SUPPORTED_ISO_MODES)));
         }
         if (focusMode != null) {
             if (mParameters.getMaxNumFocusAreas() == 0) {
@@ -480,6 +486,19 @@ public class CameraSettings {
         // initial picture size is that of the back camera.
         initialCameraPictureSize(context, parameters);
         writePreferredCameraId(preferences, currentCameraId);
+    }
+
+    public List<String> parseToList(String str) {
+        if (null == str)
+            return null;
+
+        StringTokenizer tokenizer = new StringTokenizer(str, ",");
+        ArrayList<String> substrings = new ArrayList<String>();
+
+        while (tokenizer.hasMoreElements())
+            substrings.add(tokenizer.nextToken());
+
+        return substrings;
     }
 
     private ArrayList<String> getSupportedVideoQuality() {
