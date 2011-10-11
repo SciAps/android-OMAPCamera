@@ -2184,6 +2184,16 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             editor.commit();
             mParameters.set(PARM_ISO, getString(R.string.pref_camera_iso_default));
 
+            // Set Contrast to Normal
+            editor.putString(CameraSettings.KEY_CONTRAST, getString(R.string.pref_camera_contrast_default));
+            editor.commit();
+            mParameters.set(PARM_CONTRAST, getString(R.string.pref_camera_contrast_default));
+
+            // Set brightness to Normal
+            editor.putString(CameraSettings.KEY_BRIGHTNESS, getString(R.string.pref_camera_brightness_default));
+            editor.commit();
+            mParameters.set(PARM_BRIGHTNESS, getString(R.string.pref_camera_brightness_default));
+
             if (mIndicatorControlContainer != null) {
                 mIndicatorControlContainer.reloadPreferences();
             }
