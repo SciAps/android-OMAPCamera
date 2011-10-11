@@ -140,7 +140,7 @@
     <string name="pref_camera_videoframerate_default">30</string>
 
     <!-- Settings screen, Select Video FrameRate title -->
-    <string name="pref_camera_videoframerate_title">Select Video FrameRate</string>
+    <string name="pref_camera_videoframerate_title">Select Video Max FrameRate</string>
 
     <!-- Settings screen, Video FrameRate dialog radio button choices -->
     <string name="pref_camera_videoframerate_entry_1">15</string>
@@ -154,7 +154,7 @@
     <string name="pref_camera_videominframerate_default">30</string>
 
     <!-- Settings screen, Select Video FrameRate title -->
-    <string name="pref_camera_videominframerate_title">Select Video MIN FrameRate</string>
+    <string name="pref_camera_videominframerate_title">Select Video Min FrameRate</string>
 
     <!-- Settings screen, Video FrameRate dialog radio button choices -->
     <string name="pref_camera_videominframerate_entry_1">15</string>
@@ -165,10 +165,10 @@
     <string name="pref_camera_videobitrate_category">Video BitRate</string>
 
     <!-- Default Video bitRate setting. A numerical value. Do not translate. -->
-    <string name="pref_camera_videobitrate_default">4000000</string>
+    <string name="pref_camera_videobitrate_default">12000000</string>
 
     <!-- Settings screen, Select Video bitRate title -->
-    <string name="pref_camera_videobitrate_title">Select Video bitRate</string>
+    <string name="pref_camera_videobitrate_title">Select Video BitRate</string>
     <!-- Settings screen, Video bitRate dialog radio button choices -->
     <string name="pref_camera_videobitrate_entry_0">Auto</string>
     <string name="pref_camera_videobitrate_entry_1">64K</string>
@@ -206,11 +206,9 @@
     <string name="pref_camera_audioencoder_entry_1">AMR-NB</string>
     <string name="pref_camera_audioencoder_entry_3">AAC</string>
 
-    <!-- Settings screen, Audio Encoder dialog title -->
-    <string name="pref_camera_audioencoder_dialogtitle">Audio Encoder</string>
-
     <!-- Settings screen, Video Encoder category title -->
     <string name="pref_camera_videoencoder_category">Video Encoder</string>
+
     <!-- Default Video Encoder setting. A numerical value. Do not translate. -->
     <string name="pref_camera_videoencoder_default">2</string>
 
@@ -223,10 +221,10 @@
     <string name="pref_camera_videoencoder_entry_3">MPEG4</string>
 
     <!-- Default video format setting. A numerical value. -->
-    <string name="pref_camera_video_format_default" translatable="false">5</string>
+    <string name="pref_camera_video_format_default" translatable="false">8</string>
 
     <!-- Settings screen, Video format title -->
-    <string name="pref_camera_video_format_title">Video format</string>
+    <string name="pref_camera_video_format_title">Video Format</string>
 
     <!-- Settings screen, Video format dialog radio button choices -->
     <string name="pref_camera_video_format_entry_0_sqcif">SQCIF 128x96</string>
@@ -364,6 +362,26 @@
     <string name="pref_camera_coloreffect_entry_natural">Natural</string>
     <string name="pref_camera_coloreffect_entry_vivid">Vivid</string>
     <string name="pref_camera_coloreffect_entry_colourswap">Colourswap</string>
+
+    <!-- Default 'Video Stabilization' Enabling setting. A numerical value.-->
+    <string name="pref_camera_vstab_default" translatable="false">0</string>
+
+    <!-- Settings screen, 'Video Stabilization' Enabling title -->
+    <string name="pref_camera_vstab_title">Video Stabilization</string>
+
+    <!-- Settings screen, 'Video Stabilization' Enabling dialog radio button choices -->
+    <string name="pref_camera_vstab_entry_on">ON</string>
+    <string name="pref_camera_vstab_entry_off">OFF</string>
+
+    <!-- Default 'Video Noise Filtering' Enabling setting. A numerical value.-->
+    <string name="pref_camera_vnf_default" translatable="false">0</string>
+
+    <!-- Settings screen, 'Video Noise Filtering' Enabling title -->
+    <string name="pref_camera_vnf_title">Video Noise Filtering</string>
+
+    <!-- Settings screen, 'Video Noise Filtering' Enabling dialog radio button choices -->
+    <string name="pref_camera_vnf_entry_on">ON</string>
+    <string name="pref_camera_vnf_entry_off">OFF</string>
 
     <!-- Default scene mode setting. -->
     <string name="pref_camera_scenemode_default" translatable="false">auto</string>

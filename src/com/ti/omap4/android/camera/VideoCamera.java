@@ -176,6 +176,9 @@ public class VideoCamera extends ActivityBase
 
     private long mStorageSpace;
 
+    private static final String PARM_VNF = "vnf";
+    private static final String PARM_VSTAB = "vstab";
+
     private MediaRecorder mMediaRecorder;
     private EffectsRecorder mEffectsRecorder;
     private boolean mEffectsDisplayResult;
@@ -496,9 +499,10 @@ public class VideoCamera extends ActivityBase
                     CameraSettings.KEY_AUDIO_ENCODER,
                     CameraSettings.KEY_VIDEO_ENCODER,
                     CameraSettings.KEY_VIDEO_BITRATE,
+                    CameraSettings.KEY_VSTAB,
+                    CameraSettings.KEY_VNF,
                     CameraSettings.KEY_VIDEO_FRAMERATE,
                     CameraSettings.KEY_VIDEO_MINFRAMERATE,
-                    CameraSettings.KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL,
                     CameraSettings.KEY_RECORD_LOCATION};
 
         CameraPicker.setImageResourceId(R.drawable.ic_switch_video_facing_holo_light);
@@ -1975,9 +1979,21 @@ public class VideoCamera extends ActivityBase
         String vidEncoder = mPreferences.getString(CameraSettings.KEY_VIDEO_ENCODER, (getString(R.string.pref_camera_videoencoder_default)));
         mProfile.videoCodec = Integer.parseInt(vidEncoder);
 
-       // Set Audio encoder
+        // Set Audio encoder
         String audioEncoder = mPreferences.getString(CameraSettings.KEY_AUDIO_ENCODER, (getString(R.string.pref_camera_audioencoder_default)));
         mProfile.audioCodec = Integer.parseInt(audioEncoder);
+
+        // Set Video Stabilization Mode
+        String vstab = mPreferences.getString(CameraSettings.KEY_VSTAB, (getString(R.string.pref_camera_vstab_default)));
+        int vstabEn = Integer.parseInt(vstab);
+        mParameters.set(PARM_VSTAB, vstabEn);
+        Log.v(TAG,"VSTAB Set to ["+ vstabEn +"]");
+
+        // Set Video Noise Filtering Mode
+        String vnf = mPreferences.getString(CameraSettings.KEY_VNF, (getString(R.string.pref_camera_vnf_default)));
+        int vnfEn = Integer.parseInt(vnf);
+        mParameters.set(PARM_VNF, vnfEn);
+        Log.v(TAG,"VNF Set to ["+ vnfEn +"]");
 
         mCameraDevice.setParameters(mParameters);
         // Keep preview size up to date.
@@ -2153,17 +2169,19 @@ public class VideoCamera extends ActivityBase
                 }
                 finish();
             } else {
+                boolean isPreviewRestartRequired = videoPreferencesChanged(); // Check if VNF / VSTAB has toggled state
                 readVideoPreferences();
                 showTimeLapseUI(mCaptureTimeLapse);
                 // We need to restart the preview if preview size is changed.
                 Size size = mParameters.getPreviewSize();
-                if (size.width != mDesiredPreviewWidth
-                        || size.height != mDesiredPreviewHeight) {
+                if ((size.width != mDesiredPreviewWidth
+                        || size.height != mDesiredPreviewHeight) || isPreviewRestartRequired) {
                     if (!effectsActive()) {
                         mCameraDevice.stopPreview();
                     } else {
                         mEffectsRecorder.release();
                     }
+                    mCameraDevice.stopPreview();
                     resizeForPreviewAspectRatio();
                     startPreview(); // Parameters will be set in startPreview().
                 } else {
@@ -2171,6 +2189,29 @@ public class VideoCamera extends ActivityBase
                 }
             }
         }
+    }
+
+    private boolean videoPreferencesChanged() {
+        Log.v(TAG, "videoPreferencesChanged +");
+
+        // We need to restart the preview if VSTAB or VNF mode is changed.
+        String vstab = mPreferences.getString(CameraSettings.KEY_VSTAB, (getString(R.string.pref_camera_vstab_default)));
+        boolean enableVstab = ((Integer.parseInt(vstab))>0)? true : false;
+
+        String vnf = mPreferences.getString(CameraSettings.KEY_VNF, (getString(R.string.pref_camera_vnf_default)));
+        boolean enableVnf = ((Integer.parseInt(vnf))>0)? true : false;
+
+        boolean isVstabEnabled = ((mParameters.getInt(PARM_VSTAB))>0)? true : false;
+        boolean isVnfEnabled = ((mParameters.getInt(PARM_VNF))>0)? true : false;
+        boolean isPreviewRestartRequired = false;
+
+        if((isVstabEnabled != enableVstab)||(isVnfEnabled != enableVnf))
+        {
+            isPreviewRestartRequired = true;
+            Log.v(TAG, "videoPreferencesChanged : isPreviewRestartRequired="+isPreviewRestartRequired);
+        }
+        Log.v(TAG, "videoPreferencesChanged -");
+        return isPreviewRestartRequired;
     }
 
     private boolean updateEffectSelection() {
