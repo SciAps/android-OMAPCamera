@@ -1167,6 +1167,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
         mContrast = getString(R.string.pref_camera_contrast_default);
         mBrightness = getString(R.string.pref_camera_brightness_default);
+        mColorEffect = getString(R.string.pref_camera_coloreffect_default);
+        mISO = getString(R.string.pref_camera_iso_default);
 
         mPreferences.setLocalId(this, mCameraId);
         CameraSettings.upgradeLocalPreferences(mPreferences.getLocal());
@@ -2034,6 +2036,15 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mColorEffect = colorEffect;
         }
 
+        // ISO
+        String iso = mPreferences.getString(
+                    CameraSettings.KEY_ISO, getString(R.string.pref_camera_iso_default));
+
+        if ( !iso.equals(mISO) ) {
+            mParameters.set(PARM_ISO, iso);
+            mISO = iso;
+        }
+
         String contrast = mPreferences.getString(
                     CameraSettings.KEY_CONTRAST,
                     getString(R.string.pref_camera_contrast_default));
@@ -2165,8 +2176,13 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             // Set Color Effects to None.
             Editor editor = mPreferences.edit();
             editor.putString(CameraSettings.KEY_COLOR_EFFECT, Parameters.EFFECT_NONE);
-            editor.apply();
+            editor.commit();
             mParameters.setColorEffect(Parameters.EFFECT_NONE);
+
+            // Set ISO to auto
+            editor.putString(CameraSettings.KEY_ISO, "auto");
+            editor.commit();
+            mParameters.set(PARM_ISO, getString(R.string.pref_camera_iso_default));
 
             if (mIndicatorControlContainer != null) {
                 mIndicatorControlContainer.reloadPreferences();
@@ -2186,15 +2202,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         } else {
             mParameters.set(PARM_GBCE, PARM_BCE_DISABLE);
             mParameters.set(PARM_GLBCE, PARM_BCE_DISABLE);
-        }
-
-        // ISO
-        String iso = mPreferences.getString(
-                    CameraSettings.KEY_ISO, getString(R.string.pref_camera_iso_default));
-
-        if ( !iso.equals(mISO) ) {
-            mParameters.set(PARM_ISO, iso);
-            mISO = iso;
         }
 
         // Capture mode
