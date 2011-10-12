@@ -2439,10 +2439,6 @@ public class VideoCamera extends ActivityBase
     // Preview area is touched. Take a picture.
     @Override
     public boolean onTouch(View v, MotionEvent e) {
-
-         /* Video Snapshot not Supported - So supressing the Touch */
-         return false;
-        /*
         if (mMediaRecorderRecording && effectsActive()) {
             Toast.makeText(this, getResources().getString(
                     R.string.disable_video_snapshot_hint), Toast.LENGTH_LONG).show();
@@ -2464,7 +2460,7 @@ public class VideoCamera extends ActivityBase
         mCameraDevice.takePicture(null, null, null, new JpegPictureCallback(loc));
         showVideoSnapshotUI(true);
         mSnapshotInProgress = true;
-        return true;*/
+        return true;
     }
 
     private final class JpegPictureCallback implements PictureCallback {
