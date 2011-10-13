@@ -179,7 +179,9 @@ public abstract class ZoomControl extends RelativeLayout {
         if (!mSmoothZoomSupported) {
             // Repeat the zoom action on tablet as the user is still holding
             // the zoom slider.
-            mHandler.postDelayed(mRunnable, ZOOMING_INTERVAL / mZoomMax);
+            if ( 0 < mZoomMax ) {
+                mHandler.postDelayed(mRunnable, ZOOMING_INTERVAL / mZoomMax);
+            }
         }
     }
 
