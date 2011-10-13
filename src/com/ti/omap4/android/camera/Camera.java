@@ -146,6 +146,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private GestureDetector mPopupGestureDetector;
     private boolean mOpenCameraFail = false;
     private boolean mCameraDisabled = false;
+    public  static boolean mIsTestExecuting = false;
 
     private View mPreviewPanel;  // The container of PreviewFrameLayout.
     private PreviewFrameLayout mPreviewFrameLayout;
@@ -265,6 +266,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mColorEffect;
     private String mContrast;
     private String mBrightness;
+    public  static String mIMGscriptTitle;
 
     private long mFocusStartTime;
     private long mCaptureStartTime;
@@ -300,6 +302,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private int mBackCameraId;
 
     private boolean mQuickCapture;
+    private IntentFilter mTestIntent = null;
+    private final BroadcastReceiver mTestReceiver = new CameraBroadcastReceiverTest();
 
     /**
      * This Handler is used to post message back onto the main thread of the
@@ -1027,6 +1031,12 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         private void storeImage(final byte[] data, Location loc, int width,
                 int height, long dateTaken, int previewWidth) {
             String title = Util.createJpegName(dateTaken);
+
+            if(mIsTestExecuting) {
+                title = title + "_" + mIMGscriptTitle;
+                mIsTestExecuting = false;
+            }
+
             int orientation = Exif.getOrientation(data);
             Uri uri = Storage.addImage(mContentResolver, title, dateTaken,
                     loc, orientation, data, width, height);
@@ -1651,6 +1661,11 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             }
         }
 
+	    if (mTestIntent != null) {
+            unregisterReceiver(mTestReceiver);
+            mTestIntent = null;
+        }
+
         if (mDidRegister) {
             unregisterReceiver(mReceiver);
             mDidRegister = false;
@@ -1879,6 +1894,13 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         } catch (Throwable ex) {
             closeCamera();
             throw new RuntimeException("setPreviewDisplay failed", ex);
+        }
+        if (mTestIntent == null) {
+            mTestIntent = new IntentFilter("cameraTest");
+            registerReceiver(mTestReceiver, mTestIntent);
+        }else {
+            unregisterReceiver(mTestReceiver);
+            registerReceiver(mTestReceiver, mTestIntent);
         }
     }
 
@@ -2499,6 +2521,77 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 getString(R.string.confirm_restore_title),
                 getString(R.string.confirm_restore_message),
                 runnable);
+    }
+
+    //Receiver for Automated Testing intent broadcasts
+    private class CameraBroadcastReceiverTest extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            String action = intent.getAction();
+            Log.d(TAG,"CameraTest Broadcast received: " + action);
+            Bundle bundle = intent.getExtras();
+            Log.d(TAG,"CameraTest Broadcast received: " + bundle);
+            if(bundle != null) {
+
+                mIsTestExecuting = true;
+                String actionTest = bundle.getString("params");
+                String actionValue = bundle.getString("value");
+
+                if(actionTest.equals("script_title")) {
+                    Log.d(TAG, "Executing Automated Test");
+                    Log.d(TAG, actionValue + " is running");
+                    mIMGscriptTitle = actionValue;
+                    return;
+                }
+
+                if(actionTest.equals("capture")) {
+                    Log.d(TAG, "Capture selected");
+                    if (mFirstTimeInitialized) {
+                        mShutterButton.setPressed(true);
+                        mFocusManager.doSnap();
+                        mShutterButton.setPressed(false);
+                    }
+                    return;
+                }
+
+                if(actionTest.equals("primary")) {
+                    mCameraId = mFrontCameraId;
+                    CameraSettings.writePreferredCameraId(mPreferences,
+                            ((mCameraId == mFrontCameraId)
+                            ? mBackCameraId : mFrontCameraId));
+                    onSharedPreferenceChanged();
+                    return;
+                }
+
+                if(actionTest.equals("secondary")) {
+                    mCameraId = mBackCameraId;
+                    CameraSettings.writePreferredCameraId(mPreferences,
+                            ((mCameraId == mFrontCameraId)
+                            ? mBackCameraId : mFrontCameraId));
+                    onSharedPreferenceChanged();
+                    return;
+                }
+                if(actionTest.equals("restore")) {
+                    restorePreferences();
+                    return;
+                }
+
+                if(actionTest.equals("quit")) {
+                    onDestroy();
+                    finish();
+                }
+
+                Editor editor = mPreferences.edit();
+                editor.putString(actionTest,actionValue);
+                if(editor.commit() == true) {
+                    setCameraParameters(UPDATE_PARAM_ALL);
+                    if (mIndicatorControlContainer != null) {
+                        mIndicatorControlContainer.reloadPreferences();
+                    }
+                }
+            }
+        }
     }
 
     private void restorePreferences() {
