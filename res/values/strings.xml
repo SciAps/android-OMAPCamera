@@ -204,6 +204,7 @@
 
     <!-- Settings screen, Audio Encoder dialog radio button choices -->
     <string name="pref_camera_audioencoder_entry_1">AMR-NB</string>
+    <string name="pref_camera_audioencoder_entry_2">AMR-WB</string>
     <string name="pref_camera_audioencoder_entry_3">AAC</string>
 
     <!-- Settings screen, Video Encoder category title -->
