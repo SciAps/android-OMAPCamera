@@ -1231,6 +1231,15 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+        getPreferredCameraId();
+        mFocusManager = new FocusManager(mPreferences,
+                getString(R.string.pref_camera_focusmode_default));
+
+        /*
+         * To reduce startup time, we start the camera open and preview threads.
+         * We make sure the preview is started at the end of onCreate.
+         */
+        mCameraOpenThread.start();
 
         PreferenceInflater inflater = new PreferenceInflater(this);
         PreferenceGroup group =
@@ -1276,12 +1285,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mFocusManager = new FocusManager(mPreferences,
                 getString(R.string.pref_camera_focusmode_default));
         mTouchManager = new TouchManager();
-
-        /*
-         * To reduce startup time, we start the camera open and preview threads.
-         * We make sure the preview is started at the end of onCreate.
-         */
-        mCameraOpenThread.start();
 
         mIsImageCaptureIntent = isImageCaptureIntent();
         setContentView(R.layout.camera);
