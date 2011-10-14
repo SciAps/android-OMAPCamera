@@ -425,8 +425,10 @@ public class EffectsRecorder {
                 "recordingWidth", mProfile.videoFrameWidth,
                 "recordingHeight", mProfile.videoFrameHeight,
                 "recordingProfile", mProfile,
+                "audioSource", MediaRecorder.AudioSource.CAMCORDER,
                 "learningDoneListener", mLearningDoneListener,
                 "recordingDoneListener", mRecordingDoneListener);
+
         mRunner = null;
         mGraphId = -1;
         mCurrentEffect = EFFECT_NONE;

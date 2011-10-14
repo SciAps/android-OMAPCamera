@@ -30,6 +30,7 @@
 @external recordingHeight;
 @external recordingProfile;
 @external recordingDoneListener;
+@external audioSource;
 
 @external previewSurface;
 @external previewWidth;

@@ -1774,7 +1774,7 @@ public class VideoCamera extends ActivityBase
 
             try {
                 if (effectsActive()) {
-                    // This is asynchronous, so we can't add to media store now because thumbnail
+                    // This is asynchronous, so we cant add to media store now because thumbnail
                     // may not be ready. In such case addVideoToMediaStore is called later
                     // through a callback from the MediaEncoderFilter to EffectsRecorder,
                     // and then to the VideoCamera.
@@ -2194,20 +2194,8 @@ public class VideoCamera extends ActivityBase
             mBgLearningMessageFrame.setVisibility(View.GONE);
             checkQualityAndStartPreview();
         } else if (effectMsg == EffectsRecorder.EFFECT_MSG_RECORDING_DONE) {
-            // TODO: This assumes the codepath from onStopVideoRecording.  It
-            // does not appear to cause problems for the other codepaths, but
-            // should be properly thought through.
-            if (mEffectsDisplayResult) {
-                addVideoToMediaStore();
-                if (mIsVideoCaptureIntent) {
-                    if (!mQuickCapture) {
-                        showAlert();
-                    }
-                } else {
-                    getThumbnail();
-                }
-            }
-            mEffectsDisplayResult = false;
+            addVideoToMediaStore();
+            getThumbnail();
         } else if (effectId == EffectsRecorder.EFFECT_BACKDROPPER) {
             switch (effectMsg) {
                 case EffectsRecorder.EFFECT_MSG_STARTED_LEARNING:
