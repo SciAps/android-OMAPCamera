@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2007 The Android Open Source Project
+<!-- Copyright (C) 2011 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,17 +14,18 @@
      limitations under the License.
 -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:camera="http://schemas.android.com/apk/res/com.ti.omap4.android.camera"
-        android:id="@+id/app_root"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
         android:layout_height="match_parent"
         android:layout_width="match_parent">
-    <LinearLayout
-            android:orientation="vertical"
-            android:layout_height="match_parent"
-            android:layout_width="match_parent">
-        <include layout="@layout/preview_frame_video"/>
-        <include layout="@layout/camera_control"/>
-    </LinearLayout>
-    <include layout="@layout/bg_replacement_training_message"/>
-</RelativeLayout>
+    <TextView android:id="@+id/recording_time"
+            style="@style/OnViewfinderLabel"
+            android:gravity="center"
+            android:drawableLeft="@drawable/ic_recording_indicator"
+            android:drawablePadding="5dp"
+            android:visibility="gone" />
+    <TextView android:id="@+id/time_lapse_label"
+            android:text="@string/time_lapse_title"
+            style="@style/OnViewfinderLabel"
+            android:visibility="gone" />
+</LinearLayout>
