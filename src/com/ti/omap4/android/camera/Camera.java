@@ -265,6 +265,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mISO;
     private String mPreviewSize;
     private String mColorEffect;
+    private String mAntibanding;
     private String mContrast;
     private String mBrightness;
     public  static String mIMGscriptTitle;
@@ -1169,6 +1170,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mContrast = getString(R.string.pref_camera_contrast_default);
         mBrightness = getString(R.string.pref_camera_brightness_default);
         mColorEffect = getString(R.string.pref_camera_coloreffect_default);
+        mAntibanding = getString(R.string.pref_camera_antibanding_default);
         mISO = getString(R.string.pref_camera_iso_default);
         mPreviewSize = getString(R.string.pref_camera_previewsize_default);
 
@@ -1325,6 +1327,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_ISO,
                 CameraSettings.KEY_BRACKET_RANGE,
                 CameraSettings.KEY_COLOR_EFFECT,
+                CameraSettings.KEY_ANTIBANDING,
                 CameraSettings.KEY_PREVIEW_SIZE,
                 CameraSettings.KEY_PICTURE_SIZE};
 
@@ -2066,6 +2069,15 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mBrightness = brightness;
         }
 
+        String antibanding = mPreferences.getString(
+                    CameraSettings.KEY_ANTIBANDING,
+                    getString(R.string.pref_camera_antibanding_default));
+
+        if ( !antibanding.equals(mAntibanding) ) {
+            mParameters.setAntibanding(antibanding);
+            mAntibanding = antibanding;
+        }
+
         // Set picture size.
         String pictureSize = mPreferences.getString(
                 CameraSettings.KEY_PICTURE_SIZE, null);
@@ -2189,6 +2201,11 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             editor.putString(CameraSettings.KEY_BRIGHTNESS, getString(R.string.pref_camera_brightness_default));
             editor.commit();
             mParameters.set(PARM_BRIGHTNESS, getString(R.string.pref_camera_brightness_default));
+
+            // Set antibanding to Normal
+            editor.putString(CameraSettings.KEY_ANTIBANDING, getString(R.string.pref_camera_antibanding_default));
+            editor.commit();
+            mParameters.setAntibanding(getString(R.string.pref_camera_antibanding_default));
 
             if (mIndicatorControlContainer != null) {
                 mIndicatorControlContainer.reloadPreferences();

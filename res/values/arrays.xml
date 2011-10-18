@@ -600,6 +600,20 @@
         <item>blackwhite</item>
     </string-array>
 
+    <string-array name="pref_camera_antibanding_entries" translatable="false">
+        <item>@string/pref_camera_antibanding_entry_auto</item>
+        <item>@string/pref_camera_antibanding_entry_50hz</item>
+        <item>@string/pref_camera_antibanding_entry_60Hz</item>
+        <item>@string/pref_camera_antibanding_entry_off</item>
+    </string-array>
+
+    <string-array name="pref_camera_antibanding_entryvalues" translatable="false">
+        <item>auto</item>
+        <item>50hz</item>
+        <item>60hz</item>
+        <item>off</item>
+    </string-array>
+
     <array name="camera_id_entries" translatable="false">
         <item>@string/pref_camera_id_entry_back</item>
         <item>@string/pref_camera_id_entry_front</item>

@@ -69,6 +69,7 @@ public class CameraSettings {
     public static final String KEY_CONTRAST = "pref_camera_contrast_key";
     public static final String KEY_BRIGHTNESS = "pref_camera_brightness_key";
     public static final String KEY_PREVIEW_SIZE = "pref_camera_previewsize_key";
+    public static final String KEY_ANTIBANDING = "pref_camera_antibanding_key";
 
     public static final String EXPOSURE_DEFAULT_VALUE = "0";
 
@@ -185,6 +186,7 @@ public static boolean setCameraPreviewSize(
                 group.findPreference(KEY_VIDEOCAMERA_FLASH_MODE);
         ListPreference videoEffect = group.findPreference(KEY_VIDEO_EFFECT);
         ListPreference previewSize = group.findPreference(KEY_PREVIEW_SIZE);
+        ListPreference antibanding = group.findPreference(KEY_ANTIBANDING);
 
         // Since the screen could be loaded from different resources, we need
         // to check if the preference is available here
@@ -215,6 +217,10 @@ public static boolean setCameraPreviewSize(
         if (colorEffect != null) {
             filterUnsupportedOptions(group,
                     colorEffect, mParameters.getSupportedColorEffects());
+        }
+        if (antibanding != null) {
+            filterUnsupportedOptions(group,
+                    antibanding, mParameters.getSupportedAntibanding());
         }
         if ( iso  != null) {
             filterUnsupportedOptions(group, iso,
