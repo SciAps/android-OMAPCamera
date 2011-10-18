@@ -68,6 +68,7 @@ public class CameraSettings {
     public static final String KEY_COLOR_EFFECT = "pref_camera_coloreffect_key";
     public static final String KEY_CONTRAST = "pref_camera_contrast_key";
     public static final String KEY_BRIGHTNESS = "pref_camera_brightness_key";
+    public static final String KEY_PREVIEW_SIZE = "pref_camera_previewsize_key";
 
     public static final String EXPOSURE_DEFAULT_VALUE = "0";
 
@@ -152,6 +153,21 @@ public class CameraSettings {
         return false;
     }
 
+public static boolean setCameraPreviewSize(
+          String candidate, List<Size> supported, Parameters parameters) {
+       int index = candidate.indexOf('x');
+       if (index == NOT_FOUND) return false;
+       int width = Integer.parseInt(candidate.substring(0, index));
+       int height = Integer.parseInt(candidate.substring(index + 1));
+       for (Size size: supported) {
+           if (size.width == width && size.height == height) {
+               parameters.setPreviewSize(width, height);
+               return true;
+           }
+       }
+       return false;
+    }
+
     private void initPreference(PreferenceGroup group) {
         ListPreference videoQuality = group.findPreference(KEY_VIDEO_QUALITY);
         ListPreference timeLapseInterval = group.findPreference(KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL);
@@ -168,6 +184,7 @@ public class CameraSettings {
         ListPreference videoFlashMode =
                 group.findPreference(KEY_VIDEOCAMERA_FLASH_MODE);
         ListPreference videoEffect = group.findPreference(KEY_VIDEO_EFFECT);
+        ListPreference previewSize = group.findPreference(KEY_PREVIEW_SIZE);
 
         // Since the screen could be loaded from different resources, we need
         // to check if the preference is available here
@@ -178,6 +195,10 @@ public class CameraSettings {
         if (pictureSize != null) {
             filterUnsupportedOptions(group, pictureSize, sizeListToStringList(
                     mParameters.getSupportedPictureSizes()));
+        }
+        if (previewSize != null) {
+            filterUnsupportedOptions(group, previewSize, sizeListToStringList(
+                    mParameters.getSupportedPreviewSizes()));
         }
         if (whiteBalance != null) {
             filterUnsupportedOptions(group,

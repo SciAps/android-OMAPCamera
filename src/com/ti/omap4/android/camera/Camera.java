@@ -263,6 +263,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mGBCE = "off";
     private String mBracketRange;
     private String mISO;
+    private String mPreviewSize;
     private String mColorEffect;
     private String mContrast;
     private String mBrightness;
@@ -1169,6 +1170,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mBrightness = getString(R.string.pref_camera_brightness_default);
         mColorEffect = getString(R.string.pref_camera_coloreffect_default);
         mISO = getString(R.string.pref_camera_iso_default);
+        mPreviewSize = getString(R.string.pref_camera_previewsize_default);
 
         mPreferences.setLocalId(this, mCameraId);
         CameraSettings.upgradeLocalPreferences(mPreferences.getLocal());
@@ -1323,6 +1325,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_ISO,
                 CameraSettings.KEY_BRACKET_RANGE,
                 CameraSettings.KEY_COLOR_EFFECT,
+                CameraSettings.KEY_PREVIEW_SIZE,
                 CameraSettings.KEY_PICTURE_SIZE};
 
         CameraPicker.setImageResourceId(R.drawable.ic_switch_photo_facing_holo_light);
@@ -2074,28 +2077,21 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                     pictureSize, supported, mParameters);
         }
 
-        // Set the preview frame aspect ratio according to the picture size.
-        Size size = mParameters.getPictureSize();
-
         mPreviewPanel = findViewById(R.id.frame_layout);
         mPreviewFrameLayout = (PreviewFrameLayout) findViewById(R.id.frame);
-        mPreviewFrameLayout.setAspectRatio((double) size.width / size.height);
 
-        // Set a preview size that is closest to the viewfinder height and has
-        // the right aspect ratio.
-        List<Size> sizes = mParameters.getSupportedPreviewSizes();
-        Size optimalSize = Util.getOptimalPreviewSize(this,
-                sizes, (double) size.width / size.height);
-        Size original = mParameters.getPreviewSize();
-        if (!original.equals(optimalSize)) {
-            mParameters.setPreviewSize(optimalSize.width, optimalSize.height);
+        String previewSize = mPreferences.getString(
+                CameraSettings.KEY_PREVIEW_SIZE,
+                getString(R.string.pref_camera_previewsize_default));
+        List<Size> supported = mParameters.getSupportedPreviewSizes();
+        CameraSettings.setCameraPreviewSize(previewSize, supported, mParameters);
 
-            // Zoom related settings will be changed for different preview
-            // sizes, so set and read the parameters to get lastest values
-            mCameraDevice.setParameters(mParameters);
-            mParameters = mCameraDevice.getParameters();
+        if ( !previewSize.equals(mPreviewSize) ) {
+            mPreviewSize = previewSize;
+            Size size = mParameters.getPreviewSize();
+            mPreviewFrameLayout.setAspectRatio((double) size.width / size.height);
+            restartNeeded = true;
         }
-        Log.v(TAG, "Preview size is " + optimalSize.width + "x" + optimalSize.height);
 
         // Since change scene mode may change supported values,
         // Set scene mode first,
