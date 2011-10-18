@@ -144,6 +144,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private SurfaceHolder mSurfaceHolder = null;
     private ShutterButton mShutterButton;
     private GestureDetector mPopupGestureDetector;
+    private GestureDetector mGestureDetector;
     private boolean mOpenCameraFail = false;
     private boolean mCameraDisabled = false;
     public  static boolean mIsTestExecuting = false;
@@ -292,6 +293,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mSceneMode;
     private Toast mNotSelectableToast;
     private Toast mNoShareToast;
+    private boolean mTouchFocusEnabled = false;
 
     private final Handler mHandler = new MainHandler();
     private IndicatorControlContainer mIndicatorControlContainer;
@@ -556,6 +558,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mZoomControl.setZoomIndex(mParameters.getZoom());
         mZoomControl.setSmoothZoomSupported(mSmoothZoomSupported);
         mZoomControl.setOnZoomChangeListener(new ZoomChangeListener());
+
+        mGestureDetector = new GestureDetector(this, new ZoomGestureListener());
         mCameraDevice.setZoomChangeListener(mZoomListener);
     }
 
@@ -627,10 +631,56 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         }
     }
 
+    private class ZoomGestureListener extends
+            GestureDetector.SimpleOnGestureListener {
+
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            int doubleCLick_X = (int) e.getX();
+            int doubleClick_Y = (int) e.getY();
+
+            SurfaceView mSurfaceView = (SurfaceView) findViewById(R.id.camera_preview);
+            int frameOffsetLeft = mPreviewFrameLayout.getLeft();
+            int frameOffsetTop = mPreviewFrameLayout.getTop();
+            frameOffsetLeft += mSurfaceView.getLeft();
+            frameOffsetTop += mSurfaceView.getTop();
+
+            if ( !mTouchFocusEnabled ) {
+                // Perform zoom only when preview is started and snapshot is not in
+                // progress.
+                if (mPausing || !isCameraIdle() || mCameraState == PREVIEW_STOPPED
+                             || mZoomState != ZOOM_STOPPED) {
+                    return false;
+                } else if( ( doubleCLick_X < frameOffsetLeft ) ||
+                        ( doubleCLick_X > mSurfaceView.getWidth() ) ) {
+                    return false;
+                } else if ( ( doubleClick_Y < frameOffsetTop ) ||
+                        ( doubleClick_Y > mSurfaceView.getHeight() ) ) {
+                    return false;
+                }
+
+                if (mZoomValue < mZoomMax) {
+                    // Zoom in to the maximum.
+                    mZoomValue = mZoomMax;
+                } else {
+                    mZoomValue = 0;
+                }
+
+                setCameraParametersWhenIdle(UPDATE_PARAM_ZOOM);
+
+                mZoomControl.setZoomIndex(mZoomValue);
+            }
+
+            return true;
+          }
+    }
+
+
     @Override
     public boolean dispatchTouchEvent(MotionEvent m) {
         // Check if the popup window should be dismissed first.
-        if (mPopupGestureDetector != null && mPopupGestureDetector.onTouchEvent(m)) {
+        if ( (mPopupGestureDetector != null && mPopupGestureDetector.onTouchEvent(m)) ||
+             (mGestureDetector != null && mGestureDetector.onTouchEvent(m)) ) {
             return true;
         }
 
