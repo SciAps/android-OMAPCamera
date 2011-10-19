@@ -230,6 +230,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private final ZoomListener mZoomListener = new ZoomListener();
     private final CameraErrorCallback mErrorCallback = new CameraErrorCallback();
 
+    private static final String PARM_SENSOR_ORIENTATION = "sensor-orientation";
     private static final String PARM_GBCE = "gbce";
     private static final String PARM_GLBCE = "glbce";
     private static final String PARM_GBCE_OFF = "off";
@@ -2098,6 +2099,11 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mParameters.setColorEffect(colorEffect);
             mColorEffect = colorEffect;
         }
+
+        // Set Default Sensor Orientation
+        String sensorOrientation =
+           getString(R.string.pref_omap4_camera_sensor_orientation_default);
+        mParameters.set(PARM_SENSOR_ORIENTATION, sensorOrientation);
 
         // ISO
         String iso = mPreferences.getString(
