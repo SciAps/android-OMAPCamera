@@ -32,6 +32,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.hardware.Camera.CameraInfo;
@@ -1342,6 +1343,10 @@ public class VideoCamera extends ActivityBase
         // If the mCameraDevice is null, then this activity is going to finish
         if (mCameraDevice == null) return;
 
+        boolean inLandscape =
+                (getRequestedOrientation() ==
+                 ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
         CameraInfo info = CameraHolder.instance().getCameraInfo()[mCameraId];
 
         mEffectsDisplayResult = false;
@@ -1349,6 +1354,7 @@ public class VideoCamera extends ActivityBase
 
         // TODO: Confirm none of the foll need to go to initializeEffectsRecording()
         // and none of these change even when the preview is not refreshed.
+        mEffectsRecorder.setAppToLandscape(inLandscape);
         mEffectsRecorder.setCamera(mCameraDevice);
         mEffectsRecorder.setCameraFacing(info.facing);
         mEffectsRecorder.setProfile(mProfile);
