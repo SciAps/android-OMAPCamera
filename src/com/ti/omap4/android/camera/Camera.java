@@ -273,6 +273,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mContrast;
     private String mBrightness;
     public  static String mIMGscriptTitle;
+    private String mLastPreviewFramerate;
 
     private long mFocusStartTime;
     private long mCaptureStartTime;
@@ -1380,6 +1381,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_BURST,
                 CameraSettings.KEY_ISO,
                 CameraSettings.KEY_EXPOSURE_MODE,
+                CameraSettings.KEY_PREVIEW_FRAMERATE,
                 CameraSettings.KEY_BRACKET_RANGE,
                 CameraSettings.KEY_COLOR_EFFECT,
                 CameraSettings.KEY_ANTIBANDING,
@@ -2140,6 +2142,18 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         if ( !antibanding.equals(mAntibanding) ) {
             mParameters.setAntibanding(antibanding);
             mAntibanding = antibanding;
+        }
+
+        // Set Preview Framerate
+        String framerate =  mPreferences.getString(
+                    CameraSettings.KEY_PREVIEW_FRAMERATE,
+                    getString(R.string.pref_camera_previewframerate_default));
+
+        if ( !framerate.equals(mLastPreviewFramerate) ) {
+            mParameters.setPreviewFpsRange(Integer.parseInt(framerate)*1000,
+                                           Integer.parseInt(framerate)*1000);
+            mLastPreviewFramerate = framerate;
+            restartNeeded = true;
         }
 
         // Set picture size.

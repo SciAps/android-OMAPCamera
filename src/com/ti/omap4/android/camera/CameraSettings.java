@@ -71,6 +71,7 @@ public class CameraSettings {
     public static final String KEY_PREVIEW_SIZE = "pref_camera_previewsize_key";
     public static final String KEY_ANTIBANDING = "pref_camera_antibanding_key";
     public static final String KEY_EXPOSURE_MODE = "pref_camera_exposuremode_key";
+    public static final String KEY_PREVIEW_FRAMERATE = "pref_camera_previewframerate_key";
 
     public static final String EXPOSURE_DEFAULT_VALUE = "0";
 
@@ -189,6 +190,7 @@ public static boolean setCameraPreviewSize(
         ListPreference previewSize = group.findPreference(KEY_PREVIEW_SIZE);
         ListPreference antibanding = group.findPreference(KEY_ANTIBANDING);
         ListPreference exposureMode = group.findPreference(KEY_EXPOSURE_MODE);
+        ListPreference previewFramerate = group.findPreference(KEY_PREVIEW_FRAMERATE);
 
         // Since the screen could be loaded from different resources, we need
         // to check if the preference is available here
@@ -207,6 +209,10 @@ public static boolean setCameraPreviewSize(
         if (whiteBalance != null) {
             filterUnsupportedOptions(group,
                     whiteBalance, mParameters.getSupportedWhiteBalance());
+        }
+        if (previewFramerate != null) {
+            filterUnsupportedOptionsInt(group,
+                    previewFramerate, mParameters.getSupportedPreviewFrameRates());
         }
         if (sceneMode != null) {
             filterUnsupportedOptions(group,
@@ -336,6 +342,24 @@ public static boolean setCameraPreviewSize(
         }
 
         resetIfInvalid(pref);
+    }
+
+    private void filterUnsupportedOptionsInt(PreferenceGroup group,
+            ListPreference pref, List<Integer> supported) {
+        // Remove the preference if the parameter is not supported or there is
+        // only one options for the settings.
+        if (supported == null || supported.size() <= 1) {
+            removePreference(group, pref.getKey());
+            return;
+        }
+
+        pref.filterUnsupportedInt(supported);
+
+        // Set the value to the first entry if it is invalid.
+        String value = pref.getValue();
+        if (pref.findIndexOfValue(value) == NOT_FOUND) {
+            pref.setValueIndex(0);
+        }
     }
 
     private void resetIfInvalid(ListPreference pref) {

@@ -269,6 +269,13 @@
     <string name="pref_camera_previewsize_entry_wvga">WVGA</string>
     <string name="pref_camera_previewsize_entry_hd">720p</string>
 
+    <string name="pref_camera_previewframerate_title">Select FPS</string>
+    <string name="pref_camera_previewframerate_default">30</string>
+    <string name="pref_camera_previewframerate_entry_ten">10</string>
+    <string name="pref_camera_previewframerate_entry_fifteen">15</string>
+    <string name="pref_camera_previewframerate_entry_twenty">20</string>
+    <string name="pref_camera_previewframerate_entry_thirty">30</string>
+
     <string name="pref_camera_mode_title">Capture mode</string>
     <string name="pref_camera_mode_default">high-quality-zsl</string>
     <string name="pref_camera_mode_entry_hs">High Speed</string>
