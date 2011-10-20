@@ -70,6 +70,7 @@ public class CameraSettings {
     public static final String KEY_BRIGHTNESS = "pref_camera_brightness_key";
     public static final String KEY_PREVIEW_SIZE = "pref_camera_previewsize_key";
     public static final String KEY_ANTIBANDING = "pref_camera_antibanding_key";
+    public static final String KEY_EXPOSURE_MODE = "pref_camera_exposuremode_key";
 
     public static final String EXPOSURE_DEFAULT_VALUE = "0";
 
@@ -187,6 +188,7 @@ public static boolean setCameraPreviewSize(
         ListPreference videoEffect = group.findPreference(KEY_VIDEO_EFFECT);
         ListPreference previewSize = group.findPreference(KEY_PREVIEW_SIZE);
         ListPreference antibanding = group.findPreference(KEY_ANTIBANDING);
+        ListPreference exposureMode = group.findPreference(KEY_EXPOSURE_MODE);
 
         // Since the screen could be loaded from different resources, we need
         // to check if the preference is available here
@@ -225,6 +227,10 @@ public static boolean setCameraPreviewSize(
         if ( iso  != null) {
             filterUnsupportedOptions(group, iso,
                     parseToList(mParameters.get(Camera.PARM_SUPPORTED_ISO_MODES)));
+        }
+        if ( exposureMode  != null) {
+            filterUnsupportedOptions(group, exposureMode,
+                    parseToList(mParameters.get(Camera.PARM_SUPPORTED_EXPOSURE_MODES)));
         }
         if (focusMode != null) {
             if (mParameters.getMaxNumFocusAreas() == 0) {

@@ -252,8 +252,10 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final int EXPOSURE_BRACKETING_COUNT = 3;
     private static final String PARM_TEMPORAL_BRACKETING_RANGE_POS = "temporal-bracketing-range-positive";
     private static final String PARM_TEMPORAL_BRACKETING_RANGE_NEG = "temporal-bracketing-range-negative";
-    public static  final String PARM_SUPPORTED_ISO_MODES = "iso-mode-values";
+    public static final String PARM_SUPPORTED_ISO_MODES = "iso-mode-values";
+    public static final String PARM_SUPPORTED_EXPOSURE_MODES = "exposure-mode-values";
     private static final String PARM_ISO = "iso";
+    private static final String PARM_EXPOSURE_MODE = "exposure";
     private static final String PARM_CONTRAST = "contrast";
     private static final String PARM_BRIGHTNESS = "brightness";
 
@@ -264,6 +266,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mGBCE = "off";
     private String mBracketRange;
     private String mISO;
+    private String mExposureMode;
     private String mPreviewSize;
     private String mColorEffect;
     private String mAntibanding;
@@ -1222,6 +1225,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mColorEffect = getString(R.string.pref_camera_coloreffect_default);
         mAntibanding = getString(R.string.pref_camera_antibanding_default);
         mISO = getString(R.string.pref_camera_iso_default);
+        mExposureMode = getString(R.string.pref_camera_exposuremode_default);
         mPreviewSize = getString(R.string.pref_camera_previewsize_default);
 
         mPreferences.setLocalId(this, mCameraId);
@@ -1375,6 +1379,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_BRIGHTNESS,
                 CameraSettings.KEY_BURST,
                 CameraSettings.KEY_ISO,
+                CameraSettings.KEY_EXPOSURE_MODE,
                 CameraSettings.KEY_BRACKET_RANGE,
                 CameraSettings.KEY_COLOR_EFFECT,
                 CameraSettings.KEY_ANTIBANDING,
@@ -2101,6 +2106,15 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mISO = iso;
         }
 
+        // Exposure mode
+        String exposureMode = mPreferences.getString(
+                    CameraSettings.KEY_EXPOSURE_MODE, getString(R.string.pref_camera_exposuremode_default));
+
+        if ( !exposureMode.equals(mExposureMode) ) {
+            mParameters.set(PARM_EXPOSURE_MODE, exposureMode);
+            mExposureMode = exposureMode;
+        }
+
         String contrast = mPreferences.getString(
                     CameraSettings.KEY_CONTRAST,
                     getString(R.string.pref_camera_contrast_default));
@@ -2241,6 +2255,12 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             editor.putString(CameraSettings.KEY_ISO, "auto");
             editor.commit();
             mParameters.set(PARM_ISO, getString(R.string.pref_camera_iso_default));
+
+            // Set Exposure mode to auto
+            editor.putString(CameraSettings.KEY_EXPOSURE_MODE,
+                    getString(R.string.pref_camera_iso_default));
+            editor.commit();
+            mParameters.set(PARM_EXPOSURE_MODE, getString(R.string.pref_camera_iso_default));
 
             // Set Contrast to Normal
             editor.putString(CameraSettings.KEY_CONTRAST, getString(R.string.pref_camera_contrast_default));

@@ -304,6 +304,21 @@
     <string name="pref_camera_iso_entry_400">400</string>
     <string name="pref_camera_iso_entry_800">800</string>
 
+    <string name="pref_camera_exposuremode_title">Exposure Mode</string>
+    <string name="pref_camera_exposuremode_default">auto</string>
+    <string name="pref_camera_exposuremode_entry_auto">Auto</string>
+    <string name="pref_camera_exposuremode_entry_macro">Macro</string>
+    <string name="pref_camera_exposuremode_entry_portrait">Portrait</string>
+    <string name="pref_camera_exposuremode_entry_snow">Snow</string>
+    <string name="pref_camera_exposuremode_entry_sports">Sports</string>
+    <string name="pref_camera_exposuremode_entry_night">Night</string>
+    <string name="pref_camera_exposuremode_entry_spotlight">Spotlight</string>
+    <string name="pref_camera_exposuremode_entry_backlighting">Backlighting</string>
+    <string name="pref_camera_exposuremode_entry_beach">Beach</string>
+    <string name="pref_camera_exposuremode_entry_aperture">Aperture</string>
+    <string name="pref_camera_exposuremode_entry_smallaperture">Small aperture</string>
+    <string name="pref_camera_exposuremode_entry_manual">Manual</string>
+
     <!-- Default focus mode setting.-->
     <string name="pref_camera_focusmode_default" translatable="false">continuous-picture</string>
 
