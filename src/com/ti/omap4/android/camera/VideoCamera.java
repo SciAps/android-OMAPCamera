@@ -498,7 +498,7 @@ public class VideoCamera extends ActivityBase
         final String[] SETTING_KEYS = {
                     CameraSettings.KEY_VIDEOCAMERA_FLASH_MODE,
                     CameraSettings.KEY_WHITE_BALANCE,
-                    CameraSettings.KEY_VIDEO_EFFECT,
+                    //CameraSettings.KEY_VIDEO_EFFECT, Disabling Video Effects since the required filters are not available
                     CameraSettings.KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL};
                     //CameraSettings.KEY_VIDEO_QUALITY}; //Disabling redundant Video Qualily Menu
         final String[] OTHER_SETTING_KEYS = {
@@ -1983,13 +1983,6 @@ public class VideoCamera extends ActivityBase
 
         mParameters.setRecordingHint(true);
 
-        // Enable video stabilization. Convenience methods not available in API
-        // level <= 14
-        String vstabSupported = mParameters.get("video-stabilization-supported");
-        if ("true".equals(vstabSupported)) {
-            mParameters.set("video-stabilization", "true");
-        }
-
         // Set picture size.
         // The logic here is different from the logic in still-mode camera.
         // There we determine the preview size based on the picture size, but
@@ -2060,7 +2053,12 @@ public class VideoCamera extends ActivityBase
         // Set Video Stabilization Mode
         String vstab = mPreferences.getString(CameraSettings.KEY_VSTAB, (getString(R.string.pref_camera_vstab_default)));
         int vstabEn = Integer.parseInt(vstab);
-        mParameters.set(PARM_VSTAB, vstabEn);
+        if(vstabEn == 1){
+            mParameters.set("video-stabilization", "true");
+        }
+        else{
+            mParameters.set("video-stabilization", "false");
+        }
         Log.v(TAG,"VSTAB Set to ["+ vstabEn +"]");
 
         // Set Video Noise Filtering Mode
@@ -2295,7 +2293,11 @@ public class VideoCamera extends ActivityBase
         String vnf = mPreferences.getString(CameraSettings.KEY_VNF, (getString(R.string.pref_camera_vnf_default)));
         boolean enableVnf = ((Integer.parseInt(vnf))>0)? true : false;
 
-        boolean isVstabEnabled = ((mParameters.getInt(PARM_VSTAB))>0)? true : false;
+        String isvstabON = mParameters.get("video-stabilization");
+        boolean isVstabEnabled = false;
+        if("true".equals(isvstabON)){
+            isVstabEnabled = true;
+        }
         boolean isVnfEnabled = ((mParameters.getInt(PARM_VNF))>0)? true : false;
         boolean isPreviewRestartRequired = false;
 
