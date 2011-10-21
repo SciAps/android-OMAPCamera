@@ -291,16 +291,9 @@ public static boolean setCameraPreviewSize(
             return;
         }
 
-        CharSequence[] entryValues = new CharSequence[2];
+        CharSequence[] entryValues = new CharSequence[numOfCameras];
         for (int i = 0; i < mCameraInfo.length; ++i) {
-            int index =
-                    (mCameraInfo[i].facing == CameraInfo.CAMERA_FACING_FRONT)
-                    ? CameraInfo.CAMERA_FACING_FRONT
-                    : CameraInfo.CAMERA_FACING_BACK;
-            if (entryValues[index] == null) {
-                entryValues[index] = "" + i;
-                if (entryValues[((index == 1) ? 0 : 1)] != null) break;
-            }
+            entryValues[i] = "" + i;
         }
         preference.setEntryValues(entryValues);
     }
@@ -500,17 +493,9 @@ public static boolean setCameraPreviewSize(
             ComboPreferences preferences, Parameters parameters) {
         int currentCameraId = readPreferredCameraId(preferences);
 
-        // Clear the preferences of both cameras.
-        int backCameraId = CameraHolder.instance().getBackCameraId();
-        if (backCameraId != -1) {
-            preferences.setLocalId(context, backCameraId);
-            Editor editor = preferences.edit();
-            editor.clear();
-            editor.apply();
-        }
-        int frontCameraId = CameraHolder.instance().getFrontCameraId();
-        if (frontCameraId != -1) {
-            preferences.setLocalId(context, frontCameraId);
+        for (int i=0; i<CameraHolder.instance().getNumberOfCameras(); i++)
+        {
+            preferences.setLocalId(context, i);
             Editor editor = preferences.edit();
             editor.clear();
             editor.apply();

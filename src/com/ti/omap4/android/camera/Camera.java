@@ -316,8 +316,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     // multiple cameras support
     private int mNumberOfCameras;
     private int mCameraId;
-    private int mFrontCameraId;
-    private int mBackCameraId;
 
     private boolean mQuickCapture;
     private IntentFilter mTestIntent = null;
@@ -1290,9 +1288,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mZoomControl = (ZoomControl) findViewById(R.id.zoom_control);
         mLocationManager = new LocationManager(this, this);
 
-        mBackCameraId = CameraHolder.instance().getBackCameraId();
-        mFrontCameraId = CameraHolder.instance().getFrontCameraId();
-
         // Wait until the camera settings are retrieved.
         synchronized (mCameraPreviewThread) {
             try {
@@ -1316,7 +1311,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     }
 
     private void overridePictureSettings() {
-        if ( mCameraId == mBackCameraId ) {
+        if ( mCameraId == CameraHolder.instance().getBackCameraId() ) {
             // We limit the picture size during ZSL on
             // the back facing sensor.
             Editor editor = mPreferences.edit();
@@ -2690,8 +2685,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                     .setOnMenuItemClickListener(new OnMenuItemClickListener() {
                 public boolean onMenuItemClick(MenuItem item) {
                     CameraSettings.writePreferredCameraId(mPreferences,
-                            ((mCameraId == mFrontCameraId)
-                            ? mBackCameraId : mFrontCameraId));
+                            (((mCameraId + 1) < mNumberOfCameras)
+                            ? (mCameraId + 1) : 0));
                     onSharedPreferenceChanged();
                     return true;
                 }
@@ -2808,19 +2803,17 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 }
 
                 if(actionTest.equals("primary")) {
-                    mCameraId = mFrontCameraId;
+                    mCameraId = CameraHolder.instance().getFrontCameraId();
                     CameraSettings.writePreferredCameraId(mPreferences,
-                            ((mCameraId == mFrontCameraId)
-                            ? mBackCameraId : mFrontCameraId));
+                            mCameraId);
                     onSharedPreferenceChanged();
                     return;
                 }
 
                 if(actionTest.equals("secondary")) {
-                    mCameraId = mBackCameraId;
+                    mCameraId = CameraHolder.instance().getBackCameraId();
                     CameraSettings.writePreferredCameraId(mPreferences,
-                            ((mCameraId == mFrontCameraId)
-                            ? mBackCameraId : mFrontCameraId));
+                            mCameraId);
                     onSharedPreferenceChanged();
                     return;
                 }

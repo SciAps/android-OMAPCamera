@@ -552,6 +552,7 @@ public class Util {
                 cameraId = backCameraId;
             }
         }
+
         return cameraId;
     }
 

@@ -33,7 +33,7 @@ public class CameraPicker extends RotateImageView implements View.OnClickListene
     private OnPreferenceChangedListener mListener;
     private ListPreference mPreference;
     private CharSequence[] mCameras;
-    private int mCameraFacing;
+    private int mCameraIndex;
 
     public CameraPicker(Context context) {
         super(context);
@@ -57,21 +57,19 @@ public class CameraPicker extends RotateImageView implements View.OnClickListene
         setOnClickListener(this);
         String cameraId = pref.getValue();
         setVisibility(View.VISIBLE);
-        if (mCameras[CameraInfo.CAMERA_FACING_FRONT].equals(cameraId)) {
-            mCameraFacing = CameraInfo.CAMERA_FACING_FRONT;
-        } else {
-            mCameraFacing = CameraInfo.CAMERA_FACING_BACK;
-        }
+
+        mCameraIndex = (((Integer.parseInt(cameraId)) < mCameras.length)
+                                ? (Integer.parseInt(cameraId)) : 0);
     }
 
     @Override
     public void onClick(View v) {
         if (mCameras == null) return;
-        int newCameraIndex = (mCameraFacing == CameraInfo.CAMERA_FACING_BACK)
-                ? CameraInfo.CAMERA_FACING_FRONT
-                : CameraInfo.CAMERA_FACING_BACK;
-        mCameraFacing = newCameraIndex;
-        mPreference.setValue((String) mCameras[mCameraFacing]);
+        int newCameraIndex = (((mCameraIndex + 1) < mCameras.length)
+                                ? (mCameraIndex + 1) : 0);
+
+        mCameraIndex = newCameraIndex;
+        mPreference.setValue((String) mCameras[mCameraIndex]);
         mListener.onSharedPreferenceChanged();
     }
 }

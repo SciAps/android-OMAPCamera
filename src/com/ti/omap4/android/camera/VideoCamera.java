@@ -239,8 +239,6 @@ public class VideoCamera extends ActivityBase
     // multiple cameras support
     private int mNumberOfCameras;
     private int mCameraId;
-    private int mFrontCameraId;
-    private int mBackCameraId;
 
     private GestureDetector mPopupGestureDetector;
 
@@ -459,9 +457,6 @@ public class VideoCamera extends ActivityBase
         showTimeLapseUI(mCaptureTimeLapse);
         initializeVideoSnapshot();
         resizeForPreviewAspectRatio();
-
-        mBackCameraId = CameraHolder.instance().getBackCameraId();
-        mFrontCameraId = CameraHolder.instance().getFrontCameraId();
 
         initializeIndicatorControl();
     }
@@ -1500,8 +1495,8 @@ public class VideoCamera extends ActivityBase
                     .setOnMenuItemClickListener(new OnMenuItemClickListener() {
                 public boolean onMenuItemClick(MenuItem item) {
                     CameraSettings.writePreferredCameraId(mPreferences,
-                            ((mCameraId == mFrontCameraId)
-                            ? mBackCameraId : mFrontCameraId));
+                            (((mCameraId + 1) < mNumberOfCameras)
+                            ? (mCameraId + 1) : 0));
                     onSharedPreferenceChanged();
                     return true;
                 }
