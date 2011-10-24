@@ -2194,8 +2194,20 @@ public class VideoCamera extends ActivityBase
             mBgLearningMessageFrame.setVisibility(View.GONE);
             checkQualityAndStartPreview();
         } else if (effectMsg == EffectsRecorder.EFFECT_MSG_RECORDING_DONE) {
-            addVideoToMediaStore();
-            getThumbnail();
+            // TODO: This assumes the codepath from onStopVideoRecording.  It
+            // does not appear to cause problems for the other codepaths, but
+            // should be properly thought through.
+            if (mEffectsDisplayResult) {
+                addVideoToMediaStore();
+                if (mIsVideoCaptureIntent) {
+                    if (!mQuickCapture) {
+                        showAlert();
+                    }
+                } else {
+                    getThumbnail();
+                }
+            }
+            mEffectsDisplayResult = false;
         } else if (effectId == EffectsRecorder.EFFECT_BACKDROPPER) {
             switch (effectMsg) {
                 case EffectsRecorder.EFFECT_MSG_STARTED_LEARNING:
