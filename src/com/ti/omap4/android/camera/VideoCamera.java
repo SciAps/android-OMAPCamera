@@ -1638,7 +1638,9 @@ public class VideoCamera extends ActivityBase
             mRecordingTimeView.setVisibility(View.VISIBLE);
             if (mReviewControl != null) mReviewControl.setVisibility(View.GONE);
             if (mCaptureTimeLapse) {
-                if (Util.isTabletUI()) {
+                // The wheel control is shown only in Landscape Orientation.
+                // So the TimeLapse animation is also shown only in Landscape Orientation
+                if (Util.isTabletUI() && (mLastOrientation == 0 || mLastOrientation == 180)) {
                     ((IndicatorControlWheelContainer) mIndicatorControlContainer)
                             .startTimeLapseAnimation(
                                     mTimeBetweenTimeLapseFrameCaptureMs,
@@ -1651,7 +1653,7 @@ public class VideoCamera extends ActivityBase
             mRecordingTimeView.setVisibility(View.GONE);
             if (mReviewControl != null) mReviewControl.setVisibility(View.VISIBLE);
             if (mCaptureTimeLapse) {
-                if (Util.isTabletUI()) {
+                if (Util.isTabletUI() && (mLastOrientation == 0 || mLastOrientation == 180)) {
                     ((IndicatorControlWheelContainer) mIndicatorControlContainer)
                             .stopTimeLapseAnimation();
                 }
