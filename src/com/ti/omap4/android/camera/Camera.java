@@ -1345,14 +1345,24 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         }
     }
 
+    private void overrideCameraExposure(final String exposure) {
+        if (mIndicatorControlContainer != null) {
+            resetExposureCompensation();
+            mIndicatorControlContainer.overrideSettings(
+                    CameraSettings.KEY_EXPOSURE, exposure);
+        }
+    }
+
     private void updateSceneModeUI() {
         // If scene mode is set, we cannot set flash mode, white balance, and
         // focus mode, instead, we read it from driver
         if (!Parameters.SCENE_MODE_AUTO.equals(mSceneMode)) {
             overrideCameraSettings(mParameters.getFlashMode(),
                     mParameters.getWhiteBalance(), mParameters.getFocusMode());
+            overrideCameraExposure(getString(R.string.pref_exposure_default));
         } else {
             overrideCameraSettings(null, null, null);
+            overrideCameraExposure(null);
         }
 
         // GBCE/GLBCE is only available when in HQ mode
@@ -1369,9 +1379,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mIndicatorControlContainer.reloadPreferences();
 
             overrideCameraBurst(getString(R.string.pref_camera_burst_default));
-            } else {
-            overrideCameraBurst(null);
-            }
+        } else {
+        overrideCameraBurst(null);
+        }
     }
 
     private void loadCameraPreferences() {
@@ -2297,9 +2307,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
             // Set Exposure mode to auto
             editor.putString(CameraSettings.KEY_EXPOSURE_MODE,
-                    getString(R.string.pref_camera_iso_default));
+                    getString(R.string.pref_camera_exposuremode_default));
             editor.commit();
-            mParameters.set(PARM_EXPOSURE_MODE, getString(R.string.pref_camera_iso_default));
+            mParameters.set(PARM_EXPOSURE_MODE, getString(R.string.pref_camera_exposuremode_default));
 
             // Set Contrast to Normal
             editor.putString(CameraSettings.KEY_CONTRAST, getString(R.string.pref_camera_contrast_default));
