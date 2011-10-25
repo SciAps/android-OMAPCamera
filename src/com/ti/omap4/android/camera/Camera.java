@@ -260,6 +260,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final String PARM_CONTRAST = "contrast";
     private static final String PARM_BRIGHTNESS = "brightness";
 
+    // Limits ZSL capture size due to some hardware limitations
+    private static final String PARM_ZSL_SIZE = "2016x1512";
+
     private int mBurstImages = 0;
     private boolean mTempBracketingEnabled = false;
 
@@ -1302,6 +1305,22 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mCameraPreviewThread = null;
     }
 
+    private void overridePictureSettings() {
+        if ( mCameraId == mBackCameraId ) {
+            // We limit the picture size during ZSL on
+            // the back facing sensor.
+            Editor editor = mPreferences.edit();
+            editor.putString(CameraSettings.KEY_PICTURE_SIZE, PARM_ZSL_SIZE);
+            editor.apply();
+
+            if (mIndicatorControlContainer != null) {
+                mIndicatorControlContainer.reloadPreferences();
+                mIndicatorControlContainer.overrideSettings(
+                        CameraSettings.KEY_PICTURE_SIZE, PARM_ZSL_SIZE);
+            }
+        }
+    }
+
     private void overrideCameraSettings(final String flashMode,
             final String whiteBalance, final String focusMode) {
         if (mIndicatorControlContainer != null) {
@@ -2319,8 +2338,12 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
         // Capture mode
         String mode = mPreferences.getString(
-                CameraSettings.KEY_MODE, PARM_HQ_MODE);
+                CameraSettings.KEY_MODE, PARM_ZSL_MODE);
         setCaptureMode(mode, mParameters);
+
+        if ( PARM_ZSL_MODE.equals(mode) ) {
+            overridePictureSettings();
+        }
 
         String bracketRange =  mPreferences.getString(
                 CameraSettings.KEY_BRACKET_RANGE,
