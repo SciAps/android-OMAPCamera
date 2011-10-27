@@ -331,6 +331,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                         updateAllParams = false;
                     }
                     startPreview(updateAllParams);
+                    startFaceDetection();
                     if (mJpegPictureCallbackTime != 0) {
                         long now = System.currentTimeMillis();
                         mJpegCallbackFinishTime = now - mJpegPictureCallbackTime;
@@ -595,7 +596,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
     @Override
     public void startFaceDetection() {
-        if (mParameters.getMaxNumDetectedFaces() > 0) {
+        if ( ( mParameters.getMaxNumDetectedFaces() > 0 ) && ( null != mCameraDevice )) {
             mFaceView = (FaceView) findViewById(R.id.face_view);
             mFaceView.clear();
             mFaceView.setVisibility(View.VISIBLE);
@@ -604,7 +605,12 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mFaceView.setMirror(info.facing == CameraInfo.CAMERA_FACING_FRONT);
             mFaceView.resume();
             mCameraDevice.setFaceDetectionListener(this);
-            mCameraDevice.startFaceDetection();
+            try {
+                mCameraDevice.startFaceDetection();
+            } catch ( RuntimeException e ) {
+                Log.e(TAG, "Face detection already started. ", e);
+                return;
+            }
         }
     }
 
@@ -1705,8 +1711,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 initializeCapabilities();
                 resetExposureCompensation();
                 startPreview(true);
-                if (mFirstTimeInitialized) startFaceDetection();
-            } catch(CameraHardwareException e) {
+                startFaceDetection();
+            } catch (CameraHardwareException e) {
                 Util.showErrorAndFinish(this, R.string.cannot_connect_camera);
                 return;
             } catch (CameraDisabledException e) {
@@ -1940,7 +1946,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         // display rotation in onCreate may not be what we want.
         if (mCameraState == PREVIEW_STOPPED) {
             startPreview(true);
-            if (mFirstTimeInitialized) startFaceDetection();
+            startFaceDetection();
         } else {
             if (Util.getDisplayRotation(this) != mDisplayRotation) {
                 setDisplayOrientation();
