@@ -86,6 +86,8 @@ public class CameraSettings {
     public static final String KEY_AUTOCONVERGENCE_MODE_VALUES = "auto-convergence-mode-values";
 
     public static final String KEY_TEMPORAL_BRACKETING = "temporal-bracketing";
+    public static final String KEY_CAMERA_FIRST_USE_HINT_SHOWN = "pref_camera_first_use_hint_shown_key";
+    public static final String KEY_VIDEO_FIRST_USE_HINT_SHOWN = "pref_video_first_use_hint_shown_key";
 
     public static final String EXPOSURE_DEFAULT_VALUE = "0";
 
