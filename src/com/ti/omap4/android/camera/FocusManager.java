@@ -287,7 +287,7 @@ public class FocusManager {
 
         // Set the focus area and metering area.
         mListener.setFocusParameters();
-        if (mFocusAreaSupported && (e.getAction() == MotionEvent.ACTION_UP)) {
+        if (mFocusAreaSupported && (e.getAction() == MotionEvent.ACTION_DOWN)) {
             autoFocus();
         } else {  // Just show the indicator in all other cases.
             updateFocusUI();

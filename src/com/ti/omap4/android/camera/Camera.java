@@ -122,6 +122,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private int mZoomMax;
     private int mTargetZoomValue;
     private ZoomControl mZoomControl;
+    private boolean mCAFActive = false;
 
     private Parameters mParameters;
     private Parameters mInitialParams;
@@ -1850,6 +1851,11 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         // Check if metering area or focus area is supported.
         if (!mFocusAreaSupported && !mMeteringAreaSupported) return false;
 
+        // Do touch AF only in continuous AF mode.
+        if ( !mCAFActive ) {
+            return false;
+        }
+
         return mFocusManager.onTouch(e);
     }
 
@@ -2295,9 +2301,14 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             }
 
             // Set focus mode.
+            String focusMode = mFocusManager.getFocusMode();
             mFocusManager.overrideFocusMode(null);
-            mParameters.setFocusMode(mFocusManager.getFocusMode());
-
+            mParameters.setFocusMode(focusMode);
+            if (Parameters.FOCUS_MODE_CONTINUOUS_PICTURE.equals(focusMode)) {
+                mCAFActive = true;
+            } else {
+                mCAFActive = false;
+            }
         } else {
             mFocusManager.overrideFocusMode(mParameters.getFocusMode());
             // Set Color Effects to None.

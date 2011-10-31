@@ -239,13 +239,8 @@ public static boolean setCameraPreviewSize(
                     parseToList(mParameters.get(Camera.PARM_SUPPORTED_EXPOSURE_MODES)));
         }
         if (focusMode != null) {
-            if (mParameters.getMaxNumFocusAreas() == 0) {
-                filterUnsupportedOptions(group,
-                        focusMode, mParameters.getSupportedFocusModes());
-            } else {
-                // Remove the focus mode if we can use tap-to-focus.
-                removePreference(group, focusMode.getKey());
-            }
+            filterUnsupportedOptions(group,
+                    focusMode, mParameters.getSupportedFocusModes());
         }
         if (videoFlashMode != null) {
             filterUnsupportedOptions(group,
