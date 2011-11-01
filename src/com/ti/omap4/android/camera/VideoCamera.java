@@ -942,10 +942,7 @@ public class VideoCamera extends ActivityBase
             Log.v(TAG," Setting Orientation = "+ mLastOrientation);
             mRotationUpdated = true;
         }
-        int orientation = Util.getDisplayOrientation(mDisplayRotation, mCameraId);
-        CameraInfo info = CameraHolder.instance().getCameraInfo()[mCameraId];
-        if (info.facing == CameraInfo.CAMERA_FACING_FRONT)
-            mCameraDevice.setDisplayOrientation(orientation);
+
         setCameraParameters();
 
         if (!effectsActive()) {
@@ -1930,7 +1927,16 @@ public class VideoCamera extends ActivityBase
         CameraInfo info = CameraHolder.instance().getCameraInfo()[mCameraId];
 
         // Set Sensor Orientation
-        mParameters.set(PARM_SENSOR_ORIENTATION, mLastOrientation);
+        //For FRONT Facing Camera, the orientation should be counter clockwise.
+        if (info.facing == CameraInfo.CAMERA_FACING_FRONT){
+            int mOrientationFrontFacingCamera = mLastOrientation;
+            if(mLastOrientation == 90 || mLastOrientation == 270) {
+                    mOrientationFrontFacingCamera = (mLastOrientation + 180) % 360;
+            }
+            mParameters.set(PARM_SENSOR_ORIENTATION,mOrientationFrontFacingCamera);
+        } else {
+            mParameters.set(PARM_SENSOR_ORIENTATION, mLastOrientation);
+        }
         Log.v(TAG," Setting Orientation = "+ mLastOrientation);
 
         //Set Video Resolution
