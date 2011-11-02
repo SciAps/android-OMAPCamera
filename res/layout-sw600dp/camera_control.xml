@@ -43,12 +43,12 @@
             <com.ti.omap4.android.camera.ui.IndicatorControlWheel android:id="@+id/indicator_control_wheel"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
+                <com.ti.omap4.android.camera.ui.ZoomControlWheel
+                        android:id="@+id/zoom_control"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:visibility="gone" />
             </com.ti.omap4.android.camera.ui.IndicatorControlWheel>
-            <com.ti.omap4.android.camera.ui.ZoomControlWheel
-                    android:id="@+id/zoom_control"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:visibility="gone" />
         </com.ti.omap4.android.camera.ui.IndicatorControlWheelContainer>
         <include layout="@layout/mode_picker" />
 </com.ti.omap4.android.camera.ui.ControlPanelLayout>
