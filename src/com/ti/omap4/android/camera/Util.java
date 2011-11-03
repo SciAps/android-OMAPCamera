@@ -367,6 +367,54 @@ public class Util {
         return orientationHistory;
     }
 
+    public static Size getOptimalSnapshotSize(List<Size> sizes, Size videoSize) {
+        Size optimalSize = null;
+        final double ASPECT_TOLERANCE = 0.001;
+
+        if ( ( 0 < sizes.size() ) &&
+             ( 0 < videoSize.width ) &&
+             ( 0 < videoSize.height) ) {
+
+            double targetRatio = ( double ) videoSize.width / videoSize.height;
+            double minDiff = Double.MAX_VALUE;
+            for ( Size size : sizes ) {
+                if ( ( 0 < size.width ) && ( 0 < size.height) ) {
+
+                    double ratio = ( double ) size.width / size.height;
+
+                    if ( Math.abs( ratio - targetRatio ) > ASPECT_TOLERANCE ) {
+                        continue;
+                    }
+
+                    if (Math.abs(size.height - videoSize.height) < minDiff) {
+                        optimalSize = size;
+                        minDiff = Math.abs(size.height - videoSize.height);
+                    }
+                }
+            }
+
+            // If we don't match anything with appropriate aspect
+            // and resolution, then try with a minimal area difference.
+            if ( null == optimalSize ) {
+                minDiff = Double.MAX_VALUE;
+                double targetArea = videoSize.width * videoSize.height;
+                for ( Size size : sizes ) {
+                    if ( ( 0 < size.width ) && ( 0 < size.height) ) {
+
+                        double area = size.width * size.height;
+
+                        if (Math.abs(targetArea - area) < minDiff) {
+                            optimalSize = size;
+                            minDiff = Math.abs(targetArea - area);
+                        }
+                    }
+                }
+            }
+        }
+
+        return optimalSize;
+    }
+
     public static Size getOptimalPreviewSize(Activity currentActivity,
             List<Size> sizes, double targetRatio) {
         // Use a very small tolerance because we want an exact match.

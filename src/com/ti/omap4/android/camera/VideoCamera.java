@@ -2539,6 +2539,13 @@ public class VideoCamera extends ActivityBase
         Util.setRotationParameter(mParameters, mCameraId, mOrientation);
         Location loc = mLocationManager.getCurrentLocation();
         Util.setGpsParameters(mParameters, loc);
+
+        Size snapshotSize = Util.getOptimalSnapshotSize(mParameters.getSupportedPictureSizes(),
+                                                        mParameters.getPreviewSize());
+        if ( null != snapshotSize ) {
+            mParameters.setPictureSize(snapshotSize.width, snapshotSize.height);
+        }
+
         mCameraDevice.setParameters(mParameters);
 
         Log.v(TAG, "Video snapshot start");
