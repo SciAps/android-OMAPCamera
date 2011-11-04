@@ -654,6 +654,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             int doubleCLick_X = (int) e.getX();
             int doubleClick_Y = (int) e.getY();
 
+            // Do not trigger double tap zoom if popup window is opened.
+            if (collapseCameraControls()) return false;
+
             SurfaceView mSurfaceView = (SurfaceView) findViewById(R.id.camera_preview);
             int frameOffsetLeft = mPreviewFrameLayout.getLeft();
             int frameOffsetTop = mPreviewFrameLayout.getTop();
