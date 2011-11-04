@@ -152,6 +152,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private boolean mOpenCameraFail = false;
     private boolean mCameraDisabled = false;
     public  static boolean mIsTestExecuting = false;
+    private boolean mFaceDetectionStarted = false;
 
     private View mPreviewPanel;  // The container of PreviewFrameLayout.
     private PreviewFrameLayout mPreviewFrameLayout;
@@ -609,7 +610,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
     @Override
     public void startFaceDetection() {
+        if (mFaceDetectionStarted || mCameraState != IDLE) return;
         if ( ( mParameters.getMaxNumDetectedFaces() > 0 ) && ( null != mCameraDevice )) {
+            mFaceDetectionStarted = true;
             mFaceView = (FaceView) findViewById(R.id.face_view);
             mFaceView.clear();
             mFaceView.setVisibility(View.VISIBLE);
@@ -629,7 +632,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
     @Override
     public void stopFaceDetection() {
+        if (!mFaceDetectionStarted) return;
         if (mParameters.getMaxNumDetectedFaces() > 0) {
+            mFaceDetectionStarted = false;
             mCameraDevice.setFaceDetectionListener(null);
             mCameraDevice.stopFaceDetection();
             if (mFaceView != null) mFaceView.clear();
@@ -1192,6 +1197,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
         mCameraDevice.takePicture(mShutterCallback, mRawPictureCallback,
                 mPostViewPictureCallback, new JpegPictureCallback(loc));
+        mFaceDetectionStarted = false;
         setCameraState(SNAPSHOT_IN_PROGRESS);
         return true;
     }
@@ -2112,6 +2118,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private void closeCamera() {
         if (mCameraDevice != null) {
             CameraHolder.instance().release();
+            mFaceDetectionStarted = false;
             mCameraDevice.setZoomChangeListener(null);
             mCameraDevice.setFaceDetectionListener(null);
             mCameraDevice.setErrorCallback(null);
@@ -2202,6 +2209,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             Log.v(TAG, "stopPreview");
             mCameraDevice.cancelAutoFocus(); // Reset the focus.
             mCameraDevice.stopPreview();
+            mFaceDetectionStarted = false;
         }
         setCameraState(PREVIEW_STOPPED);
         mFocusManager.onPreviewStopped();
