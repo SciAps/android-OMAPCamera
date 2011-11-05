@@ -58,6 +58,7 @@ public class FocusManager {
     private boolean mFocusAreaSupported;
     private boolean mLockAeAwbNeeded;
     private boolean mAeAwbLock;
+    private boolean mTempBracketingActive = false;
     private Matrix mMatrix;
     private SoundPlayer mSoundPlayer;
     private View mFocusIndicatorRotateLayout;
@@ -479,9 +480,21 @@ public class FocusManager {
         return supported == null ? false : supported.indexOf(value) >= 0;
     }
 
+    public void setTempBracketingFlag(boolean active) {
+        this.mTempBracketingActive = active;
+    }
+
+    public boolean getTempBracketingFlag() {
+        return this.mTempBracketingActive;
+    }
+
     private boolean needAutoFocusCall() {
         String focusMode = getFocusMode();
-        return !(focusMode.equals(Parameters.FOCUS_MODE_INFINITY)
+
+        // In case we have infinity configured and temporal bracketing
+        // is active as well, a call to autoFocus is needed.
+        return !( ( focusMode.equals(Parameters.FOCUS_MODE_INFINITY)
+                    && (!mTempBracketingActive) )
                 || focusMode.equals(Parameters.FOCUS_MODE_FIXED)
                 || focusMode.equals(Parameters.FOCUS_MODE_EDOF));
     }

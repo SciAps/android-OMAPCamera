@@ -2521,6 +2521,11 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             params.set(PARM_MODE, PARM_HQ_MODE);
             params.set(PARM_IPP, PARM_IPP_LDCNSF);
         }
+
+        if ( null != mFocusManager ) {
+            mFocusManager.setTempBracketingFlag(mTempBracketingEnabled);
+        }
+
     }
 
     private void gotoGallery() {
