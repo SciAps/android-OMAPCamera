@@ -152,6 +152,7 @@ public class VideoCamera extends ActivityBase
     private int mSurfaceWidth;
     private int mSurfaceHeight;
     private View mReviewControl;
+    private RotateDialogController mRotateDialog;
 
     private Toast mNoShareToast;
     // An review image having same size as preview. It is displayed when
@@ -436,6 +437,8 @@ public class VideoCamera extends ActivityBase
             mModePicker.setOnModeChangeListener(this);
         }
 
+        mRotateDialog = new RotateDialogController(this, R.layout.rotate_dialog);
+
         mPreviewPanel = findViewById(R.id.frame_layout);
         mPreviewFrameLayout = (PreviewFrameLayout) findViewById(R.id.frame);
         mReviewImage = (ImageView) findViewById(R.id.review_image);
@@ -605,7 +608,7 @@ public class VideoCamera extends ActivityBase
     private void setOrientationIndicator(int orientation) {
         Rotatable[] indicators = {mThumbnailView, mModePicker, mSharePopup,
                 mBgLearningMessageRotater, mIndicatorControlContainer,
-                mReviewDoneButton, mReviewPlayButton, mReviewCancelButton};
+                mReviewDoneButton, mReviewPlayButton, mReviewCancelButton, mRotateDialog};
         for (Rotatable indicator : indicators) {
             if (indicator != null) indicator.setOrientation(orientation);
         }
@@ -2309,10 +2312,11 @@ public class VideoCamera extends ActivityBase
                 restorePreferences();
             }
         };
-        MenuHelper.confirmAction(this,
+        mRotateDialog.showAlertDialog(
                 getString(R.string.confirm_restore_title),
                 getString(R.string.confirm_restore_message),
-                runnable);
+                getString(android.R.string.ok), runnable,
+                getString(android.R.string.cancel), null);
     }
 
     private void restorePreferences() {
