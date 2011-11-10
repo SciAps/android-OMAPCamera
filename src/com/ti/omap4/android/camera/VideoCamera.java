@@ -1560,7 +1560,7 @@ public class VideoCamera extends ActivityBase
     private void pauseAudioPlayback() {
         // Shamelessly copied from MediaPlaybackService.java, which
         // should be public, but isn't.
-        Intent i = new Intent("com.ti.omap4.android.music.musicservicecommand");
+        Intent i = new Intent("com.android.music.musicservicecommand");
         i.putExtra("command", "pause");
 
         sendBroadcast(i);
