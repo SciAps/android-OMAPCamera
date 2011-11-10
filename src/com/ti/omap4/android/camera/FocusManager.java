@@ -480,6 +480,10 @@ public class FocusManager {
         return mState == STATE_SUCCESS || mState == STATE_FAIL;
     }
 
+    public boolean isFocusingSnapOnFinish() {
+        return mState == STATE_FOCUSING_SNAP_ON_FINISH;
+    }
+
     public void removeMessages() {
         mHandler.removeMessages(RESET_TOUCH_FOCUS);
     }
