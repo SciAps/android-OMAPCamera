@@ -22,6 +22,7 @@ import com.ti.omap4.android.camera.ui.IndicatorControlContainer;
 import com.ti.omap4.android.camera.ui.Rotatable;
 import com.ti.omap4.android.camera.ui.RotateImageView;
 import com.ti.omap4.android.camera.ui.RotateLayout;
+import com.ti.omap4.android.camera.ui.RotateTextToast;
 import com.ti.omap4.android.camera.ui.SharePopup;
 import com.ti.omap4.android.camera.ui.ZoomControl;
 
@@ -96,8 +97,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final int SET_CAMERA_PARAMETERS_WHEN_IDLE = 4;
     private static final int CHECK_DISPLAY_ROTATION = 5;
     private static final int SHOW_TAP_TO_FOCUS_TOAST = 6;
-    private static final int DISMISS_TAP_TO_FOCUS_TOAST = 7;
-    private static final int UPDATE_THUMBNAIL = 8;
+    private static final int UPDATE_THUMBNAIL = 7;
 
     private static final int MODE_RESTART = 9;
     private static final int RESTART_PREVIEW = 10;
@@ -393,14 +393,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
                 case SHOW_TAP_TO_FOCUS_TOAST: {
                     showTapToFocusToast();
-                    break;
-                }
-
-                case DISMISS_TAP_TO_FOCUS_TOAST: {
-                    View v = findViewById(R.id.first_use_hint);
-                    v.setVisibility(View.GONE);
-                    v.setAnimation(AnimationUtils.loadAnimation(Camera.this,
-                            R.anim.on_screen_hint_exit));
                     break;
                 }
 
@@ -3063,15 +3055,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     }
 
     private void showTapToFocusToast() {
-        // Set the text of toast
-        TextView textView = (TextView) findViewById(R.id.toast_text);
-        textView.setText(R.string.tap_to_focus);
-        // Show the toast.
-        RotateLayout v = (RotateLayout) findViewById(R.id.first_use_hint);
-        v.setOrientation(mOrientationCompensation);
-        v.startAnimation(AnimationUtils.loadAnimation(this, R.anim.on_screen_hint_enter));
-        v.setVisibility(View.VISIBLE);
-        mHandler.sendEmptyMessageDelayed(DISMISS_TAP_TO_FOCUS_TOAST, 5000);
+        new RotateTextToast(this, R.string.tap_to_focus, mOrientation).show();
         // Clear the preference.
         Editor editor = mPreferences.edit();
         editor.putBoolean(CameraSettings.KEY_CAMERA_FIRST_USE_HINT_SHOWN, false);
