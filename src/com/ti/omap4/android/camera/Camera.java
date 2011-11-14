@@ -747,6 +747,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
     @Override
     public void showGpsOnScreenIndicator(boolean hasSignal) {
+        if (mGpsIndicator == null) {
+            return;
+        }
         if (hasSignal) {
             mGpsIndicator.setImageResource(R.drawable.ic_viewfinder_gps_on);
         } else {
@@ -757,10 +760,16 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
     @Override
     public void hideGpsOnScreenIndicator() {
+        if (mGpsIndicator == null) {
+            return;
+        }
         mGpsIndicator.setVisibility(View.GONE);
     }
 
     private void updateExposureOnScreenIndicator(int value) {
+        if (mExposureIndicator == null) {
+            return;
+        }
         if (value == 0) {
             mExposureIndicator.setText("");
             mExposureIndicator.setVisibility(View.GONE);
@@ -776,6 +785,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     }
 
     private void updateFlashOnScreenIndicator(String value) {
+        if (mFlashIndicator == null) {
+            return;
+        }
         if (Parameters.FLASH_MODE_AUTO.equals(value)) {
             mFlashIndicator.setImageResource(R.drawable.ic_indicators_landscape_flash_auto);
         } else if (Parameters.FLASH_MODE_ON.equals(value)) {
@@ -786,10 +798,16 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     }
 
     private void updateSceneOnScreenIndicator(boolean isVisible) {
+        if (mSceneIndicator == null) {
+            return;
+        }
         mSceneIndicator.setVisibility(isVisible ? View.VISIBLE : View.GONE);
     }
 
     private void updateWhiteBalanceOnScreenIndicator(String value) {
+        if (mWhiteBalanceIndicator == null) {
+            return;
+        }
         if (Parameters.WHITE_BALANCE_AUTO.equals(value)) {
             mWhiteBalanceIndicator.setVisibility(View.GONE);
         } else {
@@ -807,6 +825,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     }
 
     private void updateFocusOnScreenIndicator(String value) {
+        if (mFocusIndicator == null) {
+            return;
+        }
         if (Parameters.FOCUS_MODE_INFINITY.equals(value)) {
             mFocusIndicator.setImageResource(R.drawable.ic_indicators_landscape);
             mFocusIndicator.setVisibility(View.VISIBLE);
