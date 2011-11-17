@@ -1334,16 +1334,29 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     }
 
     private void overrideCameraGBCE(final String gbce) {
-        if (mIndicatorControlContainer != null) {
-            mIndicatorControlContainer.overrideSettings(
-                    CameraSettings.KEY_GBCE, gbce);
+        if (gbce != null) {
+            Editor editor = mPreferences.edit();
+            editor.putString(CameraSettings.KEY_GBCE, gbce);
+            editor.apply();
+            mParameters.set(PARM_GBCE, gbce);
+            mCameraDevice.setParameters(mParameters);
+            if (mIndicatorControlContainer != null) {
+                mIndicatorControlContainer.reloadPreferences();
+            }
         }
     }
 
     private void overrideCameraBurst(final String burst) {
-        if (mIndicatorControlContainer != null) {
-            mIndicatorControlContainer.overrideSettings(
-                    CameraSettings.KEY_BURST, burst);
+        if (burst != null) {
+            Editor editor = mPreferences.edit();
+            editor.putString(CameraSettings.KEY_BURST, burst);
+            editor.apply();
+            mParameters.set(PARM_BURST, burst);
+            mCameraDevice.setParameters(mParameters);
+            mBurstRunning = false;
+            if (mIndicatorControlContainer != null) {
+                mIndicatorControlContainer.reloadPreferences();
+            }
         }
     }
 
@@ -1375,14 +1388,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         }
 
         if ( !PARM_HS_MODE.equals(mCaptureMode) ) {
-            Editor editor = mPreferences.edit();
-            editor.putString(CameraSettings.KEY_BURST, "0");
-            editor.apply();
-            mIndicatorControlContainer.reloadPreferences();
-
             overrideCameraBurst(getString(R.string.pref_camera_burst_default));
         } else {
-        overrideCameraBurst(null);
+            overrideCameraBurst(null);
         }
     }
 
@@ -2393,7 +2401,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         if (( burst != mBurstImages ) &&
                 ( mode.equals(PARM_HS_MODE) ) ) {
               mBurstImages = burst;
-              if ( 0 < mBurstImages ) {
+              if ( 0 <= mBurstImages ) {
                   mParameters.set(PARM_BURST, mBurstImages);
                   mBurstRunning = true;
               }
