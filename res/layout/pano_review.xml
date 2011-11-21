@@ -53,7 +53,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
-        <com.android.camera.panorama.PanoProgressBar
+        <com.ti.omap4.android.camera.panorama.PanoProgressBar
                 android:id="@+id/pano_saving_progress_bar"
                 android:src="@drawable/ic_pan_progression"
                 android:layout_centerInParent="true"

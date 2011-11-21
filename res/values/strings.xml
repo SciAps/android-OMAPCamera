@@ -26,10 +26,10 @@
     <string name="camera_disabled">Camera has been disabled because of security policies.</string>
 
     <!-- label for the icon meaning 'show me all the images that were taken with the camera' -->
-    <string name="camera_label">Camera</string>
+    <string name="camera_label">CameraOMAP4</string>
 
     <!-- label for the 'video recording application shown in the top level 'all applications' -->
-    <string name="video_camera_label">Camcorder</string>
+    <string name="video_camera_label">CamcorderOMAP4</string>
 
     <!-- label for the folder that contains Camera pictures in the gallery -->
     <string name="gallery_camera_bucket_name">Camera pictures</string>

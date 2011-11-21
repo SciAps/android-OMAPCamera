@@ -17,8 +17,8 @@
 */
 -->
 
-<com.android.camera.ui.OtherSettingsPopup xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:camera="http://schemas.android.com/apk/res/com.android.camera"
+<com.ti.omap4.android.camera.ui.OtherSettingsPopup xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:camera="http://schemas.android.com/apk/res/com.ti.omap4.android.camera"
         style="@style/SettingPopupWindow">
 
     <LinearLayout android:orientation="vertical"
@@ -44,4 +44,4 @@
                     style="@style/SettingItemList" />
         </FrameLayout>
     </LinearLayout>
-</com.android.camera.ui.OtherSettingsPopup>
+</com.ti.omap4.android.camera.ui.OtherSettingsPopup>

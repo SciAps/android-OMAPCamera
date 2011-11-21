@@ -418,23 +418,23 @@ void FreeTextureMemory()
 
 extern "C"
 {
-    JNIEXPORT jint JNICALL Java_com_android_camera_panorama_MosaicRenderer_init(
+    JNIEXPORT jint JNICALL Java_com_ti_omap4_android_camera_panorama_MosaicRenderer_init(
             JNIEnv * env, jobject obj);
-    JNIEXPORT void JNICALL Java_com_android_camera_panorama_MosaicRenderer_reset(
+    JNIEXPORT void JNICALL Java_com_ti_omap4_android_camera_panorama_MosaicRenderer_reset(
             JNIEnv * env, jobject obj,  jint width, jint height);
-    JNIEXPORT void JNICALL Java_com_android_camera_panorama_MosaicRenderer_preprocess(
+    JNIEXPORT void JNICALL Java_com_ti_omap4_android_camera_panorama_MosaicRenderer_preprocess(
             JNIEnv * env, jobject obj, jfloatArray stMatrix);
-    JNIEXPORT void JNICALL Java_com_android_camera_panorama_MosaicRenderer_transferGPUtoCPU(
+    JNIEXPORT void JNICALL Java_com_ti_omap4_android_camera_panorama_MosaicRenderer_transferGPUtoCPU(
             JNIEnv * env, jobject obj);
-    JNIEXPORT void JNICALL Java_com_android_camera_panorama_MosaicRenderer_step(
+    JNIEXPORT void JNICALL Java_com_ti_omap4_android_camera_panorama_MosaicRenderer_step(
             JNIEnv * env, jobject obj);
-    JNIEXPORT void JNICALL Java_com_android_camera_panorama_MosaicRenderer_ready(
+    JNIEXPORT void JNICALL Java_com_ti_omap4_android_camera_panorama_MosaicRenderer_ready(
             JNIEnv * env, jobject obj);
-    JNIEXPORT void JNICALL Java_com_android_camera_panorama_MosaicRenderer_setWarping(
+    JNIEXPORT void JNICALL Java_com_ti_omap4_android_camera_panorama_MosaicRenderer_setWarping(
             JNIEnv * env, jobject obj, jboolean flag);
 };
 
-JNIEXPORT jint JNICALL Java_com_android_camera_panorama_MosaicRenderer_init(
+JNIEXPORT jint JNICALL Java_com_ti_omap4_android_camera_panorama_MosaicRenderer_init(
         JNIEnv * env, jobject obj)
 {
     gSurfTexRenderer[LR].InitializeGLProgram();
@@ -461,7 +461,7 @@ JNIEXPORT jint JNICALL Java_com_android_camera_panorama_MosaicRenderer_init(
 }
 
 
-JNIEXPORT void JNICALL Java_com_android_camera_panorama_MosaicRenderer_reset(
+JNIEXPORT void JNICALL Java_com_ti_omap4_android_camera_panorama_MosaicRenderer_reset(
         JNIEnv * env, jobject obj,  jint width, jint height)
 {
     // Scale the current frame's height to the height of view and
@@ -550,7 +550,7 @@ JNIEXPORT void JNICALL Java_com_android_camera_panorama_MosaicRenderer_reset(
     gPreview.SetInputTextureType(GL_TEXTURE_2D);
 }
 
-JNIEXPORT void JNICALL Java_com_android_camera_panorama_MosaicRenderer_preprocess(
+JNIEXPORT void JNICALL Java_com_ti_omap4_android_camera_panorama_MosaicRenderer_preprocess(
         JNIEnv * env, jobject obj, jfloatArray stMatrix)
 {
     jfloat *stmat = env->GetFloatArrayElements(stMatrix, 0);
@@ -579,7 +579,7 @@ now_ms(void)
 
 
 
-JNIEXPORT void JNICALL Java_com_android_camera_panorama_MosaicRenderer_transferGPUtoCPU(
+JNIEXPORT void JNICALL Java_com_ti_omap4_android_camera_panorama_MosaicRenderer_transferGPUtoCPU(
         JNIEnv * env, jobject obj)
 {
     double t0, t1, time_c;
@@ -617,7 +617,7 @@ JNIEXPORT void JNICALL Java_com_android_camera_panorama_MosaicRenderer_transferG
     sem_post(&gPreviewImage_semaphore);
 }
 
-JNIEXPORT void JNICALL Java_com_android_camera_panorama_MosaicRenderer_step(
+JNIEXPORT void JNICALL Java_com_ti_omap4_android_camera_panorama_MosaicRenderer_step(
         JNIEnv * env, jobject obj)
 {
     if(!gWarpImage) // ViewFinder
@@ -646,7 +646,7 @@ JNIEXPORT void JNICALL Java_com_android_camera_panorama_MosaicRenderer_step(
     }
 }
 
-JNIEXPORT void JNICALL Java_com_android_camera_panorama_MosaicRenderer_setWarping(
+JNIEXPORT void JNICALL Java_com_ti_omap4_android_camera_panorama_MosaicRenderer_setWarping(
         JNIEnv * env, jobject obj, jboolean flag)
 {
     // TODO: Review this logic
@@ -673,7 +673,7 @@ JNIEXPORT void JNICALL Java_com_android_camera_panorama_MosaicRenderer_setWarpin
 }
 
 
-JNIEXPORT void JNICALL Java_com_android_camera_panorama_MosaicRenderer_ready(
+JNIEXPORT void JNICALL Java_com_ti_omap4_android_camera_panorama_MosaicRenderer_ready(
         JNIEnv * env, jobject obj)
 {
     for(int i=0; i<16; i++)
