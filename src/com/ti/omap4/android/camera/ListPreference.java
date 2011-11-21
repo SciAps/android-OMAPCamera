@@ -100,6 +100,15 @@ public class ListPreference extends CameraPreference {
         return -1;
     }
 
+    public String findEntryVlaueByEntry(String entry) {
+        for (int i = 0, n = mEntries.length; i < n; ++i) {
+            if (Util.equals(mEntries[i], entry)) {
+                return mEntryValues[i].toString();
+            }
+        }
+        return null;
+    }
+
     public String getEntry() {
         return mEntries[findIndexOfValue(getValue())].toString();
     }

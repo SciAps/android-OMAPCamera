@@ -658,6 +658,19 @@
     <!-- The on/off switch in camera settings, such as store location. [CHAR LIMIT = NONE] -->
     <string name="accessibility_switch">%1$s switch</string>
 
+    <!-- Default AutoConvergence mode setting.-->
+    <string name="pref_camera_autoconvergence_default" translatable="false">frame</string>
+
+    <!-- Settings screen, AutoConvergence mode title -->
+    <string name="pref_camera_autoconvergence_title">Auto Convergence Mode</string>
+
+    <!-- Settings screen, AutoConvergence mode dialog radio button choices -->
+    <string name="pref_camera_autoconvergence_entry_mode_frame">Frame Mode</string>
+    <string name="pref_camera_autoconvergence_entry_mode_center">Center Mode</string>
+    <string name="pref_camera_autoconvergence_entry_mode_touch">Touch Mode</string>
+    <string name="pref_camera_autoconvergence_entry_mode_manual">Manual Mode</string>
+    <string name="pref_camera_autoconvergence_entry_mode_disable">Disable</string>
+
     <!-- TODO: remove the string as it is a work-around solution to bypass the default speak of the element type. -->
     <string name="empty" translatable="false">" "</string>
 </resources>

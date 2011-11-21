@@ -75,6 +75,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ArrayList;
 
 import android.filterpacks.videosink.MediaRecorderStopException;
 
@@ -86,7 +87,7 @@ public class VideoCamera extends ActivityBase
         ShutterButton.OnShutterButtonListener, SurfaceHolder.Callback,
         MediaRecorder.OnErrorListener, MediaRecorder.OnInfoListener,
         ModePicker.OnModeChangeListener, View.OnTouchListener,
-        EffectsRecorder.EffectsListener {
+        EffectsRecorder.EffectsListener, TouchManager.Listener {
 
     private static final String TAG = "videocamera";
 
@@ -267,6 +268,11 @@ public class VideoCamera extends ActivityBase
     private ZoomControl mZoomControl;
     private final ZoomListener mZoomListener = new ZoomListener();
 
+    private boolean mMeteringAreaSupported;
+    private String mTouchConvergence;
+    private TouchManager mTouchManager;
+    private String mAutoConvergence;
+
     // This Handler is used to post message back onto the main thread of the
     // application
     private class MainHandler extends Handler {
@@ -379,6 +385,9 @@ public class VideoCamera extends ActivityBase
                 try {
                     mCameraDevice = Util.openCamera(VideoCamera.this, mCameraId);
                     readVideoPreferences();
+
+                    mMeteringAreaSupported = (mCameraDevice.getParameters().getMaxNumMeteringAreas() > 0);
+
                     startPreview();
                 } catch (CameraHardwareException e) {
                     mOpenCameraFail = true;
@@ -440,6 +449,9 @@ public class VideoCamera extends ActivityBase
 
         mLocationManager = new LocationManager(this, null);
 
+        mTouchManager = new TouchManager();
+
+
         // Make sure preview is started.
         try {
             startPreviewThread.join();
@@ -459,6 +471,14 @@ public class VideoCamera extends ActivityBase
         resizeForPreviewAspectRatio();
 
         initializeIndicatorControl();
+
+        ListPreference autoConvergencePreference = mPreferenceGroup.findPreference(CameraSettings.KEY_AUTO_CONVERGENCE);
+        if (autoConvergencePreference != null) {
+            mTouchConvergence = autoConvergencePreference.findEntryVlaueByEntry(getString(R.string.pref_camera_autoconvergence_entry_mode_touch));
+            if (mTouchConvergence == null) {
+                mTouchConvergence = "";
+            }
+        }
     }
 
     private void loadCameraPreferences() {
@@ -498,6 +518,7 @@ public class VideoCamera extends ActivityBase
                     //CameraSettings.KEY_VIDEO_QUALITY}; //Disabling redundant Video Qualily Menu
         final String[] OTHER_SETTING_KEYS = {
                     CameraSettings.KEY_VIDEO_FORMAT,
+                    CameraSettings.KEY_AUTO_CONVERGENCE,
                     CameraSettings.KEY_AUDIO_ENCODER,
                     CameraSettings.KEY_VIDEO_ENCODER,
                     CameraSettings.KEY_VIDEO_BITRATE,
@@ -631,6 +652,13 @@ public class VideoCamera extends ActivityBase
 
     public void onProtectiveCurtainClick(View v) {
         // Consume clicks
+    }
+
+    @Override
+    public void setTouchParameters() {
+        mParameters = mCameraDevice.getParameters();
+        mParameters.setMeteringAreas(mTouchManager.getMeteringAreas());
+        mCameraDevice.setParameters(mParameters);
     }
 
     @Override
@@ -833,6 +861,8 @@ public class VideoCamera extends ActivityBase
     @Override
     protected void doOnResume() {
         if (mOpenCameraFail || mCameraDisabled) return;
+
+        mAutoConvergence = getString(R.string.pref_camera_autoconvergence_default);
 
         mPausing = false;
         mZoomValue = 0;
@@ -1133,6 +1163,16 @@ public class VideoCamera extends ActivityBase
             }
             startPreview();
         }
+
+        SurfaceView preview = (SurfaceView) findViewById(R.id.camera_preview);
+        CameraInfo info = CameraHolder.instance().getCameraInfo()[mCameraId];
+        boolean mirror = (info.facing == CameraInfo.CAMERA_FACING_FRONT);
+        int displayRotation = Util.getDisplayRotation(this);
+        int displayOrientation = Util.getDisplayOrientation(displayRotation, mCameraId);
+
+        mTouchManager.initialize(preview.getHeight() / 3, preview.getHeight() / 3,
+               preview, this, mirror, displayOrientation);
+
     }
 
     public void surfaceCreated(SurfaceHolder holder) {
@@ -1983,6 +2023,16 @@ public class VideoCamera extends ActivityBase
             }
         }
 
+        // Auto Convergence
+        String autoConvergence = mPreferences.getString(
+                CameraSettings.KEY_AUTO_CONVERGENCE,
+                getString(R.string.pref_camera_autoconvergence_default));
+
+        if ( !autoConvergence.equals(mAutoConvergence) ) {
+            mParameters.set(CameraSettings.KEY_AUTOCONVERGENCE_MODE, autoConvergence);
+            mAutoConvergence = autoConvergence;
+        }
+
         // Set zoom.
         if (mParameters.isZoomSupported()) {
             mParameters.setZoom(mZoomValue);
@@ -2542,6 +2592,12 @@ public class VideoCamera extends ActivityBase
             Toast.makeText(this, getResources().getString(
                     R.string.disable_video_snapshot_hint), Toast.LENGTH_LONG).show();
             return false;
+        }
+
+        // Check if metering area is supported and touch convergence is selected
+        if (mMeteringAreaSupported &&
+                mAutoConvergence.equals(mTouchConvergence)) {
+            return mTouchManager.onTouch(e);
         }
 
         if (mPausing || mSnapshotInProgress

@@ -75,6 +75,10 @@ public class CameraSettings {
     public static final String KEY_SATURATION = "pref_camera_saturation_key";
     public static final String KEY_SHARPNESS = "pref_camera_sharpness_key";
 
+    public static final String KEY_AUTO_CONVERGENCE = "pref_camera_autoconvergence_key";
+    public static final String KEY_AUTOCONVERGENCE_MODE = "auto-convergence-mode";
+    public static final String KEY_AUTOCONVERGENCE_MODE_VALUES = "auto-convergence-mode-values";
+
     public static final String EXPOSURE_DEFAULT_VALUE = "0";
 
     public static final int CURRENT_VERSION = 5;
@@ -183,6 +187,7 @@ public static boolean setCameraPreviewSize(
         ListPreference focusMode = group.findPreference(KEY_FOCUS_MODE);
         ListPreference exposure = group.findPreference(KEY_EXPOSURE);
         ListPreference colorEffect = group.findPreference(KEY_COLOR_EFFECT);
+        ListPreference autoConvergence = group.findPreference(KEY_AUTO_CONVERGENCE);
         ListPreference iso = group.findPreference(KEY_ISO);
         IconListPreference cameraIdPref =
                 (IconListPreference) group.findPreference(KEY_CAMERA_ID);
@@ -255,6 +260,18 @@ public static boolean setCameraPreviewSize(
         if (videoEffect != null) {
             initVideoEffect(group, videoEffect);
             resetIfInvalid(videoEffect);
+        }
+
+        if (autoConvergence != null) {
+            ArrayList<String> suppConvergence = new ArrayList<String>();
+            String convergence = mParameters.get(CameraSettings.KEY_AUTOCONVERGENCE_MODE_VALUES);
+            if (convergence != null && !convergence.equals("")) {
+                for(String item : convergence.split(",")){
+                    suppConvergence.add(item);
+                }
+            }
+            filterUnsupportedOptions(group,
+                    autoConvergence, suppConvergence);
         }
     }
 
