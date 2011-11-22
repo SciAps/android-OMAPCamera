@@ -30,6 +30,7 @@ import com.ti.omap4.android.camera.ShutterButton;
 import com.ti.omap4.android.camera.Storage;
 import com.ti.omap4.android.camera.Thumbnail;
 import com.ti.omap4.android.camera.Util;
+import com.ti.omap4.android.camera.ui.PopupManager;
 import com.ti.omap4.android.camera.ui.Rotatable;
 import com.ti.omap4.android.camera.ui.RotateImageView;
 import com.ti.omap4.android.camera.ui.RotateLayout;
@@ -1002,9 +1003,13 @@ public class PanoramaActivity extends ActivityBase implements
             keepScreenOnAwhile();
         } catch (CameraHardwareException e) {
             Util.showErrorAndFinish(this, R.string.cannot_connect_camera);
+            return;
         } catch (CameraDisabledException e) {
             Util.showErrorAndFinish(this, R.string.camera_disabled);
+            return;
         }
+        // Dismiss open menu if exists.
+        PopupManager.getInstance(this).notifyShowPopup(null);
     }
 
     /**
