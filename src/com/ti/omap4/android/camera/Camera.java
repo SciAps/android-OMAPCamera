@@ -1362,7 +1362,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
     private void overrideCameraExposure(final String exposure) {
         if (mIndicatorControlContainer != null) {
-            resetExposureCompensation();
             mIndicatorControlContainer.overrideSettings(
                     CameraSettings.KEY_EXPOSURE, exposure);
         }
@@ -2271,16 +2270,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         // For the following settings, we need to check if the settings are
         // still supported by latest driver, if not, ignore the settings.
 
-        // Set exposure compensation
-        int value = CameraSettings.readExposure(mPreferences);
-        int max = mParameters.getMaxExposureCompensation();
-        int min = mParameters.getMinExposureCompensation();
-        if (value >= min && value <= max) {
-            mParameters.setExposureCompensation(value);
-        } else {
-            Log.w(TAG, "invalid exposure range: " + value);
-        }
-
         if (Parameters.SCENE_MODE_AUTO.equals(mSceneMode)) {
             // Set flash mode.
             String flashMode = mPreferences.getString(
@@ -2321,6 +2310,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 mCAFActive = false;
             }
         } else {
+            resetExposureCompensation();
+
             mFocusManager.overrideFocusMode(mParameters.getFocusMode());
             // Set Color Effects to None.
             Editor editor = mPreferences.edit();
@@ -2357,6 +2348,16 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             if (mIndicatorControlContainer != null) {
                 mIndicatorControlContainer.reloadPreferences();
             }
+        }
+
+        // Set exposure compensation
+        int value = CameraSettings.readExposure(mPreferences);
+        int max = mParameters.getMaxExposureCompensation();
+        int min = mParameters.getMinExposureCompensation();
+        if (value >= min && value <= max) {
+            mParameters.setExposureCompensation(value);
+        } else {
+            Log.w(TAG, "invalid exposure range: " + value);
         }
 
         // GBCE/GLBCE
