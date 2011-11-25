@@ -272,6 +272,7 @@ public class VideoCamera extends ActivityBase
     private String mTouchConvergence;
     private TouchManager mTouchManager;
     private String mAutoConvergence;
+    private String mMechanicalMisalignmentCorrection;
 
     // This Handler is used to post message back onto the main thread of the
     // application
@@ -519,6 +520,7 @@ public class VideoCamera extends ActivityBase
         final String[] OTHER_SETTING_KEYS = {
                     CameraSettings.KEY_VIDEO_FORMAT,
                     CameraSettings.KEY_AUTO_CONVERGENCE,
+                    CameraSettings.KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU,
                     CameraSettings.KEY_AUDIO_ENCODER,
                     CameraSettings.KEY_VIDEO_ENCODER,
                     CameraSettings.KEY_VIDEO_BITRATE,
@@ -863,6 +865,7 @@ public class VideoCamera extends ActivityBase
         if (mOpenCameraFail || mCameraDisabled) return;
 
         mAutoConvergence = getString(R.string.pref_camera_autoconvergence_default);
+        mMechanicalMisalignmentCorrection = getString(R.string.pref_camera_mechanical_misalignment_correction_default);
 
         mPausing = false;
         mZoomValue = 0;
@@ -2021,6 +2024,16 @@ public class VideoCamera extends ActivityBase
             if (whiteBalance == null) {
                 whiteBalance = Parameters.WHITE_BALANCE_AUTO;
             }
+        }
+
+        // Mechanical Misalignment Correction
+        String mechanicalMisalignmentCorrection = mPreferences.getString(
+                    CameraSettings.KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU,
+                    getString(R.string.pref_camera_mechanical_misalignment_correction_default));
+
+        if( !mechanicalMisalignmentCorrection.equals(mMechanicalMisalignmentCorrection)) {
+            mParameters.set(CameraSettings.KEY_MECHANICAL_MISALIGNMENT_CORRECTION, mechanicalMisalignmentCorrection);
+            mMechanicalMisalignmentCorrection = mechanicalMisalignmentCorrection;
         }
 
         // Auto Convergence

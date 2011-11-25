@@ -75,6 +75,10 @@ public class CameraSettings {
     public static final String KEY_SATURATION = "pref_camera_saturation_key";
     public static final String KEY_SHARPNESS = "pref_camera_sharpness_key";
 
+    public static final String KEY_MECHANICAL_MISALIGNMENT_CORRECTION = "mechanical-misalignment-correction";
+    public static final String KEY_MECHANICAL_MISALIGNMENT_CORRECTION_VALUES = "mechanical-misalignment-correction-values";
+    public static final String KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU="pref_camera_mechanical_misalignment_correction_key";
+
     public static final String KEY_AUTO_CONVERGENCE = "pref_camera_autoconvergence_key";
     public static final String KEY_AUTOCONVERGENCE_MODE = "auto-convergence-mode";
     public static final String KEY_AUTOCONVERGENCE_MODE_VALUES = "auto-convergence-mode-values";
@@ -198,13 +202,13 @@ public static boolean setCameraPreviewSize(
         ListPreference antibanding = group.findPreference(KEY_ANTIBANDING);
         ListPreference exposureMode = group.findPreference(KEY_EXPOSURE_MODE);
         ListPreference previewFramerate = group.findPreference(KEY_PREVIEW_FRAMERATE);
+        ListPreference mechanicalMisalignmentCorrection = group.findPreference(KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU);
 
         // Since the screen could be loaded from different resources, we need
         // to check if the preference is available here
         if (videoQuality != null) {
             filterUnsupportedOptions(group, videoQuality, getSupportedVideoQuality());
         }
-
         if (pictureSize != null) {
             filterUnsupportedOptions(group, pictureSize, sizeListToStringList(
                     mParameters.getSupportedPictureSizes()));
@@ -272,6 +276,17 @@ public static boolean setCameraPreviewSize(
             }
             filterUnsupportedOptions(group,
                     autoConvergence, suppConvergence);
+        }
+
+        if(mechanicalMisalignmentCorrection !=null){
+            ArrayList<String> suppMechanicalMisalignmentCorrection = new ArrayList<String>();
+            String mechanicalMisalignmentCorrectionValues = mParameters.get(KEY_MECHANICAL_MISALIGNMENT_CORRECTION_VALUES);
+            if(mechanicalMisalignmentCorrectionValues != null && !mechanicalMisalignmentCorrectionValues.equals("")){
+                for(String item : mechanicalMisalignmentCorrectionValues.split(",")){
+                    suppMechanicalMisalignmentCorrection.add(item);
+                }
+            }
+            filterUnsupportedOptions(group, mechanicalMisalignmentCorrection, suppMechanicalMisalignmentCorrection);
         }
     }
 

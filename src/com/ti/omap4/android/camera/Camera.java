@@ -287,7 +287,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mSharpness;
     private int mJpegQuality = CameraProfile.QUALITY_HIGH;
     private String mAutoConvergence;
-
+    private String mMechanicalMisalignmentCorrection;
     private long mFocusStartTime;
     private long mCaptureStartTime;
     private long mShutterCallbackTime;
@@ -1437,6 +1437,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_SCENE_MODE};
         final String[] OTHER_SETTING_KEYS = {
                 CameraSettings.KEY_AUTO_CONVERGENCE,
+                CameraSettings.KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU,
                 CameraSettings.KEY_RECORD_LOCATION,
                 CameraSettings.KEY_FOCUS_MODE,
                 CameraSettings.KEY_MODE,
@@ -1734,6 +1735,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mPausing = false;
 
         mAutoConvergence = getString(R.string.pref_camera_autoconvergence_default);
+        mMechanicalMisalignmentCorrection = getString(R.string.pref_camera_mechanical_misalignment_correction_default);
 
         mJpegPictureCallbackTime = 0;
         mZoomValue = 0;
@@ -2212,6 +2214,16 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         if ( !iso.equals(mISO) ) {
             mParameters.set(PARM_ISO, iso);
             mISO = iso;
+        }
+
+        // Mechanical Misalignment Correction
+        String mechanicalMisalignmentCorrection = mPreferences.getString(
+                    CameraSettings.KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU,
+                    getString(R.string.pref_camera_mechanical_misalignment_correction_default));
+
+        if( !mechanicalMisalignmentCorrection.equals(mMechanicalMisalignmentCorrection)) {
+            mParameters.set(CameraSettings.KEY_MECHANICAL_MISALIGNMENT_CORRECTION, mechanicalMisalignmentCorrection);
+            mMechanicalMisalignmentCorrection = mechanicalMisalignmentCorrection;
         }
 
         // Exposure mode

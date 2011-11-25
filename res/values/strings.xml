@@ -671,6 +671,16 @@
     <string name="pref_camera_autoconvergence_entry_mode_manual">Manual Mode</string>
     <string name="pref_camera_autoconvergence_entry_mode_disable">Disable</string>
 
+     <!--  Mechanical Misalignment Correction mode setting -->
+    <string name="pref_camera_mechanical_misalignment_correction_default" translatable="false">enable</string>
+
+    <!-- Settings screen, Mechanical Misalignment Correction title -->
+    <string name="pref_camera_mechanical_misalignment_correction_title">SMALC</string>
+
+    <!-- Settings screen, Misalignment dialog radio button choices -->
+    <string name="pref_camera_mechanical_misalignment_correction_enable">Enable</string>
+    <string name="pref_camera_mechanical_misalignment_correction_disable">Disable</string>
+
     <!-- TODO: remove the string as it is a work-around solution to bypass the default speak of the element type. -->
     <string name="empty" translatable="false">" "</string>
 </resources>
