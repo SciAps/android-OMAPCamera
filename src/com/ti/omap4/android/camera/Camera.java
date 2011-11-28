@@ -1235,14 +1235,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mThumbnailView.setVisibility(View.VISIBLE);
         }
 
-        mContrast = getString(R.string.pref_camera_contrast_default);
-        mBrightness = getString(R.string.pref_camera_brightness_default);
-        mColorEffect = getString(R.string.pref_camera_coloreffect_default);
-        mAntibanding = getString(R.string.pref_camera_antibanding_default);
-        mISO = getString(R.string.pref_camera_iso_default);
-        mExposureMode = getString(R.string.pref_camera_exposuremode_default);
-        mPreviewSize = getString(R.string.pref_camera_previewsize_default);
-
         mPreferences.setLocalId(this, mCameraId);
         CameraSettings.upgradeLocalPreferences(mPreferences.getLocal());
 
@@ -1707,6 +1699,14 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
         mJpegPictureCallbackTime = 0;
         mZoomValue = 0;
+
+        mContrast = getString(R.string.pref_camera_contrast_default);
+        mBrightness = getString(R.string.pref_camera_brightness_default);
+        mColorEffect = getString(R.string.pref_camera_coloreffect_default);
+        mAntibanding = getString(R.string.pref_camera_antibanding_default);
+        mISO = getString(R.string.pref_camera_iso_default);
+        mExposureMode = getString(R.string.pref_camera_exposuremode_default);
+        mPreviewSize = getString(R.string.pref_camera_previewsize_default);
 
         // Start the preview if it is not started.
         if (mCameraState == PREVIEW_STOPPED) {
