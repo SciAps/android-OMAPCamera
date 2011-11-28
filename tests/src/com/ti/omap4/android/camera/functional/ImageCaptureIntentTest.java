@@ -50,6 +50,7 @@ public class ImageCaptureIntentTest extends ActivityInstrumentationTestCase2 <Ca
     protected void setUp() throws Exception {
         super.setUp();
         mIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        mIntent.putExtra("android.intent.extra.quickCapture", true);
     }
 
     @LargeTest
@@ -146,9 +147,11 @@ public class ImageCaptureIntentTest extends ActivityInstrumentationTestCase2 <Ca
     }
 
     private void takePicture() throws Exception {
-        getInstrumentation().sendKeySync(
-                new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_FOCUS));
-        getInstrumentation().sendCharacterSync(KeyEvent.KEYCODE_CAMERA);
+        getInstrumentation().runOnMainSync(new Runnable() {
+            public void run() {
+                getActivity().findViewById(R.id.shutter_button).performClick();
+            }
+        });
         Thread.sleep(4000);
     }
 
