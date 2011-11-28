@@ -51,9 +51,9 @@
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:visibility="gone"
+            android:onClick="onReviewCancelClicked"
             android:layout_marginBottom="36dp">
-        <LinearLayout style="@style/ReviewControlGroup"
-                android:onClick="onReviewCancelClicked">
+        <LinearLayout style="@style/ReviewControlGroup">
             <ImageView style="@style/ReviewControlIcon"
                     android:src="@drawable/ic_menu_cancel_holo_light" />
             <TextView style="@style/ReviewControlText"
