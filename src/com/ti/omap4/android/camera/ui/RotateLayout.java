@@ -22,10 +22,11 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.OnClickListener;
 
 // A RotateLayout is designed to display a single item and provides the
 // capabilities to rotate the item.
-public class RotateLayout extends ViewGroup implements Rotatable {
+public class RotateLayout extends ViewGroup implements Rotatable, OnClickListener {
     private static final String TAG = "RotateLayout";
     private int mOrientation;
     private View mChild;
@@ -60,6 +61,13 @@ public class RotateLayout extends ViewGroup implements Rotatable {
             case 270:
                 mChild.layout(0, 0, height, width);
                 break;
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        if ( null != mChild ) {
+            v.performClick();
         }
     }
 
