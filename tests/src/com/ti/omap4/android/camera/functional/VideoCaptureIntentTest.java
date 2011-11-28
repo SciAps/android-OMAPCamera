@@ -56,6 +56,7 @@ public class VideoCaptureIntentTest extends ActivityInstrumentationTestCase2 <Vi
     protected void setUp() throws Exception {
         super.setUp();
         mIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+        mIntent.putExtra("android.intent.extra.quickCapture", true);
     }
 
     @Override
@@ -241,8 +242,16 @@ public class VideoCaptureIntentTest extends ActivityInstrumentationTestCase2 <Vi
         return durationValue;
     }
 
+    private void triggerShutter() throws Exception {
+        getInstrumentation().runOnMainSync(new Runnable() {
+            public void run() {
+                getActivity().findViewById(R.id.shutter_button).performClick();
+            }
+        });
+    }
+
     private void recordVideo(int ms) throws Exception {
-        getInstrumentation().sendCharacterSync(KeyEvent.KEYCODE_CAMERA);
+        triggerShutter();
         Thread.sleep(ms);
         getInstrumentation().runOnMainSync(new Runnable() {
             public void run() {
