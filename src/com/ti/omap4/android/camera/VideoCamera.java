@@ -2314,6 +2314,15 @@ public class VideoCamera extends ActivityBase
             isPreviewRestartRequired = true;
             Log.v(TAG, "videoPreferencesChanged : isPreviewRestartRequired="+isPreviewRestartRequired);
         }
+        // If Min / Max FPS is increased then, we need to restart preview for Port FPS to get updated.
+        String framerate = mPreferences.getString(CameraSettings.KEY_VIDEO_FRAMERATE, (getString(R.string.pref_camera_videoframerate_default)));
+        int maxFrameRate = Integer.parseInt(framerate);
+        String minframerate = mPreferences.getString(CameraSettings.KEY_VIDEO_MINFRAMERATE, (getString(R.string.pref_camera_videominframerate_default)));
+        int minFrameRate = Integer.parseInt(minframerate);
+        if((maxFrameRate > mProfile.videoFrameRate)||(minFrameRate > mProfile.videoFrameRate)){
+            Log.v(TAG, " FPS has been increased beyond port FPS. So restarting Preveiw ");
+            isPreviewRestartRequired = true;
+        }
         Log.v(TAG, "videoPreferencesChanged -");
         return isPreviewRestartRequired;
     }
