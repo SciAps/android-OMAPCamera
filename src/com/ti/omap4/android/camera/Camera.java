@@ -1941,7 +1941,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         stopPreview();
         // Close the camera now because other activities may need to use it.
         closeCamera();
-        CameraSound.release();
+        if (mCameraSound != null) mCameraSound.release();
         resetScreenOn();
 
         // Clear UI.
