@@ -60,7 +60,9 @@ public class CameraSettings {
     public static final String KEY_VIDEO_EFFECT = "pref_video_effect_key";
     public static final String KEY_CAMERA_ID = "pref_camera_id_key";
     public static final String KEY_TAP_TO_FOCUS_PROMPT_SHOWN = "pref_tap_to_focus_prompt_shown_key";
-    public static final String KEY_MODE = "pref_camera_mode_key";
+    public static final String KEY_MODE = "mode";
+    public static final String KEY_MODE_MENU = "pref_camera_mode_key";
+    public static final String KEY_CAP_MODE_VALUES = "mode-values";
     public static final String KEY_GBCE = "pref_camera_gbce_key";
     public static final String KEY_BRACKET_RANGE = "pref_camera_bracketrange_key";
     public static final String KEY_BURST = "pref_camera_burst_key";
@@ -82,6 +84,8 @@ public class CameraSettings {
     public static final String KEY_AUTO_CONVERGENCE = "pref_camera_autoconvergence_key";
     public static final String KEY_AUTOCONVERGENCE_MODE = "auto-convergence-mode";
     public static final String KEY_AUTOCONVERGENCE_MODE_VALUES = "auto-convergence-mode-values";
+
+    public static final String KEY_TEMPORAL_BRACKETING = "temporal-bracketing";
 
     public static final String EXPOSURE_DEFAULT_VALUE = "0";
 
@@ -203,6 +207,7 @@ public static boolean setCameraPreviewSize(
         ListPreference exposureMode = group.findPreference(KEY_EXPOSURE_MODE);
         ListPreference previewFramerate = group.findPreference(KEY_PREVIEW_FRAMERATE);
         ListPreference mechanicalMisalignmentCorrection = group.findPreference(KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU);
+        ListPreference mode = group.findPreference(KEY_MODE_MENU);
 
         // Since the screen could be loaded from different resources, we need
         // to check if the preference is available here
@@ -287,6 +292,17 @@ public static boolean setCameraPreviewSize(
                 }
             }
             filterUnsupportedOptions(group, mechanicalMisalignmentCorrection, suppMechanicalMisalignmentCorrection);
+        }
+
+        if(mode !=null){
+            ArrayList<String> suppMode = new ArrayList<String>();
+            String modeValues = mParameters.get(KEY_CAP_MODE_VALUES);
+            if(modeValues != null && !modeValues.equals("")){
+                for(String item : modeValues.split(",")){
+                    suppMode.add(item);
+                }
+            }
+            filterUnsupportedOptions(group, mode, suppMode);
         }
     }
 
