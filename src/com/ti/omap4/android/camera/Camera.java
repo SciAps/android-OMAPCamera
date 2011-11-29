@@ -260,6 +260,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final String PARM_EXPOSURE_MODE = "exposure";
     private static final String PARM_CONTRAST = "contrast";
     private static final String PARM_BRIGHTNESS = "brightness";
+    private static final String PARM_SHARPNESS = "sharpness";
+    private static final String PARM_SATURATION = "saturation";
 
     // Limits ZSL capture size due to some hardware limitations
     private static final String PARM_ZSL_SIZE = "2016x1512";
@@ -279,6 +281,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mBrightness;
     public  static String mIMGscriptTitle;
     private String mLastPreviewFramerate;
+    private String mSaturation;
+    private String mSharpness;
 
     private long mFocusStartTime;
     private long mCaptureStartTime;
@@ -1417,6 +1421,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_GBCE,
                 CameraSettings.KEY_CONTRAST,
                 CameraSettings.KEY_BRIGHTNESS,
+                CameraSettings.KEY_SHARPNESS,
+                CameraSettings.KEY_SATURATION,
                 CameraSettings.KEY_BURST,
                 CameraSettings.KEY_ISO,
                 CameraSettings.KEY_EXPOSURE_MODE,
@@ -1714,6 +1720,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mISO = getString(R.string.pref_camera_iso_default);
         mExposureMode = getString(R.string.pref_camera_exposuremode_default);
         mPreviewSize = getString(R.string.pref_camera_previewsize_default);
+        mSaturation = getString(R.string.pref_camera_saturation_default);
+        mSharpness = getString(R.string.pref_camera_sharpness_default);
 
         // Start the preview if it is not started.
         if (mCameraState == PREVIEW_STOPPED) {
@@ -2190,6 +2198,24 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         if ( !brightness.equals(mBrightness) ) {
             mParameters.set(PARM_BRIGHTNESS, Integer.parseInt(brightness) );
             mBrightness = brightness;
+        }
+        // Set Saturation
+        String saturation =  mPreferences.getString(
+                    CameraSettings.KEY_SATURATION,
+                    getString(R.string.pref_camera_saturation_default));
+
+        if ( !saturation.equals(mSaturation) ) {
+            mParameters.set(PARM_SATURATION, Integer.parseInt(saturation) );
+            mSaturation = saturation;
+        }
+        // Set Sharpness
+        String sharpness = mPreferences.getString(
+                    CameraSettings.KEY_SHARPNESS,
+                    getString(R.string.pref_camera_sharpness_default));
+
+        if ( !sharpness.equals(mSharpness) ) {
+            mParameters.set(PARM_SHARPNESS, Integer.parseInt(sharpness) );
+            mSharpness = sharpness;
         }
 
         String antibanding = mPreferences.getString(

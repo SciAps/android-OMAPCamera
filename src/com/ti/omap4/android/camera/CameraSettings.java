@@ -72,6 +72,8 @@ public class CameraSettings {
     public static final String KEY_ANTIBANDING = "pref_camera_antibanding_key";
     public static final String KEY_EXPOSURE_MODE = "pref_camera_exposuremode_key";
     public static final String KEY_PREVIEW_FRAMERATE = "pref_camera_previewframerate_key";
+    public static final String KEY_SATURATION = "pref_camera_saturation_key";
+    public static final String KEY_SHARPNESS = "pref_camera_sharpness_key";
 
     public static final String EXPOSURE_DEFAULT_VALUE = "0";
 
