@@ -309,7 +309,6 @@ public class IndicatorControlWheel extends IndicatorControl implements
         // The icons are spreaded on the left side of the shutter button.
         for (int i = 0; i < getChildCount(); ++i) {
             View view = getChildAt(i);
-            if (!view.isEnabled()) continue;
             double radian = mChildRadians[i];
             double startVisibleRadians = mInAnimation
                     ? mStartVisibleRadians[1]
