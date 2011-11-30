@@ -1125,7 +1125,17 @@ public class VideoCamera extends ActivityBase
                 && holder.isCreating()) {
             setPreviewDisplay(holder);
         } else {
+            boolean isRecording = mMediaRecorderRecording;
             stopVideoRecording();
+
+            // For surfaceChanged() scenario, we need to call getThumbnail()
+            // after stopVideoRecording(), in order to generate the thumbnail
+            // for the newly recorded video.
+            // For Tablet UI, whenever HDMI-TV is plugged/unplugged during
+            // recording, Status bar height is readjusted, so the surface changes.
+            if (isRecording && !mIsVideoCaptureIntent && !effectsActive()) {
+                getThumbnail();
+            }
             startPreview();
         }
     }
