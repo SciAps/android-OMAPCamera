@@ -283,6 +283,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mLastPreviewFramerate;
     private String mSaturation;
     private String mSharpness;
+    private int mJpegQuality = CameraProfile.QUALITY_HIGH;
 
     private long mFocusStartTime;
     private long mCaptureStartTime;
@@ -1432,6 +1433,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_PREVIEW_FRAMERATE,
                 CameraSettings.KEY_BRACKET_RANGE,
                 CameraSettings.KEY_COLOR_EFFECT,
+                CameraSettings.KEY_JPEG_QUALITY,
                 CameraSettings.KEY_ANTIBANDING,
                 CameraSettings.KEY_PREVIEW_SIZE,
                 CameraSettings.KEY_PICTURE_SIZE};
@@ -2292,9 +2294,21 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         }
 
         // Set JPEG quality.
-        int jpegQuality = CameraProfile.getJpegEncodingQualityParameter(mCameraId,
-                CameraProfile.QUALITY_HIGH);
-        mParameters.setJpegQuality(jpegQuality);
+        String quality = mPreferences.getString(CameraSettings.KEY_JPEG_QUALITY,
+                                                 getString(R.string.pref_camera_jpegquality_default));
+        int jpegQuality = CameraProfile.QUALITY_HIGH;
+
+        try {
+            jpegQuality = Integer.parseInt(quality);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
+
+        if ( mJpegQuality != jpegQuality ) {
+            mJpegQuality = jpegQuality;
+            jpegQuality = CameraProfile.getJpegEncodingQualityParameter(mCameraId, mJpegQuality);
+            mParameters.setJpegQuality(jpegQuality);
+        }
 
         // For the following settings, we need to check if the settings are
         // still supported by latest driver, if not, ignore the settings.
