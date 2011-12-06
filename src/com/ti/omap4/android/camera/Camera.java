@@ -897,6 +897,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 mBurstImages --;
                 if (mBurstImages == 0 ) {
                     mHandler.sendEmptyMessageDelayed(RESTART_PREVIEW, 0);
+                    mFocusManager.setTempBracketingState(FocusManager.TempBracketingStates.OFF);
                     mTempBracketingEnabled = true;
                 }
             }
@@ -928,7 +929,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mFocusManager.onAutoFocus(focused);
             // If focus completes and the snapshot is not started, enable the
             // controls.
-            if (mFocusManager.isFocusCompleted()) {
+            if (mFocusManager.isFocusCompleted() && (!mTempBracketingEnabled)) {
                 enableCameraControls(true);
             }
         }
@@ -1157,7 +1158,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         Util.setRotationParameter(mParameters, mCameraId, mOrientation);
         Location loc = mLocationManager.getCurrentLocation();
         Util.setGpsParameters(mParameters, loc);
-        mCameraDevice.setParameters(mParameters);
+        if (canSetParameters()) {
+            mCameraDevice.setParameters(mParameters);
+        }
 
         mCameraDevice.takePicture(mShutterCallback, mRawPictureCallback,
                 mPostViewPictureCallback, new JpegPictureCallback(loc));
@@ -2443,11 +2446,28 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         return restartNeeded;
     }
 
+    private boolean canSetParameters() {
+        boolean ret = true;
+
+        //Hack: Don't apply any new parameters during
+        //      temporal bracketing.
+        if ( null != mFocusManager ) {
+            if ( mFocusManager.getTempBracketingState() == FocusManager.TempBracketingStates.RUNNING ) {
+                ret = false;
+            }
+        }
+
+        return ret;
+    }
     // We separate the parameters into several subsets, so we can update only
     // the subsets actually need updating. The PREFERENCE set needs extra
     // locking because the preference can be changed from GLThread as well.
     private void setCameraParameters(int updateSet) {
         boolean restartPreview = false;
+
+        if ( !canSetParameters() ) {
+            return;
+        }
 
         mParameters = mCameraDevice.getParameters();
 
@@ -2558,7 +2578,12 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         }
 
         if ( null != mFocusManager ) {
-            mFocusManager.setTempBracketingFlag(mTempBracketingEnabled);
+            if( mTempBracketingEnabled ) {
+                mFocusManager.setTempBracketingState(FocusManager.TempBracketingStates.ACTIVE);
+            }
+            else {
+                mFocusManager.setTempBracketingState(FocusManager.TempBracketingStates.OFF);
+            }
         }
 
     }

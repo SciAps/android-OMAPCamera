@@ -42,6 +42,7 @@ import java.util.List;
 public class FocusManager {
     private static final String TAG = "FocusManager";
 
+    public enum TempBracketingStates { OFF, ACTIVE, RUNNING}
     private static final int RESET_TOUCH_FOCUS = 0;
     private static final int FOCUS_BEEP_VOLUME = 100;
     private static final int RESET_TOUCH_FOCUS_DELAY = 3000;
@@ -58,7 +59,7 @@ public class FocusManager {
     private boolean mFocusAreaSupported;
     private boolean mLockAeAwbNeeded;
     private boolean mAeAwbLock;
-    private boolean mTempBracketingActive = false;
+    private TempBracketingStates mTempBracketingState = TempBracketingStates.OFF;
     private Matrix mMatrix;
     private SoundPlayer mSoundPlayer;
     private View mFocusIndicatorRotateLayout;
@@ -89,8 +90,10 @@ public class FocusManager {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case RESET_TOUCH_FOCUS: {
-                    cancelAutoFocus();
-                    mListener.startFaceDetection();
+                    if ( getTempBracketingState() != TempBracketingStates.RUNNING ) {
+                        cancelAutoFocus();
+                        mListener.startFaceDetection();
+                    }
                     break;
                 }
             }
@@ -202,6 +205,9 @@ public class FocusManager {
     }
 
     public void onAutoFocus(boolean focused) {
+
+        setTempBracketingState(TempBracketingStates.RUNNING);
+
         if (mState == STATE_FOCUSING_SNAP_ON_FINISH) {
             // Take the picture no matter focus succeeds or fails. No need
             // to play the AF sound if we're about to play the shutter
@@ -367,9 +373,12 @@ public class FocusManager {
             // Always use autofocus in tap-to-focus.
             mFocusMode = Parameters.FOCUS_MODE_AUTO;
         } else {
-            // The default is continuous autofocus.
-            mFocusMode = mPreferences.getString(
-                    CameraSettings.KEY_FOCUS_MODE, mDefaultFocusMode);
+            if ( getTempBracketingState() != TempBracketingStates.RUNNING ) {
+                mFocusMode = mPreferences.getString(
+                        CameraSettings.KEY_FOCUS_MODE, mDefaultFocusMode);
+            } else {
+                mFocusMode = Parameters.FOCUS_MODE_AUTO;
+            }
         }
         if (!isSupported(mFocusMode, mParameters.getSupportedFocusModes())) {
             // For some reasons, the driver does not support the current
@@ -480,21 +489,52 @@ public class FocusManager {
         return supported == null ? false : supported.indexOf(value) >= 0;
     }
 
-    public void setTempBracketingFlag(boolean active) {
-        this.mTempBracketingActive = active;
+    public void setTempBracketingState(TempBracketingStates state) {
+
+        synchronized (mTempBracketingState) {
+            switch ( mTempBracketingState ) {
+                case OFF:
+
+                    if ( state ==  TempBracketingStates.ACTIVE ) {
+                        mTempBracketingState = state;
+                    }
+
+                    break;
+                case ACTIVE:
+
+                    if ( ( state == TempBracketingStates.OFF ) ||
+                         ( state == TempBracketingStates.RUNNING ) ) {
+                        mTempBracketingState = state;
+                    }
+
+                    break;
+                case RUNNING:
+
+                    if ( state == TempBracketingStates.OFF ) {
+                       mTempBracketingState = state;
+                    }
+
+                    break;
+            }
+        }
     }
 
-    public boolean getTempBracketingFlag() {
-        return this.mTempBracketingActive;
+    public TempBracketingStates getTempBracketingState() {
+        synchronized (mTempBracketingState) {
+            return this.mTempBracketingState;
+        }
     }
 
     private boolean needAutoFocusCall() {
         String focusMode = getFocusMode();
+        TempBracketingStates state = getTempBracketingState();
 
-        // In case we have infinity configured and temporal bracketing
-        // is active as well, a call to autoFocus is needed.
+        if ( state == TempBracketingStates.RUNNING ) {
+            return false;
+        }
+
         return !( ( focusMode.equals(Parameters.FOCUS_MODE_INFINITY)
-                    && (!mTempBracketingActive) )
+                    && ( state != TempBracketingStates.ACTIVE ) )
                 || focusMode.equals(Parameters.FOCUS_MODE_FIXED)
                 || focusMode.equals(Parameters.FOCUS_MODE_EDOF));
     }
