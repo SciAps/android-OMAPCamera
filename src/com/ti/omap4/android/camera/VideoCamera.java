@@ -85,6 +85,8 @@ import java.util.ArrayList;
 
 import android.filterpacks.videosink.MediaRecorderStopException;
 
+import com.ti.s3d.S3DView;
+
 /**
  * The Camcorder activity.
  */
@@ -96,6 +98,8 @@ public class VideoCamera extends ActivityBase
         EffectsRecorder.EffectsListener, TouchManager.Listener {
 
     private static final String TAG = "videocamera";
+
+    private static final boolean OMAP_ENHANCEMENT_S3D = android.os.SystemProperties.getBoolean("com.ti.omap_enhancement_s3d", false);
 
     private static final int CHECK_DISPLAY_ROTATION = 3;
     private static final int CLEAR_SCREEN_DELAY = 4;
@@ -291,6 +295,8 @@ public class VideoCamera extends ActivityBase
     private String mAutoConvergence;
     private String mMechanicalMisalignmentCorrection;
 
+    private S3DView s3dView;
+
     // This Handler is used to post message back onto the main thread of the
     // application
     private class MainHandler extends Handler {
@@ -455,6 +461,10 @@ public class VideoCamera extends ActivityBase
         SurfaceView preview = (SurfaceView) findViewById(R.id.camera_preview);
         SurfaceHolder holder = preview.getHolder();
         holder.addCallback(this);
+
+        if (OMAP_ENHANCEMENT_S3D)
+            s3dView = new S3DView(holder);
+
         holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
         mQuickCapture = getIntent().getBooleanExtra(EXTRA_QUICK_CAPTURE, false);
@@ -995,6 +1005,28 @@ public class VideoCamera extends ActivityBase
         PopupManager.getInstance(this).notifyShowPopup(null);
     }
 
+    private void setSurfaceLayout() {
+        if (!OMAP_ENHANCEMENT_S3D || mParameters == null || s3dView == null) {
+            return;
+        }
+
+        //get selected layout from camera hal; returns "none" in mono mode
+        String currentPreviewLayout = mParameters.get(CameraSettings.KEY_S3D_PRV_FRAME_LAYOUT);
+        if (currentPreviewLayout == null) {
+            s3dView.setLayout(S3DView.Layout.MONO);
+            return;
+        }
+        if (currentPreviewLayout.equals(CameraSettings.TB_FULL_S3D_LAYOUT) ||
+            currentPreviewLayout.equals(CameraSettings.TB_SUB_S3D_LAYOUT)) {
+            s3dView.setLayout(S3DView.Layout.TOPBOTTOM_L);
+        } else if (currentPreviewLayout.equals(CameraSettings.SS_FULL_S3D_LAYOUT) ||
+                   currentPreviewLayout.equals(CameraSettings.SS_SUB_S3D_LAYOUT)) {
+            s3dView.setLayout(S3DView.Layout.SIDE_BY_SIDE_LR);
+        } else {
+            s3dView.setLayout(S3DView.Layout.MONO);
+        }
+    }
+
     private void setPreviewDisplay(SurfaceHolder holder) {
         try {
             if (effectsActive()) {
@@ -1003,6 +1035,7 @@ public class VideoCamera extends ActivityBase
                         mSurfaceWidth,
                         mSurfaceHeight);
             } else {
+                setSurfaceLayout();
                 mCameraDevice.setPreviewDisplay(holder);
             }
         } catch (Throwable ex) {
