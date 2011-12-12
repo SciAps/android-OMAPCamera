@@ -750,6 +750,50 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             GestureDetector.SimpleOnGestureListener {
 
         @Override
+        public void onLongPress(MotionEvent e) {
+            if (mPausing || mCameraDevice == null || !mFirstTimeInitialized ||
+                    mCameraState == SNAPSHOT_IN_PROGRESS) {
+                return;
+            }
+
+            // Do not trigger touch focus if popup window is opened.
+            if (mIndicatorControlContainer.getActiveSettingPopup() != null) return;
+
+            final String focusMode = mFocusManager.getFocusMode();
+            boolean cafActive = false;
+            if (focusMode.equals(Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) ||
+                    (focusMode.equals(Parameters.FOCUS_MODE_AUTO) &&
+                    mFocusManager.getFocusAreas() != null)) {
+                cafActive = true;
+            }
+
+            // Check if metering area is supported and touch convergence is selected
+            if (mMeteringAreaSupported && !cafActive &&
+                    mAutoConvergence.equals(mTouchConvergence)) {
+                if (mS3dViewEnabled || is2DMode()) {
+                    mTouchManager.onTouch(e);
+                } else {
+                    mTouchManager.onTouch(e, mPreviewLayout);
+                }
+                return;
+            }
+
+            // Check if metering area or focus area is supported.
+            if (!mFocusAreaSupported && !mMeteringAreaSupported) return;
+
+            // Do touch AF only in continuous AF mode.
+            if (!cafActive) {
+                return;
+            }
+
+            if (mS3dViewEnabled || is2DMode()) {
+                mFocusManager.onTouch(e);
+            } else {
+                mFocusManager.onTouch(e, mPreviewLayout);
+            }
+        }
+
+        @Override
         public boolean onDoubleTap(MotionEvent e) {
             int doubleCLick_X = (int) e.getX();
             int doubleClick_Y = (int) e.getY();
@@ -2242,37 +2286,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         // Do not trigger touch focus if popup window is opened.
         if (collapseCameraControls()) return false;
 
-        String focusMode = mFocusManager.getFocusMode();
-        boolean cafActive = false;
-        if ( Parameters.FOCUS_MODE_CONTINUOUS_PICTURE.equals(focusMode) ||
-                ( ( Parameters.FOCUS_MODE_AUTO.equals(focusMode) ) &&
-                  ( null != mFocusManager.getFocusAreas() ))) {
-            cafActive = true;
-        }
-
-        // Check if metering area is supported and touch convergence is selected
-        if (mMeteringAreaSupported && !cafActive &&
-                mAutoConvergence.equals(mTouchConvergence)) {
-            if (mS3dViewEnabled || is2DMode()) {
-                return mTouchManager.onTouch(e);
-            } else {
-                return mTouchManager.onTouch(e, mPreviewLayout);
-            }
-        }
-
-        // Check if metering area or focus area is supported.
-        if (!mFocusAreaSupported && !mMeteringAreaSupported) return false;
-
-        // Do touch AF only in continuous AF mode.
-        if ( !cafActive ) {
-            return false;
-        }
-
-        if (mS3dViewEnabled || is2DMode()) {
-            return mFocusManager.onTouch(e);
-        } else {
-            return mFocusManager.onTouch(e, mPreviewLayout);
-        }
+        return true;
     }
 
     @Override
