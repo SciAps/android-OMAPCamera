@@ -629,13 +629,13 @@ public class VideoCamera extends ActivityBase
 
     @OnClickAttr
     public void onReviewDoneClicked(View v) {
-        doReturnToCaller(true);
+        doReturnToCaller(true, true);
     }
 
     @OnClickAttr
     public void onReviewCancelClicked(View v) {
         stopVideoRecording();
-        doReturnToCaller(false);
+        doReturnToCaller(false, true);
     }
 
     private void onStopVideoRecording(boolean valid) {
@@ -643,7 +643,7 @@ public class VideoCamera extends ActivityBase
         stopVideoRecording();
         if (mIsVideoCaptureIntent) {
             if (mQuickCapture) {
-                doReturnToCaller(valid);
+                doReturnToCaller(valid, false);
             } else if (!effectsActive()) {
                 showAlert();
             }
@@ -1207,7 +1207,7 @@ public class VideoCamera extends ActivityBase
         return (MediaStore.ACTION_VIDEO_CAPTURE.equals(action));
     }
 
-    private void doReturnToCaller(boolean valid) {
+    private void doReturnToCaller(boolean valid, boolean finishActivity) {
         Intent resultIntent = new Intent();
         int resultCode;
         if (valid) {
@@ -1217,7 +1217,9 @@ public class VideoCamera extends ActivityBase
             resultCode = RESULT_CANCELED;
         }
         setResultEx(resultCode, resultIntent);
-        finish();
+        if ( finishActivity ) {
+            finish();
+        }
     }
 
     private void cleanupEmptyFile() {
