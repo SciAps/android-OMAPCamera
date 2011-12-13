@@ -25,9 +25,9 @@
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:visibility="gone"
+            android:onClick="onReviewDoneClicked"
             android:layout_marginTop="36dp">
-        <LinearLayout style="@style/ReviewControlGroup"
-                android:onClick="onReviewDoneClicked">
+        <LinearLayout style="@style/ReviewControlGroup">
             <ImageView style="@style/ReviewControlIcon"
                     android:src="@drawable/ic_menu_done_holo_light" />
             <TextView style="@style/ReviewControlText"
