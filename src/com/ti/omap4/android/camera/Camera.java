@@ -820,6 +820,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 return;
             }
 
+            FocusManager.TempBracketingStates tempState = mFocusManager.getTempBracketingState();
             mJpegPictureCallbackTime = System.currentTimeMillis();
             // If postview callback has arrived, the captured image is displayed
             // in postview callback. If not, the captured image is displayed in
@@ -841,7 +842,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             if (!mIsImageCaptureIntent) {
                 enableCameraControls(true);
 
-                if ((!mCaptureMode.equals(mTemporalBracketing)) &&
+                if (( tempState != FocusManager.TempBracketingStates.RUNNING ) &&
                       !mCaptureMode.equals(mExposureBracketing) &&
                       !mBurstRunning == true) {
                 // We want to show the taken picture for a while, so we wait
@@ -850,7 +851,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                     if (delay < 0) {
                         startPreview(true);
                     } else {
-                mHandler.sendEmptyMessageDelayed(RESTART_PREVIEW, delay);
+                        mHandler.sendEmptyMessageDelayed(RESTART_PREVIEW, delay);
                     }
                 }
 
@@ -896,7 +897,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 mCameraDevice.setParameters(mParameters);
             }
 
-            if (mCaptureMode.equals(mTemporalBracketing) ) {
+            if ( tempState == FocusManager.TempBracketingStates.RUNNING ) {
                 mBurstImages --;
                 if (mBurstImages == 0 ) {
                     mHandler.sendEmptyMessageDelayed(RESTART_PREVIEW, 0);
