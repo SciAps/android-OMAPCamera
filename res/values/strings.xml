@@ -734,4 +734,18 @@
     <!-- Manual Convergence Settings Dialog -->
     <string name="settings_manual_convergence_caption">Manual Convergence: </string>
     <string name="settings_manual_convergence_button_ok">Ok</string>
+
+    <!-- Manual Exposure Settings Dialog -->
+    <string name="settings_manual_3d_exposure_left_caption">Left Manual Exposure [ms]: </string>
+    <string name="settings_manual_3d_exposure_right_caption">Right Manual Exposure [ms]: </string>
+
+    <string name="settings_manual_3d_gain_left_caption">Left ISO: </string>
+    <string name="settings_manual_3d_gain_right_caption">Right ISO: </string>
+    <string name="settings_manual_3d_gain_exposure_button_ok">Ok</string>
+
+    <string name="settings_manual_2d_exposure_caption"> Manual Exposure [ms]: </string>
+    <string name="settings_manual_2d_gain_caption">Manual ISO: </string>
+
+    <string name="settings_manual_gain_exposure_button_ok">Ok</string>
+    <string name="settings_manual_exposure_title_popup">Manual Exposure Settings</string>
 </resources>

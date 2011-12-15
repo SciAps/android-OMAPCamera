@@ -61,7 +61,7 @@ public class CameraSettings {
     public static final String KEY_VIDEOCAMERA_FLASH_MODE = "pref_camera_video_flashmode_key";
     public static final String KEY_WHITE_BALANCE = "pref_camera_whitebalance_key";
     public static final String KEY_SCENE_MODE = "pref_camera_scenemode_key";
-    public static final String KEY_EXPOSURE = "pref_camera_exposure_key";
+    public static final String KEY_EXPOSURE_COMPENSATION_MENU = "pref_camera_exposure_key";
     public static final String KEY_VIDEO_EFFECT = "pref_video_effect_key";
     public static final String KEY_CAMERA_ID = "pref_camera_id_key";
     public static final String KEY_TAP_TO_FOCUS_PROMPT_SHOWN = "pref_tap_to_focus_prompt_shown_key";
@@ -78,7 +78,7 @@ public class CameraSettings {
     public static final String KEY_PREVIEW_SIZE = "pref_camera_previewsize_key";
     public static final String KEY_PREVIEW_SIZE_2D = "pref_camera_previewsize2d_key";
     public static final String KEY_ANTIBANDING = "pref_camera_antibanding_key";
-    public static final String KEY_EXPOSURE_MODE = "pref_camera_exposuremode_key";
+    public static final String KEY_EXPOSURE_MODE_MENU = "pref_camera_exposuremode_key";
     public static final String KEY_PREVIEW_FRAMERATE = "pref_camera_previewframerate_key";
     public static final String KEY_SATURATION = "pref_camera_saturation_key";
     public static final String KEY_SHARPNESS = "pref_camera_sharpness_key";
@@ -121,6 +121,19 @@ public class CameraSettings {
 
     private static final boolean OMAP_ENHANCEMENT_S3D = android.os.SystemProperties.getBoolean("com.ti.omap_enhancement_s3d", false);
     public static final String KEY_S3D_MENU = "pref_camera_s3d_key";
+
+    public static final String KEY_EXPOSURE_MODE = "exposure";
+    // 3D exposure keys
+    public static final String KEY_SUPPORTED_MANUAL_EXPOSURE_MIN = "supported-manual-exposure-min";
+    public static final String KEY_SUPPORTED_MANUAL_EXPOSURE_MAX = "supported-manual-exposure-max";
+    public static final String KEY_SUPPORTED_MANUAL_EXPOSURE_STEP = "supported-manual-exposure-step";
+    public static final String KEY_SUPPORTED_MANUAL_GAIN_ISO_MIN = "supported-manual-gain-iso-min";
+    public static final String KEY_SUPPORTED_MANUAL_GAIN_ISO_MAX = "supported-manual-gain-iso-max";
+    public static final String KEY_SUPPORTED_MANUAL_GAIN_ISO_STEP = "supported-manual-gain-iso-step";
+    public static final String KEY_MANUAL_EXPOSURE = "manual-exposure";
+    public static final String KEY_MANUAL_EXPOSURE_RIGHT = "manual-exposure-right";
+    public static final String KEY_MANUAL_GAIN_ISO = "manual-gain-iso";
+    public static final String KEY_MANUAL_GAIN_ISO_RIGHT = "manual-gain-iso-right";
 
     public static final String KEY_TEMPORAL_BRACKETING = "temporal-bracketing";
     public static final String KEY_CAMERA_FIRST_USE_HINT_SHOWN = "pref_camera_first_use_hint_shown_key";
@@ -303,7 +316,7 @@ public class CameraSettings {
         ListPreference sceneMode = group.findPreference(KEY_SCENE_MODE);
         ListPreference flashMode = group.findPreference(KEY_FLASH_MODE);
         ListPreference focusMode = group.findPreference(KEY_FOCUS_MODE);
-        ListPreference exposure = group.findPreference(KEY_EXPOSURE);
+        ListPreference exposure = group.findPreference(KEY_EXPOSURE_COMPENSATION_MENU);
         ListPreference colorEffect = group.findPreference(KEY_COLOR_EFFECT);
         ListPreference autoConvergence = group.findPreference(KEY_AUTO_CONVERGENCE);
         ListPreference iso = group.findPreference(KEY_ISO);
@@ -317,7 +330,7 @@ public class CameraSettings {
         ListPreference antibanding = group.findPreference(KEY_ANTIBANDING);
         ListPreference vstab = group.findPreference(KEY_VSTAB);
         ListPreference vnf = group.findPreference(KEY_VNF);
-        ListPreference exposureMode = group.findPreference(KEY_EXPOSURE_MODE);
+        ListPreference exposureMode = group.findPreference(KEY_EXPOSURE_MODE_MENU);
         ListPreference previewFramerate = group.findPreference(KEY_PREVIEW_FRAMERATE);
         ListPreference mechanicalMisalignmentCorrection = group.findPreference(KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU);
         ListPreference mode = group.findPreference(KEY_MODE_MENU);
@@ -843,7 +856,7 @@ public class CameraSettings {
 
     public static int readExposure(ComboPreferences preferences) {
         String exposure = preferences.getString(
-                CameraSettings.KEY_EXPOSURE,
+                CameraSettings.KEY_EXPOSURE_COMPENSATION_MENU,
                 EXPOSURE_DEFAULT_VALUE);
         try {
             return Integer.parseInt(exposure);
