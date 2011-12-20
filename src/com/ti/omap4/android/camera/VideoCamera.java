@@ -709,12 +709,12 @@ public class VideoCamera extends ActivityBase
              * If orientation is set to -1 (UNSPECIFIED), system
              * orientation is taken into account
              */
-            screenOrientation = -1 ; //UNSPECIFIED
-            setRequestedOrientation(screenOrientation);
+            //screenOrientation = -1 ; //UNSPECIFIED
+            //setRequestedOrientation(screenOrientation);
         } else {
             // Lock the screen Orientation before starting Record.
-            screenOrientation = getCurrentScreenOrientation();
-            setRequestedOrientation(screenOrientation);
+            //screenOrientation = getCurrentScreenOrientation();
+            //setRequestedOrientation(screenOrientation);
             startVideoRecording();
         }
         mShutterButton.setEnabled(false);
@@ -1630,8 +1630,8 @@ public class VideoCamera extends ActivityBase
                  * If orientation is set to -1 (UNSPECIFIED), system
                  * orientation is taken into account
                  */
-                screenOrientation = -1 ; //UNSPECIFIED
-                setRequestedOrientation(screenOrientation);
+                //screenOrientation = -1 ; //UNSPECIFIED
+                //setRequestedOrientation(screenOrientation);
             }
         } else if (what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED) {
             if (mMediaRecorderRecording){
@@ -1640,8 +1640,8 @@ public class VideoCamera extends ActivityBase
                  * If orientation is set to -1 (UNSPECIFIED), system
                  * orientation is taken into account
                  */
-                screenOrientation = -1 ; //UNSPECIFIED
-                setRequestedOrientation(screenOrientation);
+                //screenOrientation = -1 ; //UNSPECIFIED
+                //setRequestedOrientation(screenOrientation);
             }
             // Show the toast.
             Toast.makeText(this, R.string.video_reach_size_limit,
