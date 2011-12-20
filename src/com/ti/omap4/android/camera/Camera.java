@@ -20,6 +20,7 @@ import com.ti.omap4.android.camera.ui.CameraPicker;
 import com.ti.omap4.android.camera.ui.FaceView;
 import com.ti.omap4.android.camera.ui.IndicatorControlContainer;
 import com.ti.omap4.android.camera.ui.PopupManager;
+import com.ti.omap4.android.camera.ui.ManualConvergenceSettings;
 import com.ti.omap4.android.camera.ui.Rotatable;
 import com.ti.omap4.android.camera.ui.RotateImageView;
 import com.ti.omap4.android.camera.ui.RotateLayout;
@@ -107,7 +108,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
     private static final int MODE_RESTART = 9;
     private static final int RESTART_PREVIEW = 10;
-
+    public static final int MANUAL_CONVERGENCE_CHANGED = 11;
     // The subset of parameters we need to update in setCameraParameters().
     private static final int UPDATE_PARAM_INITIALIZE = 1;
     private static final int UPDATE_PARAM_ZOOM = 2;
@@ -280,6 +281,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final String PARM_SATURATION = "saturation";
 
     private String mTouchConvergence;
+    private String mManualConvergence;
     private String mTemporalBracketing;
     private String mExposureBracketing;
     private String mHighPerformance;
@@ -329,6 +331,10 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     public long mShutterToPictureDisplayedTime;
     public long mPictureDisplayedToJpegCallbackTime;
     public long mJpegCallbackFinishTime;
+
+    private Integer mManualConvergenceValue = new Integer(0);
+    private boolean isManualConvergence = false;
+    private boolean isConvergenceInit = false;
 
     private TouchManager mTouchManager;
 
@@ -415,6 +421,15 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
                 case UPDATE_THUMBNAIL: {
                     mImageSaver.updateThumbnail();
+                    break;
+                }
+                case MANUAL_CONVERGENCE_CHANGED: {
+                    mManualConvergenceValue = (Integer) msg.obj;
+                    mParameters.set(CameraSettings.KEY_MANUAL_CONVERGENCE, mManualConvergenceValue.intValue());
+                    if (mCameraDevice != null) {
+                        mCameraDevice.setParameters(mParameters);
+                    }
+                    Log.e(TAG,"mManualConvergenceValue = "+ mManualConvergenceValue);
                     break;
                 }
             }
@@ -1380,6 +1395,10 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mTouchConvergence = autoConvergencePreference.findEntryVlaueByEntry(getString(R.string.pref_camera_autoconvergence_entry_mode_touch));
             if (mTouchConvergence == null) {
                 mTouchConvergence = "";
+            }
+            mManualConvergence = autoConvergencePreference.findEntryVlaueByEntry(getString(R.string.pref_camera_autoconvergence_entry_mode_manual));
+            if (mManualConvergence == null) {
+                mManualConvergence = "";
             }
         }
 
@@ -2719,9 +2738,25 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_AUTO_CONVERGENCE,
                 getString(R.string.pref_camera_autoconvergence_default));
 
-        if ( !autoConvergence.equals(mAutoConvergence) ) {
+        if (!autoConvergence.equals(mAutoConvergence)) {
             mParameters.set(CameraSettings.KEY_AUTOCONVERGENCE_MODE, autoConvergence);
             mAutoConvergence = autoConvergence;
+            if (!isConvergenceInit) isConvergenceInit = true;
+            else if (autoConvergence.equals(mManualConvergence) && isManualConvergence) {
+                int convergenceMin = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_CONVERGENCE_MIN));
+                int convergenceMax = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_CONVERGENCE_MAX));
+                int convergenceStep = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_CONVERGENCE_STEP));
+                int convergenceValue = Integer.parseInt(mParameters.get(CameraSettings.KEY_MANUAL_CONVERGENCE));
+                ManualConvergenceSettings manualConvergenceDialog = new ManualConvergenceSettings(this, mHandler,
+                        convergenceValue, convergenceMin, convergenceMax, convergenceStep);
+                Editor edit = mPreferences.edit();
+                edit.putString(CameraSettings.KEY_AUTO_CONVERGENCE, autoConvergence);
+                edit.commit();
+                manualConvergenceDialog.show();
+                isManualConvergence = false;
+            } else {
+                isManualConvergence = true;
+            }
         }
 
         // Set picture size.

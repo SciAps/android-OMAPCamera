@@ -90,6 +90,10 @@ public class CameraSettings {
     public static final String KEY_AUTO_CONVERGENCE = "pref_camera_autoconvergence_key";
     public static final String KEY_AUTOCONVERGENCE_MODE = "auto-convergence-mode";
     public static final String KEY_AUTOCONVERGENCE_MODE_VALUES = "auto-convergence-mode-values";
+    public static final String KEY_MANUAL_CONVERGENCE = "manual-convergence";
+    public static final String KEY_SUPPORTED_MANUAL_CONVERGENCE_MIN = "supported-manual-convergence-min";
+    public static final String KEY_SUPPORTED_MANUAL_CONVERGENCE_MAX = "supported-manual-convergence-max";
+    public static final String KEY_SUPPORTED_MANUAL_CONVERGENCE_STEP = "supported-manual-convergence-step";
     public static final String KEY_CAPTURE_LAYOUT = "pref_camera_capture_layout_key";
     public static final String KEY_PREVIEW_LAYOUT = "pref_camera_preview_layout_key";
     public static final String KEY_CAPTURE_LAYOUT_VALUES = "s3d-cap-frame-layout-values";

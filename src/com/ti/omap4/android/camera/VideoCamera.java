@@ -19,6 +19,7 @@ package com.ti.omap4.android.camera;
 import com.ti.omap4.android.camera.ui.CameraPicker;
 import com.ti.omap4.android.camera.ui.IndicatorControlContainer;
 import com.ti.omap4.android.camera.ui.IndicatorControlWheelContainer;
+import com.ti.omap4.android.camera.ui.ManualConvergenceSettings;
 import com.ti.omap4.android.camera.ui.PopupManager;
 import com.ti.omap4.android.camera.ui.Rotatable;
 import com.ti.omap4.android.camera.ui.RotateImageView;
@@ -198,6 +199,11 @@ public class VideoCamera extends ActivityBase
     private String mVNFEnable = "";
     private String mVNFDisable = "";
 
+    private Integer mManualConvergenceValue = new Integer(0);
+    private String mManualConvergence;
+    private boolean isManualConvergence = false;
+    private boolean isConvergenceInit = false;
+
     //Parameter to communicate the sensor orientation
     private static final String PARM_SENSOR_ORIENTATION = "sensor-orientation";
 
@@ -340,7 +346,14 @@ public class VideoCamera extends ActivityBase
                     showTapToSnapshotToast();
                     break;
                 }
-
+                case Camera.MANUAL_CONVERGENCE_CHANGED: {
+                    mManualConvergenceValue = (Integer) msg.obj;
+                    mParameters.set(CameraSettings.KEY_MANUAL_CONVERGENCE, mManualConvergenceValue.intValue());
+                    if (mCameraDevice != null) {
+                        mCameraDevice.setParameters(mParameters);
+                    }
+                    break;
+                }
                 default:
                     Log.v(TAG, "Unhandled message: " + msg.what);
                     break;
@@ -526,6 +539,10 @@ public class VideoCamera extends ActivityBase
             mTouchConvergence = autoConvergencePreference.findEntryVlaueByEntry(getString(R.string.pref_camera_autoconvergence_entry_mode_touch));
             if (mTouchConvergence == null) {
                 mTouchConvergence = "";
+            }
+            mManualConvergence = autoConvergencePreference.findEntryVlaueByEntry(getString(R.string.pref_camera_autoconvergence_entry_mode_manual));
+            if (mManualConvergence == null) {
+                mManualConvergence = "";
             }
         }
 
@@ -2219,9 +2236,25 @@ public class VideoCamera extends ActivityBase
                 CameraSettings.KEY_AUTO_CONVERGENCE,
                 getString(R.string.pref_camera_autoconvergence_default));
 
-        if ( !autoConvergence.equals(mAutoConvergence) ) {
+        if (!autoConvergence.equals(mAutoConvergence)) {
             mParameters.set(CameraSettings.KEY_AUTOCONVERGENCE_MODE, autoConvergence);
             mAutoConvergence = autoConvergence;
+            if (!isConvergenceInit) isConvergenceInit = true;
+            else if (autoConvergence.equals(mManualConvergence) && isManualConvergence) {
+                int convergenceMin = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_CONVERGENCE_MIN));
+                int convergenceMax = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_CONVERGENCE_MAX));
+                int convergenceStep = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_CONVERGENCE_STEP));
+                int convergenceValue = Integer.parseInt(mParameters.get(CameraSettings.KEY_MANUAL_CONVERGENCE));
+                ManualConvergenceSettings manualConvergenceDialog = new ManualConvergenceSettings(this, mHandler,
+                        convergenceValue, convergenceMin, convergenceMax, convergenceStep);
+                Editor edit = mPreferences.edit();
+                edit.putString(CameraSettings.KEY_AUTO_CONVERGENCE, autoConvergence);
+                edit.commit();
+                manualConvergenceDialog.show();
+                isManualConvergence = false;
+            } else {
+                isManualConvergence = true;
+            }
         }
 
         // Set zoom.
