@@ -266,7 +266,11 @@ public class FocusManager {
     }
 
     public boolean onTouch(MotionEvent e) {
-        if (!mInitialized || mState == STATE_FOCUSING_SNAP_ON_FINISH) return false;
+        if (( !mInitialized ) ||
+            ( mState == STATE_FOCUSING_SNAP_ON_FINISH ) ||
+            ( TempBracketingStates.RUNNING == getTempBracketingState() ) ) {
+            return false;
+        }
 
         // Let users be able to cancel previous touch focus.
         if ((mFocusArea != null) && (mState == STATE_FOCUSING ||
@@ -312,7 +316,7 @@ public class FocusManager {
 
         // Set the focus area and metering area.
         mListener.setFocusParameters();
-        if (mFocusAreaSupported && (e.getAction() == MotionEvent.ACTION_DOWN)) {
+        if (mFocusAreaSupported) {
             autoFocus();
         } else {  // Just show the indicator in all other cases.
             updateFocusUI();

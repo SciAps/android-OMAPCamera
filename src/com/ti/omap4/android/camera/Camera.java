@@ -128,7 +128,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private int mZoomMax;
     private int mTargetZoomValue;
     private ZoomControl mZoomControl;
-    private boolean mCAFActive = false;
 
     private Parameters mParameters;
     private Parameters mInitialParams;
@@ -2037,8 +2036,16 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         // Do not trigger touch focus if popup window is opened.
         if (collapseCameraControls()) return false;
 
+        String focusMode = mFocusManager.getFocusMode();
+        boolean cafActive = false;
+        if ( Parameters.FOCUS_MODE_CONTINUOUS_PICTURE.equals(focusMode) ||
+                ( ( Parameters.FOCUS_MODE_AUTO.equals(focusMode) ) &&
+                  ( null != mFocusManager.getFocusAreas() ))) {
+            cafActive = true;
+        }
+
         // Check if metering area is supported and touch convergence is selected
-        if (mMeteringAreaSupported && !mCAFActive &&
+        if (mMeteringAreaSupported && !cafActive &&
                 mAutoConvergence.equals(mTouchConvergence)) {
             return mTouchManager.onTouch(e);
         }
@@ -2047,7 +2054,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         if (!mFocusAreaSupported && !mMeteringAreaSupported) return false;
 
         // Do touch AF only in continuous AF mode.
-        if ( !mCAFActive ) {
+        if ( !cafActive ) {
             return false;
         }
 
@@ -2556,11 +2563,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             String focusMode = mFocusManager.getFocusMode();
             mFocusManager.overrideFocusMode(null);
             mParameters.setFocusMode(focusMode);
-            if (Parameters.FOCUS_MODE_CONTINUOUS_PICTURE.equals(focusMode)) {
-                mCAFActive = true;
-            } else {
-                mCAFActive = false;
-            }
         } else {
             resetExposureCompensation();
 
