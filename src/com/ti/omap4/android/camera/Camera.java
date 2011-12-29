@@ -1094,11 +1094,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             r.width = width;
             r.height = height;
             r.dateTaken = System.currentTimeMillis();
-            if (getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
-                r.previewWidth = mPreviewFrameLayout.getHeight();
-            } else {
-                r.previewWidth = mPreviewFrameLayout.getWidth();
-            }
+            r.previewWidth = mPreviewFrameLayout.getWidth();
             synchronized (this) {
                 while (mQueue.size() >= QUEUE_LIMIT) {
                     try {

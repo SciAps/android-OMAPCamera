@@ -33,20 +33,14 @@ public class PreviewFrameLayout extends RelativeLayout {
         public void onSizeChanged();
     }
 
-    private double mAspectRatio;
+    private double mAspectRatio = 4.0 / 3.0;
 
     public PreviewFrameLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setAspectRatio(4.0 / 3.0);
     }
 
     public void setAspectRatio(double ratio) {
         if (ratio <= 0.0) throw new IllegalArgumentException();
-
-        if (((Activity) getContext()).getRequestedOrientation()
-                == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
-            ratio = 1 / ratio;
-        }
 
         if (mAspectRatio != ratio) {
             mAspectRatio = ratio;

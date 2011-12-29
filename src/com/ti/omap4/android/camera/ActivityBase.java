@@ -42,11 +42,6 @@ abstract public class ActivityBase extends Activity {
 
     @Override
     public void onCreate(Bundle icicle) {
-        if (Util.isTabletUI()) {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        } else {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        }
         super.onCreate(icicle);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }

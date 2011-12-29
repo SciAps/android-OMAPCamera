@@ -40,43 +40,30 @@ public class ControlPanelLayout extends RelativeLayout {
     protected void onMeasure(int widthSpec, int heightSpec) {
         int widthSpecSize = MeasureSpec.getSize(widthSpec);
         int heightSpecSize = MeasureSpec.getSize(heightSpec);
-        int measuredSize = 0;
+        int widthMode = MeasureSpec.getMode(widthSpec);
+        int measuredWidth = 0;
         int mode, longSideSize, shortSideSize, specSize;
 
-        boolean isLandscape = (((Activity) getContext()).getRequestedOrientation()
-                == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-
-        if (isLandscape) {
-            mode = MeasureSpec.getMode(widthSpec);
-            longSideSize = widthSpecSize;
-            shortSideSize = heightSpecSize;
-            specSize = widthSpecSize;
-        } else {
-            mode = MeasureSpec.getMode(heightSpec);
-            longSideSize = heightSpecSize;
-            shortSideSize = widthSpecSize;
-            specSize = heightSpecSize;
-        }
-
-        if (widthSpecSize > 0 && heightSpecSize > 0 && mode == MeasureSpec.AT_MOST) {
+        if (widthSpecSize > 0 && heightSpecSize > 0 && widthMode == MeasureSpec.AT_MOST) {
             // Calculate how big 4:3 preview occupies. Then deduct it from the
             // width of the parent.
-            measuredSize = (int) (longSideSize - shortSideSize / 3.0 * 4.0);
+            measuredWidth = (int) (widthSpecSize - heightSpecSize / 3.0 * 4.0 - 16);
         } else {
-            Log.e(TAG, "layout_xxx of ControlPanelLayout should be wrap_content");
+            Log.e(TAG, "layout_width of ControlPanelLayout should be wrap_content");
+        }
+
+        // Make sure the width is bigger than the minimum width.
+        int minWidth = getSuggestedMinimumWidth();
+        if (minWidth > measuredWidth) {
+            measuredWidth = minWidth;
         }
 
         // The width cannot be bigger than the constraint.
-        if (mode == MeasureSpec.AT_MOST && measuredSize > specSize) {
-            measuredSize = specSize;
+        if (widthMode == MeasureSpec.AT_MOST && measuredWidth > widthSpecSize) {
+            measuredWidth = widthSpecSize;
         }
 
-        if (isLandscape) {
-            widthSpec = MeasureSpec.makeMeasureSpec(measuredSize, MeasureSpec.EXACTLY);
-        } else {
-            heightSpec = MeasureSpec.makeMeasureSpec(measuredSize, MeasureSpec.EXACTLY);
-        }
 
-        super.onMeasure(widthSpec, heightSpec);
+        super.onMeasure(MeasureSpec.makeMeasureSpec(measuredWidth, MeasureSpec.EXACTLY),heightSpec);
     }
 }
