@@ -30,6 +30,7 @@
         </receiver>
         <activity android:name="com.ti.omap4.android.camera.Camera"
                 android:configChanges="orientation|screenSize|keyboardHidden"
+                android:screenOrientation="landscape"
                 android:clearTaskOnLaunch="true"
                 android:windowSoftInputMode="stateAlwaysHidden|adjustPan">
             <intent-filter>
