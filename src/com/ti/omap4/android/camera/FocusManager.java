@@ -385,8 +385,13 @@ public class FocusManager {
             mFocusMode = Parameters.FOCUS_MODE_AUTO;
         } else {
             if ( getTempBracketingState() != TempBracketingStates.RUNNING ) {
-                mFocusMode = mPreferences.getString(
-                        CameraSettings.KEY_FOCUS_MODE, null);
+                if ( null != mDefaultFocusModes ) {
+                    mFocusMode = mPreferences.getString(
+                            CameraSettings.KEY_FOCUS_MODE, mDefaultFocusModes[0]);
+                } else {
+                    mFocusMode = mPreferences.getString(
+                            CameraSettings.KEY_FOCUS_MODE, null);
+                }
             } else {
                 mFocusMode = Parameters.FOCUS_MODE_AUTO;
             }
