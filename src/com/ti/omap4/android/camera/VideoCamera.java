@@ -2178,6 +2178,11 @@ public class VideoCamera extends ActivityBase
         // Set Video Stabilization Mode
         String vstab = mPreferences.getString(CameraSettings.KEY_VSTAB, (getString(R.string.pref_camera_vstab_default)));
         int vstabEn = Integer.parseInt(vstab);
+        // VSTAB is disabled in Potrait 1080p resolution due to insufficient TILER memory for Tablet Device.
+        // This limitation is due to Required Height of the buffer with VSTAB.
+        if(Util.isTabletUI() && mProfile.videoFrameHeight >= 1920){
+            vstabEn = 0;
+        }
         if(vstabEn == 1){
             mParameters.set("video-stabilization", "true");
         }
