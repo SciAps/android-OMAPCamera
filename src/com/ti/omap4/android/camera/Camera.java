@@ -2240,12 +2240,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         setPreviewDisplay(mSurfaceHolder);
         setDisplayOrientation();
 
-        if ( updateAll ) {
-            Log.v(TAG, "Updating all parameters!");
-            setCameraParameters(UPDATE_PARAM_INITIALIZE | UPDATE_PARAM_ZOOM | UPDATE_PARAM_PREFERENCE);
-        } else {
-            setCameraParameters(UPDATE_PARAM_MODE);
-        }
         if (!mSnapshotOnIdle) {
             // If the focus mode is continuous autofocus, call cancelAutoFocus to
             // resume it because it may have been paused by autoFocus call.
@@ -2254,6 +2248,14 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             }
             mFocusManager.setAeAwbLock(false); // Unlock AE and AWB.
         }
+
+        if ( updateAll ) {
+            Log.v(TAG, "Updating all parameters!");
+            setCameraParameters(UPDATE_PARAM_INITIALIZE | UPDATE_PARAM_ZOOM | UPDATE_PARAM_PREFERENCE);
+        } else {
+            setCameraParameters(UPDATE_PARAM_MODE);
+        }
+
         //setCameraParameters(UPDATE_PARAM_ALL);
 
         // Inform the mainthread to go on the UI initialization.
