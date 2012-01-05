@@ -2657,8 +2657,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         if (( burst != mBurstImages ) &&
                 ( mode.equals(mHighPerformance) ) ) {
               mBurstImages = burst;
-              if ( 0 <= mBurstImages ) {
-                  mParameters.set(PARM_BURST, mBurstImages);
+              mParameters.set(PARM_BURST, mBurstImages);
+              if ( 0 < mBurstImages ) {
                   mBurstRunning = true;
               }
         }
