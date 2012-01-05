@@ -199,9 +199,7 @@ public class SecondLevelIndicatorControlBar extends IndicatorControl implements
     @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
-        if (mCurrentMode == MODE_VIDEO) {
-            mCloseIcon.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
-        }
+        mCloseIcon.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
         mCloseIcon.setEnabled(enabled);
     }
 }

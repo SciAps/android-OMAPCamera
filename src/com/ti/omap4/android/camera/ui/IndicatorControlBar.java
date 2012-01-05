@@ -113,9 +113,8 @@ public class IndicatorControlBar extends IndicatorControl implements
     @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
-        if (mCurrentMode == MODE_VIDEO) {
-            mSecondLevelIcon.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
-        } else {
+        mSecondLevelIcon.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
+        if (mCurrentMode != MODE_VIDEO) {
             // We also disable the zoom button during snapshot.
             enableZoom(enabled);
         }

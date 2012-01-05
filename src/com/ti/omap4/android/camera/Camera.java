@@ -2484,6 +2484,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mPreviewSize = previewSize;
             Size size = mParameters.getPreviewSize();
             mPreviewFrameLayout.setAspectRatio((double) size.width / size.height);
+            enableCameraControls(true);
             restartNeeded = true;
         }
 

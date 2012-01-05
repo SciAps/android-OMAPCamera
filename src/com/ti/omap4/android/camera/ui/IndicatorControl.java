@@ -200,17 +200,12 @@ public abstract class IndicatorControl extends RelativeLayout implements
             // Zoom buttons and shutter button are controlled by the activity.
             if (v instanceof AbstractIndicatorButton) {
                 v.setEnabled(enabled);
-                // Show or hide the indicator buttons during recording.
-                if (mCurrentMode == MODE_VIDEO) {
-                    v.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
-                }
+                v.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
             }
         }
         if (mCameraPicker != null) {
             mCameraPicker.setEnabled(enabled);
-            if (mCurrentMode == MODE_VIDEO) {
-                mCameraPicker.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
-            }
+            mCameraPicker.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
         }
     }
 }
