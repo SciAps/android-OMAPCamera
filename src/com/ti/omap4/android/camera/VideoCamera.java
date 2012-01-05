@@ -2175,7 +2175,10 @@ public class VideoCamera extends ActivityBase
         String audioEncoder = mPreferences.getString(CameraSettings.KEY_AUDIO_ENCODER, (getString(R.string.pref_camera_audioencoder_default)));
         mProfile.audioCodec = Integer.parseInt(audioEncoder);
 
+        // Check if VSTAB is supported
+        String vstabSupported = mParameters.get("video-stabilization-supported");
         // Set Video Stabilization Mode
+
         String vstab = mPreferences.getString(CameraSettings.KEY_VSTAB, (getString(R.string.pref_camera_vstab_default)));
         int vstabEn = Integer.parseInt(vstab);
         // VSTAB is disabled in Potrait 1080p resolution due to insufficient TILER memory for Tablet Device.
@@ -2183,7 +2186,7 @@ public class VideoCamera extends ActivityBase
         if(Util.isTabletUI() && mProfile.videoFrameHeight >= 1920){
             vstabEn = 0;
         }
-        if(vstabEn == 1){
+        if(vstabEn == 1 && "true".equals(vstabSupported)){
             mParameters.set("video-stabilization", "true");
         }
         else{
