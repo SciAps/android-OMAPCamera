@@ -206,6 +206,8 @@ public static boolean setCameraPreviewSize(
         ListPreference videoEffect = group.findPreference(KEY_VIDEO_EFFECT);
         ListPreference previewSize = group.findPreference(KEY_PREVIEW_SIZE);
         ListPreference antibanding = group.findPreference(KEY_ANTIBANDING);
+        ListPreference vstab = group.findPreference(KEY_VSTAB);
+        ListPreference vnf = group.findPreference(KEY_VNF);
         ListPreference exposureMode = group.findPreference(KEY_EXPOSURE_MODE);
         ListPreference previewFramerate = group.findPreference(KEY_PREVIEW_FRAMERATE);
         ListPreference mechanicalMisalignmentCorrection = group.findPreference(KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU);
@@ -213,6 +215,12 @@ public static boolean setCameraPreviewSize(
 
         // Since the screen could be loaded from different resources, we need
         // to check if the preference is available here
+        if ( vstab != null ) {
+            filterVSTAB(group, vstab);
+        }
+        if ( vnf != null ) {
+            filterVNF(group, vnf);
+        }
         if (videoQuality != null) {
             filterUnsupportedOptions(group, videoQuality, getSupportedVideoQuality());
         }
@@ -363,6 +371,34 @@ public static boolean setCameraPreviewSize(
             }
         }
         return false;
+    }
+
+    private void filterVNF(PreferenceGroup group, ListPreference pref) {
+        String vnfSupported = mParameters.get(VideoCamera.PARM_VNF_SUPPORTED);
+        String enable =  mContext.getString(R.string.pref_camera_vnf_entry_on);
+        String disable = mContext.getString(R.string.pref_camera_vnf_entry_off);
+        List<String> supported = new ArrayList<String>();
+
+        if ( "true".equals(vnfSupported) ) {
+            supported.add(pref.findEntryVlaueByEntry(enable));
+            supported.add(pref.findEntryVlaueByEntry(disable));
+        }
+
+        filterUnsupportedOptions(group, pref, supported);
+    }
+
+    private void filterVSTAB(PreferenceGroup group, ListPreference pref) {
+        boolean vstabSupported = mParameters.isVideoStabilizationSupported();
+        String enable =  mContext.getString(R.string.pref_camera_vstab_entry_on);
+        String disable = mContext.getString(R.string.pref_camera_vstab_entry_off);
+        List<String> supported = new ArrayList<String>();
+
+        if ( vstabSupported ) {
+            supported.add(pref.findEntryVlaueByEntry(enable));
+            supported.add(pref.findEntryVlaueByEntry(disable));
+        }
+
+        filterUnsupportedOptions(group, pref, supported);
     }
 
     private void filterUnsupportedOptions(PreferenceGroup group,

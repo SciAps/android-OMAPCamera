@@ -185,7 +185,11 @@ public class VideoCamera extends ActivityBase
     private long mStorageSpace;
 
     private static final String PARM_VNF = "vnf";
-    private static final String PARM_VSTAB = "vstab";
+    public static final String PARM_VNF_SUPPORTED = "vnf-supported";
+    private String mVSTABEnable = "";
+    private String mVSTABDisable = "";
+    private String mVNFEnable = "";
+    private String mVNFDisable = "";
 
     //Parameter to communicate the sensor orientation
     private static final String PARM_SENSOR_ORIENTATION = "sensor-orientation";
@@ -508,6 +512,19 @@ public class VideoCamera extends ActivityBase
                 mTouchConvergence = "";
             }
         }
+
+        ListPreference vstab = mPreferenceGroup.findPreference(CameraSettings.KEY_VSTAB);
+        if ( vstab != null ) {
+            mVSTABEnable = vstab.findEntryVlaueByEntry(getString(R.string.pref_camera_vstab_entry_on));
+            mVSTABDisable = vstab.findEntryVlaueByEntry(getString(R.string.pref_camera_vstab_entry_off));
+        }
+
+        ListPreference vnf = mPreferenceGroup.findPreference(CameraSettings.KEY_VNF);
+        if ( vstab != null ) {
+            mVNFEnable = vnf.findEntryVlaueByEntry(getString(R.string.pref_camera_vnf_entry_on));
+            mVNFDisable = vnf.findEntryVlaueByEntry(getString(R.string.pref_camera_vnf_entry_off));
+        }
+
     }
 
     private void loadCameraPreferences() {
@@ -2175,30 +2192,22 @@ public class VideoCamera extends ActivityBase
         String audioEncoder = mPreferences.getString(CameraSettings.KEY_AUDIO_ENCODER, (getString(R.string.pref_camera_audioencoder_default)));
         mProfile.audioCodec = Integer.parseInt(audioEncoder);
 
-        // Check if VSTAB is supported
-        String vstabSupported = mParameters.get("video-stabilization-supported");
         // Set Video Stabilization Mode
-
-        String vstab = mPreferences.getString(CameraSettings.KEY_VSTAB, (getString(R.string.pref_camera_vstab_default)));
-        int vstabEn = Integer.parseInt(vstab);
+        String vstab = mPreferences.getString(CameraSettings.KEY_VSTAB,
+                                              (getString(R.string.pref_camera_vstab_default)));
         // VSTAB is disabled in Potrait 1080p resolution due to insufficient TILER memory for Tablet Device.
         // This limitation is due to Required Height of the buffer with VSTAB.
         if(Util.isTabletUI() && mProfile.videoFrameHeight >= 1920){
-            vstabEn = 0;
+            vstab = mVSTABDisable;
         }
-        if(vstabEn == 1 && "true".equals(vstabSupported)){
-            mParameters.set("video-stabilization", "true");
-        }
-        else{
-            mParameters.set("video-stabilization", "false");
-        }
-        Log.v(TAG,"VSTAB Set to ["+ vstabEn +"]");
+        mParameters.setVideoStabilization(Boolean.parseBoolean(vstab));
+        Log.v(TAG,"VSTAB Set to ["+ vstab +"]");
 
         // Set Video Noise Filtering Mode
-        String vnf = mPreferences.getString(CameraSettings.KEY_VNF, (getString(R.string.pref_camera_vnf_default)));
-        int vnfEn = Integer.parseInt(vnf);
-        mParameters.set(PARM_VNF, vnfEn);
-        Log.v(TAG,"VNF Set to ["+ vnfEn +"]");
+        String vnf = mPreferences.getString(CameraSettings.KEY_VNF,
+                                            (getString(R.string.pref_camera_vnf_default)));
+        mParameters.set(PARM_VNF, vnf);
+        Log.v(TAG,"VNF Set to ["+ vnf +"]");
 
         mCameraDevice.setParameters(mParameters);
         // Keep preview size up to date.
@@ -2429,18 +2438,16 @@ public class VideoCamera extends ActivityBase
         Log.v(TAG, "videoPreferencesChanged +");
 
         // We need to restart the preview if VSTAB or VNF mode is changed.
-        String vstab = mPreferences.getString(CameraSettings.KEY_VSTAB, (getString(R.string.pref_camera_vstab_default)));
-        boolean enableVstab = ((Integer.parseInt(vstab))>0)? true : false;
+        String vstab = mPreferences.getString(CameraSettings.KEY_VSTAB,
+                                              (getString(R.string.pref_camera_vstab_default)));
+        boolean enableVstab = vstab.equals(mVSTABEnable);
 
-        String vnf = mPreferences.getString(CameraSettings.KEY_VNF, (getString(R.string.pref_camera_vnf_default)));
-        boolean enableVnf = ((Integer.parseInt(vnf))>0)? true : false;
+        String vnf = mPreferences.getString(CameraSettings.KEY_VNF,
+                                            (getString(R.string.pref_camera_vnf_default)));
+        boolean enableVnf = vnf.equals(mVNFEnable);
 
-        String isvstabON = mParameters.get("video-stabilization");
-        boolean isVstabEnabled = false;
-        if("true".equals(isvstabON)){
-            isVstabEnabled = true;
-        }
-        boolean isVnfEnabled = ((mParameters.getInt(PARM_VNF))>0)? true : false;
+        boolean isVstabEnabled = mParameters.getVideoStabilization();
+        boolean isVnfEnabled = mVNFEnable.equals(mParameters.get(PARM_VNF));
         boolean isPreviewRestartRequired = false;
 
         if((isVstabEnabled != enableVstab)||(isVnfEnabled != enableVnf))
