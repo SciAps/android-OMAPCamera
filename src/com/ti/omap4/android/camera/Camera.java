@@ -248,7 +248,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final String PARM_SENSOR_ORIENTATION = "sensor-orientation";
     private static final String PARM_GBCE = "gbce";
     private static final String PARM_GLBCE = "glbce";
-    private static final String PARM_GBCE_OFF = "off";
+    private static final String PARM_GBCE_OFF = "disable";
     private static final String PARM_BCE_ENABLE = "enable";
     private static final String PARM_BCE_DISABLE = "disable";
     private static final String PARM_IPP = "ipp";
@@ -277,6 +277,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mHighPerformance;
     private String mHighQuality;
     private String mHighQualityZsl;
+    private String mGBCEOff;
 
     // Limits ZSL capture size due to some hardware limitations
     private static final String PARM_ZSL_SIZE = "2016x1512";
@@ -1343,6 +1344,14 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         PreferenceGroup group =
                 (PreferenceGroup) inflater.inflate(R.xml.camera_preferences);
 
+        ListPreference gbce = group.findPreference(CameraSettings.KEY_GBCE);
+        if (gbce != null) {
+            mGBCEOff = gbce.findEntryVlaueByEntry(getString(R.string.pref_camera_gbce_entry_off));
+            if (mGBCEOff == null) {
+                mGBCEOff = "";
+            }
+        }
+
         ListPreference autoConvergencePreference = group.findPreference(CameraSettings.KEY_AUTO_CONVERGENCE);
         if (autoConvergencePreference != null) {
             mTouchConvergence = autoConvergencePreference.findEntryVlaueByEntry(getString(R.string.pref_camera_autoconvergence_entry_mode_touch));
@@ -1543,7 +1552,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
         // GBCE/GLBCE is only available when in HQ mode
         if ( !mCaptureMode.equals(mHighQuality) ) {
-            overrideCameraGBCE(PARM_GBCE_OFF);
+            overrideCameraGBCE(mGBCEOff);
         } else {
             overrideCameraGBCE(null);
         }
