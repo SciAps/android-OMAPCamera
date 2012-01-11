@@ -26,6 +26,8 @@ import android.util.TypedValue;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Arrays.fill;
+
 /**
  * A type of <code>CameraPreference</code> whose number of possible values
  * is limited.
@@ -38,6 +40,7 @@ public class ListPreference extends CameraPreference {
 
     private CharSequence[] mEntries;
     private CharSequence[] mEntryValues;
+    private boolean[] mEntryEnabledFlags;
     private boolean mLoaded = false;
 
     public ListPreference(Context context, AttributeSet attrs) {
@@ -66,7 +69,22 @@ public class ListPreference extends CameraPreference {
         setEntries(a.getTextArray(R.styleable.ListPreference_entries));
         setEntryValues(a.getTextArray(
                 R.styleable.ListPreference_entryValues));
+        mEntryEnabledFlags = new boolean[mEntryValues.length];
+        fill(mEntryEnabledFlags, true);
+
         a.recycle();
+    }
+
+    public void enableAllItems() {
+        fill(mEntryEnabledFlags, true);
+    }
+
+    public void enableItem(int key, boolean enable) {
+        mEntryEnabledFlags[key] = enable;
+    }
+
+    public boolean isItemEnabled(int key) {
+        return mEntryEnabledFlags[key];
     }
 
     public String getKey() {
@@ -87,6 +105,8 @@ public class ListPreference extends CameraPreference {
 
     public void setEntryValues(CharSequence values[]) {
         mEntryValues = values == null ? new CharSequence[0] : values;
+        mEntryEnabledFlags = new boolean[mEntryValues.length];
+        fill(mEntryEnabledFlags, true);
     }
 
     public String getValue() {

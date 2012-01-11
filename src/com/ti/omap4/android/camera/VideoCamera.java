@@ -2046,6 +2046,41 @@ public class VideoCamera extends ActivityBase
         return res;
     }
 
+    private void filterVideoBitrateItems(int resolution) {
+        if (mPreferenceGroup == null) return;
+
+        final Integer MaxBitrate = CameraSettings.MAX_VIDEO_BITRATES.get(resolution);
+        ListPreference pref = mPreferenceGroup.findPreference(CameraSettings.KEY_VIDEO_BITRATE);
+
+        CharSequence[] values = pref.getEntryValues();
+        if (((mProfile.videoCodec == MediaRecorder.VideoEncoder.H263) ||
+                (mProfile.videoCodec == MediaRecorder.VideoEncoder.MPEG_4_SP)) &&
+                (MaxBitrate != null)) {
+            int maxSupportedBitrateValue = 0;
+            for (int i=0; i<values.length; i++) {
+                boolean enabled = (Integer.valueOf(values[i].toString()) <= MaxBitrate);
+                if ((enabled == true)&&(mProfile.videoBitRate > MaxBitrate)) {
+                    //If current videoBitRate value is out of supported range, we must chose biggest supported.
+                    maxSupportedBitrateValue = Math.max(maxSupportedBitrateValue,Integer.valueOf(values[i].toString()));
+                }
+                pref.enableItem(i,enabled);
+            }
+            if(mProfile.videoBitRate > MaxBitrate) {
+                mProfile.videoBitRate = maxSupportedBitrateValue;
+                Editor editor = mPreferences.edit();
+                editor.putString(CameraSettings.KEY_VIDEO_BITRATE, String.valueOf(mProfile.videoBitRate));
+                editor.apply();
+            }
+
+        }
+        else pref.enableAllItems();
+
+        if( mIndicatorControlContainer != null ) {
+            mIndicatorControlContainer.reloadPreferences();
+        }
+
+    }
+
     private void setCameraParameters() {
         mParameters = mCameraDevice.getParameters();
 
@@ -2071,6 +2106,7 @@ public class VideoCamera extends ActivityBase
         updateVideoFormat(optVideoFormat);
 
         mParameters.setPreviewSize(mProfile.videoFrameWidth, mProfile.videoFrameHeight);
+        filterVideoBitrateItems(mProfile.videoFrameWidth*mProfile.videoFrameHeight);
         mCameraDevice.setParameters(mParameters);
         //mParameters.setPreviewFrameRate(mProfile.videoFrameRate);
 

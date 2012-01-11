@@ -27,7 +27,10 @@ import android.media.CamcorderProfile;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 /**
@@ -107,6 +110,33 @@ public class CameraSettings {
     private final Parameters mParameters;
     private final CameraInfo[] mCameraInfo;
     private final int mCameraId;
+
+    //Maximum bitrates for h263 and MPEG4V in bits per second for various video resolutions.
+    public static final int MAX_VIDEO_BITRATE_FOR_128x96 = 384*1024; //SQCIF
+    public static final int MAX_VIDEO_BITRATE_FOR_176x144 = 384*1024; //QCIF
+    public static final int MAX_VIDEO_BITRATE_FOR_352x288 = 2*1024*1024; //CIF
+    public static final int MAX_VIDEO_BITRATE_FOR_320x240 = 2*1024*1024; //QVGA
+    public static final int MAX_VIDEO_BITRATE_FOR_640x480 = 8*1024*1024; //VGA
+    public static final int MAX_VIDEO_BITRATE_FOR_720x480 = 8*1024*1024; //NTSC
+    public static final int MAX_VIDEO_BITRATE_FOR_720x576 = 8*1024*1024; //PAL
+    public static final int MAX_VIDEO_BITRATE_FOR_800x480 = 8*1024*1024; //WVGA
+    public static final int MAX_VIDEO_BITRATE_FOR_1280x720 = 12*1024*1024; //720p
+
+    public static final Map<Integer,Integer> MAX_VIDEO_BITRATES;
+
+    static {
+        Map<Integer,Integer> bitrates = new HashMap<Integer,Integer>();
+        bitrates.put(128*96, MAX_VIDEO_BITRATE_FOR_128x96);
+        bitrates.put(176*144, MAX_VIDEO_BITRATE_FOR_176x144);
+        bitrates.put(352*288, MAX_VIDEO_BITRATE_FOR_352x288);
+        bitrates.put(320*240, MAX_VIDEO_BITRATE_FOR_320x240);
+        bitrates.put(640*480, MAX_VIDEO_BITRATE_FOR_640x480);
+        bitrates.put(720*480, MAX_VIDEO_BITRATE_FOR_720x480);
+        bitrates.put(720*576, MAX_VIDEO_BITRATE_FOR_720x576);
+        bitrates.put(800*480, MAX_VIDEO_BITRATE_FOR_800x480);
+        bitrates.put(1280*720, MAX_VIDEO_BITRATE_FOR_1280x720);
+        MAX_VIDEO_BITRATES = Collections.unmodifiableMap(bitrates);
+    }
 
     public CameraSettings(Activity activity, Parameters parameters,
                           int cameraId, CameraInfo[] cameraInfo) {
