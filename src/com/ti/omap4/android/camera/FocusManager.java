@@ -78,7 +78,7 @@ public class FocusManager {
     Listener mListener;
 
     public interface Listener {
-        public void autoFocus();
+        public boolean autoFocus();
         public void cancelAutoFocus();
         public boolean capture();
         public void startFaceDetection();
@@ -317,7 +317,10 @@ public class FocusManager {
         // Set the focus area and metering area.
         mListener.setFocusParameters();
         if (mFocusAreaSupported) {
-            autoFocus();
+            if(!autoFocus()) {
+                mHandler.sendEmptyMessageDelayed(RESET_TOUCH_FOCUS,
+                                                 RESET_TOUCH_FOCUS_DELAY);
+            }
         } else {  // Just show the indicator in all other cases.
             updateFocusUI();
             // Reset the metering area in 3 seconds.
@@ -343,15 +346,19 @@ public class FocusManager {
         onPreviewStopped();
     }
 
-    private void autoFocus() {
+    private boolean autoFocus() {
         Log.v(TAG, "Start autofocus.");
-        mListener.autoFocus();
-        mState = STATE_FOCUSING;
+        boolean ret = mListener.autoFocus();
+        if( ret ) {
+            mState = STATE_FOCUSING;
+        }
         // Pause the face view because the driver will keep sending face
         // callbacks after the focus completes.
         if (mFaceView != null) mFaceView.pause();
         updateFocusUI();
         mHandler.removeMessages(RESET_TOUCH_FOCUS);
+
+        return ret;
     }
 
     private void cancelAutoFocus() {

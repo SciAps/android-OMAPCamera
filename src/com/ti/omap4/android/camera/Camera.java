@@ -228,6 +228,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final int FOCUSING = 2;
     private static final int SNAPSHOT_IN_PROGRESS = 3;
     private int mCameraState = PREVIEW_STOPPED;
+    private Object mCameraStateLock = new Object();
     private boolean mSnapshotOnIdle = false;
 
     private ContentResolver mContentResolver;
@@ -637,7 +638,12 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         if (mParameters.getMaxNumDetectedFaces() > 0) {
             mFaceDetectionStarted = false;
             mCameraDevice.setFaceDetectionListener(null);
-            mCameraDevice.stopFaceDetection();
+            try {
+                mCameraDevice.stopFaceDetection();
+            } catch (RuntimeException e) {
+                e.printStackTrace();
+                Log.e(TAG, "Face detection already stopped!");
+            }
             if (mFaceView != null) mFaceView.clear();
         }
     }
@@ -1242,27 +1248,34 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
     @Override
     public boolean capture() {
-        // If we are already in the middle of taking a snapshot then ignore.
-        if (mCameraState == SNAPSHOT_IN_PROGRESS || mCameraDevice == null) {
-            return false;
-        }
-        mCaptureStartTime = System.currentTimeMillis();
-        mPostViewPictureCallbackTime = 0;
-        mJpegImageData = null;
+        synchronized (mCameraStateLock) {
+            // If we are already in the middle of taking a snapshot then ignore.
+            if (mCameraState == SNAPSHOT_IN_PROGRESS || mCameraDevice == null) {
+                return false;
+            }
+            mCaptureStartTime = System.currentTimeMillis();
+            mPostViewPictureCallbackTime = 0;
+            mJpegImageData = null;
 
-        // Set rotation and gps data.
-        Util.setRotationParameter(mParameters, mCameraId, mOrientation);
-        Location loc = mLocationManager.getCurrentLocation();
-        Util.setGpsParameters(mParameters, loc);
-        if (canSetParameters()) {
-            mCameraDevice.setParameters(mParameters);
-        }
+            // Set rotation and gps data.
+            Util.setRotationParameter(mParameters, mCameraId, mOrientation);
+            Location loc = mLocationManager.getCurrentLocation();
+            Util.setGpsParameters(mParameters, loc);
+            if (canSetParameters()) {
+                mCameraDevice.setParameters(mParameters);
+            }
 
-        mCameraDevice.takePicture(mShutterCallback, mRawPictureCallback,
-                mPostViewPictureCallback, new JpegPictureCallback(loc));
-        mFaceDetectionStarted = false;
-        setCameraState(SNAPSHOT_IN_PROGRESS);
-        return true;
+            try {
+                mCameraDevice.takePicture(mShutterCallback, mRawPictureCallback,
+                        mPostViewPictureCallback, new JpegPictureCallback(loc));
+            } catch (RuntimeException e ) {
+                e.printStackTrace();
+                return false;
+            }
+            mFaceDetectionStarted = false;
+            setCameraState(SNAPSHOT_IN_PROGRESS);
+            return true;
+        }
     }
 
     @Override
@@ -2021,10 +2034,22 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     }
 
     @Override
-    public void autoFocus() {
-        mFocusStartTime = System.currentTimeMillis();
-        mCameraDevice.autoFocus(mAutoFocusCallback);
-        setCameraState(FOCUSING);
+    public boolean autoFocus() {
+        synchronized (mCameraStateLock) {
+            if ( mCameraState == IDLE ) {
+                mFocusStartTime = System.currentTimeMillis();
+                try {
+                    mCameraDevice.autoFocus(mAutoFocusCallback);
+                } catch ( RuntimeException e ) {
+                    e.printStackTrace();
+                    return false;
+                }
+                setCameraState(FOCUSING);
+                return true;
+            } else {
+                return false;
+            }
+        }
     }
 
     @Override
@@ -2096,7 +2121,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 return true;
             case KeyEvent.KEYCODE_P:
                 if (mFirstTimeInitialized && event.getRepeatCount() == 0) {
-                    capture();
+                    onShutterButtonClick();
                 }
                 return true;
             case KeyEvent.KEYCODE_DPAD_CENTER:
