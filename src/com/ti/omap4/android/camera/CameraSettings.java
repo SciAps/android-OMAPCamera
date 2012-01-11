@@ -47,6 +47,7 @@ public class CameraSettings {
     public static final String KEY_VIDEO_MINFRAMERATE = "pref_camera_videominframerate_key";
     public static final String KEY_VIDEO_BITRATE = "pref_camera_videobitrate_key";
     public static final String KEY_VIDEO_FORMAT = "pref_camera_video_format_key";
+    public static final String KEY_VIDEO_TIMER = "pref_camera_video_timer_key";
     public static final String KEY_VSTAB = "pref_camera_vstab_key";
     public static final String KEY_VNF = "pref_camera_vnf_key";
     public static final String KEY_PICTURE_SIZE = "pref_camera_picturesize_key";

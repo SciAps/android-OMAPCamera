@@ -226,6 +226,17 @@
         <item>9</item>
     </string-array>
 
+    <!-- Video recording timer entries -->
+    <string-array name="pref_camera_video_timer_entries" translatable="false">
+        <item>@string/pref_camera_video_timer_entry_on</item>
+        <item>@string/pref_camera_video_timer_entry_off</item>
+    </string-array>
+
+    <string-array name="pref_camera_video_timer_entryvalues" translatable="false">
+        <item>true</item>
+        <item>false</item>
+    </string-array>
+
     <!-- Camera Preferences Audio Encoder dialog box entries -->
     <string-array name="pref_camera_audioencoder_entries">
         <item>@string/pref_camera_audioencoder_entry_1</item>

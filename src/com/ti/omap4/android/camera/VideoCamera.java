@@ -182,6 +182,8 @@ public class VideoCamera extends ActivityBase
     private boolean mOpenCameraFail = false;
     private boolean mCameraDisabled = false;
 
+    private boolean mRecordingTimerEnabled = true;
+
     private long mStorageSpace;
 
     private static final String PARM_VNF = "vnf";
@@ -564,6 +566,7 @@ public class VideoCamera extends ActivityBase
                     //CameraSettings.KEY_VIDEO_QUALITY}; //Disabling redundant Video Qualily Menu
         final String[] OTHER_SETTING_KEYS = {
                     CameraSettings.KEY_VIDEO_FORMAT,
+                    CameraSettings.KEY_VIDEO_TIMER,
                     CameraSettings.KEY_AUTO_CONVERGENCE,
                     CameraSettings.KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU,
                     CameraSettings.KEY_AUDIO_ENCODER,
@@ -1745,8 +1748,10 @@ public class VideoCamera extends ActivityBase
             mIndicatorControlContainer.dismissSecondLevelIndicator();
             if (mThumbnailView != null) mThumbnailView.setEnabled(false);
             mShutterButton.setBackgroundResource(R.drawable.btn_shutter_video_recording);
-            mRecordingTimeView.setText("");
-            mRecordingTimeView.setVisibility(View.VISIBLE);
+            if ( mRecordingTimerEnabled ) {
+                mRecordingTimeView.setText("");
+                mRecordingTimeView.setVisibility(View.VISIBLE);
+            }
             if (mReviewControl != null) mReviewControl.setVisibility(View.GONE);
             if (mCaptureTimeLapse) {
                 // The wheel control is shown only in Landscape Orientation.
@@ -1761,7 +1766,9 @@ public class VideoCamera extends ActivityBase
         } else {
             if (mThumbnailView != null) mThumbnailView.setEnabled(true);
             mShutterButton.setBackgroundResource(R.drawable.btn_shutter_video);
-            mRecordingTimeView.setVisibility(View.GONE);
+            if ( mRecordingTimerEnabled ) {
+                mRecordingTimeView.setVisibility(View.GONE);
+            }
             if (mReviewControl != null) mReviewControl.setVisibility(View.VISIBLE);
             if (mCaptureTimeLapse) {
                 if (Util.isTabletUI() && (mLastOrientation == 0 || mLastOrientation == 180)) {
@@ -2436,6 +2443,10 @@ public class VideoCamera extends ActivityBase
 
     private boolean videoPreferencesChanged() {
         Log.v(TAG, "videoPreferencesChanged +");
+
+        String timer = mPreferences.getString(CameraSettings.KEY_VIDEO_TIMER,
+                                              getString(R.string.pref_camera_video_timer_default));
+        mRecordingTimerEnabled = Boolean.parseBoolean(timer);
 
         // We need to restart the preview if VSTAB or VNF mode is changed.
         String vstab = mPreferences.getString(CameraSettings.KEY_VSTAB,
