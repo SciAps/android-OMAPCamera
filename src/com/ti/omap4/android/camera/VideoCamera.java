@@ -541,6 +541,13 @@ public class VideoCamera extends ActivityBase
             mVNFDisable = vnf.findEntryVlaueByEntry(getString(R.string.pref_camera_vnf_entry_off));
         }
 
+        // if in 2D mode -> sets unknown orientation
+        // if in 3D mode -> sets landscape orientation
+        if (is2DMode()) {
+            setRequestedOrientation(mOrientationListener.ORIENTATION_UNKNOWN);
+        } else {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
     }
 
     private void loadCameraPreferences() {
@@ -745,7 +752,11 @@ public class VideoCamera extends ActivityBase
              * If orientation is set to -1 (UNSPECIFIED), system
              * orientation is taken into account
              */
-            screenOrientation = -1 ; //UNSPECIFIED
+            if (is2DMode()) {
+                screenOrientation = -1;
+            } else {
+                screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+            }
             setRequestedOrientation(screenOrientation);
         } else {
             // Lock the screen Orientation before starting Record.
@@ -2964,9 +2975,11 @@ public class VideoCamera extends ActivityBase
         if(mLastOrientation == 90 || mLastOrientation == 270)
         {
             //swap Width and Height
-            int temp = mProfile.videoFrameHeight;
-            mProfile.videoFrameHeight = mProfile.videoFrameWidth;
-            mProfile.videoFrameWidth = temp;
+            if (is2DMode()) {
+                int temp = mProfile.videoFrameHeight;
+                mProfile.videoFrameHeight = mProfile.videoFrameWidth;
+                mProfile.videoFrameWidth = temp;
+            }
             // CODEC INPUT : WIDTH should be multiple of 16
             if (mProfile.videoFrameWidth == 1080)
             {
