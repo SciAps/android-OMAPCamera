@@ -522,7 +522,7 @@ public class VideoCamera extends ActivityBase
         }
 
         ListPreference vnf = mPreferenceGroup.findPreference(CameraSettings.KEY_VNF);
-        if ( vstab != null ) {
+        if ( vnf != null ) {
             mVNFEnable = vnf.findEntryVlaueByEntry(getString(R.string.pref_camera_vnf_entry_on));
             mVNFDisable = vnf.findEntryVlaueByEntry(getString(R.string.pref_camera_vnf_entry_off));
         }
