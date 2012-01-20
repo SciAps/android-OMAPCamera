@@ -164,13 +164,14 @@ public class SharePopup extends PopupWindow implements View.OnClickListener,
     }
 
     private void adjustThumbnailPosition() {
-        FrameLayout.LayoutParams lpOld =
+
+        if (mBitmapWidth > mBitmapHeight * 2 || mBitmapHeight > mBitmapWidth * 2) {
+            FrameLayout.LayoutParams lpOld =
                 (FrameLayout.LayoutParams) mThumbnailRotateLayout.getLayoutParams();
-        FrameLayout.LayoutParams lpNew =
+            FrameLayout.LayoutParams lpNew =
                 new FrameLayout.LayoutParams(lpOld.width, lpOld.height);
 
-        mRootView.setBackgroundDrawable(null);
-        if (mBitmapWidth > mBitmapHeight * 2 || mBitmapHeight > mBitmapWidth * 2) {
+            mRootView.setBackgroundDrawable(null);
             // panorama image
             lpNew.gravity = Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL;
 
@@ -178,16 +179,10 @@ public class SharePopup extends PopupWindow implements View.OnClickListener,
             // use a special color here for that.
             mRootView.setBackgroundColor(
                     mContext.getResources().getColor(R.color.share_popup_blackout));
-        } else {
-            // landscape or portrait image
-            if (mActivityOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
-                lpNew.gravity = Gravity.BOTTOM;
-            } else {
-                lpNew.gravity = Gravity.RIGHT;
-            }
+            mThumbnailRotateLayout.setLayoutParams(lpNew);
+
         }
 
-        mThumbnailRotateLayout.setLayoutParams(lpNew);
     }
 
     public void setOrientation(int orientation) {

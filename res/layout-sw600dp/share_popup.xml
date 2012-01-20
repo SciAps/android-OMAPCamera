@@ -24,13 +24,11 @@
         android:background="@color/share_popup_background">
     <FrameLayout android:id="@+id/root"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left|center">
+            android:layout_height="wrap_content">
         <com.ti.omap4.android.camera.ui.RotateLayout
                 android:id="@+id/thumbnail_rotate_layout"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true">
+                android:layout_height="wrap_content">
             <!-- The size of the thumbnail is calculated in SharePopup.java -->
             <FrameLayout
                     android:layout_width="wrap_content"
@@ -63,11 +61,9 @@
                 android:layout_width="@dimen/share_item_width"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
-                android:layout_gravity="right"
                 android:background="@color/share_icon_background">
             <com.ti.omap4.android.camera.ui.RotateLayout
                     android:id="@+id/goto_gallery_button_rotate"
-                    android:layout_gravity="center"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/share_item_width" >
                 <ImageButton
