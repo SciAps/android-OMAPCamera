@@ -303,6 +303,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private int mJpegQuality = CameraProfile.QUALITY_HIGH;
     private String mAutoConvergence = null;
     private String mMechanicalMisalignmentCorrection = null;
+    private String mPreviewLayout = null;
+    private boolean mIsPreviewLayoutInit = false;
+    private String mCaptureLayout = null;
     private long mFocusStartTime;
     private long mCaptureStartTime;
     private long mShutterCallbackTime;
@@ -1419,6 +1422,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         }
 
         mRotateDialog = new RotateDialogController(this, R.layout.rotate_dialog);
+        mCaptureLayout = getString(R.string.pref_camera_capture_layout_default);
 
         mPreferences.setLocalId(this, mCameraId);
         CameraSettings.upgradeLocalPreferences(mPreferences.getLocal());
@@ -1595,6 +1599,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_EXPOSURE,
                 CameraSettings.KEY_SCENE_MODE};
         final String[] OTHER_SETTING_KEYS = {
+                CameraSettings.KEY_CAPTURE_LAYOUT,
+                CameraSettings.KEY_PREVIEW_LAYOUT,
                 CameraSettings.KEY_AUTO_CONVERGENCE,
                 CameraSettings.KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU,
                 CameraSettings.KEY_RECORD_LOCATION,
@@ -1925,10 +1931,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
         if ( null == mExposureMode || mPausing ) {
             mExposureMode = getString(R.string.pref_camera_exposuremode_default);
-        }
-
-        if ( null == mPreviewSize || mPausing ) {
-            mPreviewSize = getString(R.string.pref_camera_previewsize_default);
         }
 
         if ( null == mSaturation || mPausing ) {
@@ -2399,8 +2401,54 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         }
     }
 
+    private boolean is2DMode(){
+        if (mParameters == null) mParameters = mCameraDevice.getParameters();
+        String currentPreviewLayout = mParameters.get(CameraSettings.KEY_S3D_PRV_FRAME_LAYOUT);
+        // if there isn't selected layout  -> 2d mode
+        if (currentPreviewLayout == null ||
+                currentPreviewLayout.equals("") ||
+                currentPreviewLayout.equals("none")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private String elementExists(String[] firstArr, String[] secondArr){
+        for (int i = 0; i < firstArr.length; i++) {
+            for (int j = 0; j < secondArr.length; j++) {
+                if (firstArr[i].equals(secondArr[j])) {
+                    return firstArr[i];
+                }
+            }
+        }
+        return null;
+    }
+
+    private ListPreference getSupportedListPreference(String supportedKey, String menuKey, List<Size> sizes){
+        List<String> supported = new ArrayList<String>();
+        ListPreference menu = mPreferenceGroup.findPreference(menuKey);
+        if (menu == null) return null;
+        if (supportedKey != null) {
+            String supp = mParameters.get(supportedKey);
+                if (supp !=null && !supp.equals("")) {
+                    for (String item : supp.split(",")) {
+                        supported.add(item);
+                    }
+                }
+        }
+        if (sizes != null) {
+            supported = CameraSettings.sizeListToStringList(sizes);
+        }
+        CameraSettings.filterUnsupportedOptions(mPreferenceGroup, menu, supported);
+        return menu;
+    }
+
     private boolean updateCameraParametersPreference() {
         boolean restartNeeded = false;
+        boolean previewLayoutUpdated = false;
+        boolean captureLayoutUpdated = false;
+
         if (mAeLockSupported) {
             mParameters.setAutoExposureLock(mFocusManager.getAeAwbLock());
         }
@@ -2427,6 +2475,115 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
              !colorEffect.equals(mColorEffect) ) {
             mParameters.setColorEffect(colorEffect);
             mColorEffect = colorEffect;
+        }
+
+        // Layouts
+        String previewLayout = null;
+        if (is2DMode()) {
+            previewLayout = "none";
+        } else {
+            previewLayout = mPreferences.getString(
+                    CameraSettings.KEY_PREVIEW_LAYOUT,
+                    getString(R.string.pref_camera_preview_layout_default));
+        }
+        if (previewLayout!=null && !previewLayout.equals(mPreviewLayout)) {
+            if (!mIsPreviewLayoutInit) {
+                mInitialParams.set(CameraSettings.KEY_S3D_PRV_FRAME_LAYOUT, previewLayout);
+                CameraSettings settings = new CameraSettings(this, mInitialParams,
+                        mCameraId, CameraHolder.instance().getCameraInfo());
+                mPreferenceGroup = settings.getPreferenceGroup(R.xml.camera_preferences);
+                mIsPreviewLayoutInit = true;
+            }
+            mParameters.set(CameraSettings.KEY_S3D_PRV_FRAME_LAYOUT, previewLayout);
+            mPreviewLayout = previewLayout;
+            previewLayoutUpdated = true;
+            restartNeeded  = true;
+        }
+
+        String captureLayout = null;
+        if (is2DMode()) {
+            captureLayout = "none";
+        } else {
+            captureLayout = mPreferences.getString(
+                CameraSettings.KEY_CAPTURE_LAYOUT,
+                getString(R.string.pref_camera_capture_layout_default));
+        }
+        if (!mCaptureLayout.equals(captureLayout)) {
+            mParameters.set(CameraSettings.KEY_S3D_CAP_FRAME_LAYOUT, captureLayout);
+            mCaptureLayout = captureLayout;
+            captureLayoutUpdated = true;
+        }
+
+        if ((previewLayoutUpdated || captureLayoutUpdated) && mPreferenceGroup !=null) {
+            // Update preview size UI with the new sizes
+             if (previewLayoutUpdated) {
+                 ListPreference tbMenuSizes = null;
+                 ListPreference ssMenuSizes = null;
+                 ListPreference menu2dSizes = getSupportedListPreference(CameraSettings.KEY_SUPPORTED_PREVIEW_SUBSAMPLED_SIZES,
+                         CameraSettings.KEY_PREVIEW_SIZE_2D, mParameters.getSupportedPreviewSizes());
+                 if (!is2DMode()) {
+                     tbMenuSizes =  getSupportedListPreference(CameraSettings.KEY_SUPPORTED_PREVIEW_TOPBOTTOM_SIZES,CameraSettings.KEY_PREVIEW_SIZES_TB,null);
+                     ssMenuSizes =  getSupportedListPreference(CameraSettings.KEY_SUPPORTED_PREVIEW_SIDEBYSIDE_SIZES,CameraSettings.KEY_PREVIEW_SIZES_SS,null);
+                 }
+                 ListPreference newPreviewSizes = null;
+                 if (mPreviewLayout.equals(CameraSettings.SS_FULL_S3D_LAYOUT)) {
+                     newPreviewSizes = ssMenuSizes;
+                 } else if (mPreviewLayout.equals(CameraSettings.TB_FULL_S3D_LAYOUT)) {
+                     newPreviewSizes = tbMenuSizes;
+                 } else {
+                     newPreviewSizes = menu2dSizes;
+                 }
+                 ArrayList<CharSequence[]> allEntries = new ArrayList<CharSequence[]>();
+                 ArrayList<CharSequence[]> allEntryValues = new ArrayList<CharSequence[]>();
+                 allEntries.add(menu2dSizes.getEntries());
+                 allEntryValues.add(menu2dSizes.getEntryValues());
+                 if (!is2DMode()) {
+                     allEntries.add(tbMenuSizes.getEntries());
+                     allEntries.add(ssMenuSizes.getEntries());
+                     allEntryValues.add(tbMenuSizes.getEntryValues());
+                     allEntryValues.add(ssMenuSizes.getEntryValues());
+                 }
+
+                 if (mIndicatorControlContainer != null ) {
+                     mIndicatorControlContainer.replace(CameraSettings.KEY_PREVIEW_SIZE, newPreviewSizes, allEntries, allEntryValues);
+                 }
+             }
+
+            // Update picture size UI with the new sizes
+             if (captureLayoutUpdated) {
+                 ListPreference menu2dSizes = getSupportedListPreference(CameraSettings.KEY_SUPPORTED_PICTURE_SUBSAMPLED_SIZES,
+                         CameraSettings.KEY_PICTURE_SIZE_2D, mParameters.getSupportedPictureSizes());
+                 ListPreference tbMenuSizes = null;
+                 ListPreference ssMenuSizes = null;
+                 if (!is2DMode()) {
+                     tbMenuSizes =  getSupportedListPreference(CameraSettings.KEY_SUPPORTED_PICTURE_TOPBOTTOM_SIZES,CameraSettings.KEY_PICTURE_SIZES_TB,null);
+                     ssMenuSizes =  getSupportedListPreference(CameraSettings.KEY_SUPPORTED_PICTURE_SIDEBYSIDE_SIZES,CameraSettings.KEY_PICTURE_SIZES_SS,null);
+                 }
+                 ListPreference newPictureSizes = null;
+                 if (mCaptureLayout.equals(CameraSettings.SS_FULL_S3D_LAYOUT)) {
+                     newPictureSizes = ssMenuSizes;
+                 } else if (mCaptureLayout.equals(CameraSettings.TB_FULL_S3D_LAYOUT)) {
+                     newPictureSizes = tbMenuSizes;
+                 } else {
+                     newPictureSizes = menu2dSizes;
+                 }
+                 ArrayList<CharSequence[]> allEntries = new ArrayList<CharSequence[]>();
+                 ArrayList<CharSequence[]> allEntryValues = new ArrayList<CharSequence[]>();
+                 if (menu2dSizes != null) {
+                     allEntries.add(menu2dSizes.getEntries());
+                     allEntryValues.add(menu2dSizes.getEntryValues());
+                 }
+                 if (!is2DMode()) {
+                     allEntries.add(tbMenuSizes.getEntries());
+                     allEntries.add(ssMenuSizes.getEntries());
+                     allEntryValues.add(tbMenuSizes.getEntryValues());
+                     allEntryValues.add(ssMenuSizes.getEntryValues());
+                 }
+
+                 if (mIndicatorControlContainer != null ) {
+                     mIndicatorControlContainer.replace(CameraSettings.KEY_PICTURE_SIZE, newPictureSizes, allEntries, allEntryValues);
+                 }
+             }
         }
 
         // Set Default Sensor Orientation
@@ -2535,27 +2692,89 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         if (pictureSize == null) {
             CameraSettings.initialCameraPictureSize(this, mParameters);
         } else {
-            List<Size> supported = mParameters.getSupportedPictureSizes();
-            CameraSettings.setCameraPictureSize(
-                    pictureSize, supported, mParameters);
+            List<String> supported = new ArrayList<String>();
+            String supp = null;
+            if (mCaptureLayout.equals(CameraSettings.TB_FULL_S3D_LAYOUT)) {
+                supp = mParameters.get(CameraSettings.KEY_SUPPORTED_PICTURE_TOPBOTTOM_SIZES);
+                if(supp !=null && !supp.equals("")){
+                    for(String item : supp.split(",")){
+                        supported.add(item);
+                    }
+                }
+            } else if (mCaptureLayout.equals(CameraSettings.SS_FULL_S3D_LAYOUT)) {
+                supp = mParameters.get(CameraSettings.KEY_SUPPORTED_PICTURE_SIDEBYSIDE_SIZES);
+                if (supp !=null && !supp.equals("")) {
+                    for (String item : supp.split(",")) {
+                        supported.add(item);
+                    }
+                }
+            }else if (mCaptureLayout.equals(CameraSettings.SS_SUB_S3D_LAYOUT) ||
+                    mCaptureLayout.equals(CameraSettings.TB_SUB_S3D_LAYOUT)) {
+                supp = mParameters.get(CameraSettings.KEY_SUPPORTED_PICTURE_SUBSAMPLED_SIZES);
+                if (supp !=null && !supp.equals("")) {
+                    for (String item : supp.split(",")) {
+                        supported.add(item);
+                    }
+                }
+            } else {
+                supported = CameraSettings.sizeListToStringList(mParameters.getSupportedPictureSizes());
+            }
+             CameraSettings.setCameraPictureSize(
+                     pictureSize, supported, mParameters);
         }
 
         mPreviewPanel = findViewById(R.id.frame_layout);
         mPreviewFrameLayout = (PreviewFrameLayout) findViewById(R.id.frame);
 
-        String previewSize = mPreferences.getString(
-                CameraSettings.KEY_PREVIEW_SIZE,
-                getString(R.string.pref_camera_previewsize_default));
-        List<Size> supported = mParameters.getSupportedPreviewSizes();
-        CameraSettings.setCameraPreviewSize(previewSize, supported, mParameters);
+        String[] previewDefaults = getResources().getStringArray(R.array.pref_camera_previewsize_default_array);
+        String defaultPreviewSize = "";
+        if (mPreviewLayout.equals(CameraSettings.TB_FULL_S3D_LAYOUT)) {
+            String[] tbPreviewSizes = getResources().getStringArray(R.array.pref_camera_tb_previewsize_entryvalues);
+            defaultPreviewSize = elementExists(previewDefaults, tbPreviewSizes);
+        } else if (mPreviewLayout.equals(CameraSettings.SS_FULL_S3D_LAYOUT)) {
+            String[] ssPreviewSizes = getResources().getStringArray(R.array.pref_camera_ss_previewsize_entryvalues);
+            defaultPreviewSize = elementExists(previewDefaults, ssPreviewSizes);
+        } else {
+            String[] previewSizes2D = getResources().getStringArray(R.array.pref_camera_previewsize_entryvalues);
+            defaultPreviewSize = elementExists(previewDefaults, previewSizes2D);
+        }
 
-        if ( !previewSize.equals(mPreviewSize) ) {
+        String previewSize = mPreferences.getString(CameraSettings.KEY_PREVIEW_SIZE, defaultPreviewSize);
+        if (previewSize !=null && (!previewSize.equals(mPreviewSize) || previewLayoutUpdated )) {
+            List<String> supported = new ArrayList<String>();
+            String supp = null;
+            if (mPreviewLayout.equals(CameraSettings.TB_FULL_S3D_LAYOUT)) {
+                supp = mParameters.get(CameraSettings.KEY_SUPPORTED_PREVIEW_TOPBOTTOM_SIZES);
+                if (supp !=null && !supp.equals("")) {
+                    for (String item : supp.split(",")) {
+                        supported.add(item);
+                    }
+                }
+            } else if (mPreviewLayout.equals(CameraSettings.SS_FULL_S3D_LAYOUT)) {
+                supp = mParameters.get(CameraSettings.KEY_SUPPORTED_PREVIEW_SIDEBYSIDE_SIZES);
+                if (supp !=null && !supp.equals("")) {
+                    for (String item : supp.split(",")) {
+                        supported.add(item);
+                    }
+                }
+            } else if (mPreviewLayout.equals(CameraSettings.SS_SUB_S3D_LAYOUT) ||
+                    mPreviewLayout.equals(CameraSettings.TB_SUB_S3D_LAYOUT)) {
+                supp = mParameters.get(CameraSettings.KEY_SUPPORTED_PREVIEW_SUBSAMPLED_SIZES);
+                if (supp !=null && !supp.equals("")) {
+                    for (String item : supp.split(",")) {
+                        supported.add(item);
+                    }
+                }
+            } else {
+                supported = CameraSettings.sizeListToStringList(mParameters.getSupportedPreviewSizes());
+            }
+            CameraSettings.setCameraPreviewSize(previewSize, supported, mParameters);
             mPreviewSize = previewSize;
-            Size size = mParameters.getPreviewSize();
-            mPreviewFrameLayout.setAspectRatio((double) size.width / size.height);
             enableCameraControls(true);
             restartNeeded = true;
         }
+        Size size = mParameters.getPreviewSize();
+        mPreviewFrameLayout.setAspectRatio((double) size.width / size.height);
 
         // Since change scene mode may change supported values,
         // Set scene mode first,
@@ -3132,6 +3351,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         }
         if (mIndicatorControlContainer != null) {
             mIndicatorControlContainer.dismissSettingPopup();
+
             CameraSettings.restorePreferences(Camera.this, mPreferences,
                     mParameters);
             mIndicatorControlContainer.reloadPreferences();

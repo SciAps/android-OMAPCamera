@@ -16,12 +16,15 @@
 
 package com.ti.omap4.android.camera.ui;
 
+import java.util.ArrayList;
+
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.ti.omap4.android.camera.ListPreference;
 import com.ti.omap4.android.camera.R;
 
 // A popup window that shows one or more camera settings.
@@ -42,4 +45,15 @@ abstract public class AbstractSettingPopup extends RotateLayout {
     }
 
     abstract public void reloadPreference();
+
+    public void replace(String key, ListPreference pref){ }
+
+    public boolean findPref(String key){
+        return false;
+    }
+
+    public void replace(String key, ListPreference pref,
+            ArrayList<CharSequence[]> allEntries,
+            ArrayList<CharSequence[]> allEntryValues) {
+    }
 }

@@ -18,6 +18,36 @@
         xmlns:camera="http://schemas.android.com/apk/res/com.ti.omap4.android.camera"
         camera:title="@string/pref_camcorder_settings_category">
     <IconListPreference
+            camera:key="pref_video_preview_layout_key"
+            camera:defaultValue="@string/pref_video_preview_layout_default"
+            camera:title="@string/pref_video_preview_layout_title"
+            camera:entries="@array/pref_video_preview_layout_entries"
+            camera:entryValues="@array/pref_video_preview_layout_entryvalues"/>
+    <ListPreference
+            camera:key="pref_camera_previewsize_key"
+            camera:defaultValue="@array/pref_camera_previewsize_default_array"
+            camera:title="@string/pref_camera_previewsize_title"
+            camera:entries="@array/pref_camera_previewsize_entries"
+            camera:entryValues="@array/pref_camera_previewsize_entryvalues" />
+    <ListPreference
+            camera:key="pref_camera_previewsize2d_key"
+            camera:defaultValue="@array/pref_camera_previewsize_default_array"
+            camera:title="@string/pref_camera_previewsize_title"
+            camera:entries="@array/pref_camera_previewsize_entries"
+            camera:entryValues="@array/pref_camera_previewsize_entryvalues" />
+    <ListPreference
+            camera:key="pref_camera_ss_previewsize_key"
+            camera:defaultValue="@array/pref_camera_previewsize_default_array"
+            camera:title="@string/pref_camera_previewsize_title"
+            camera:entries="@array/pref_camera_previewsize_entries"
+            camera:entryValues="@array/pref_camera_ss_previewsize_entryvalues" />
+    <ListPreference
+            camera:key="pref_camera_tb_previewsize_key"
+            camera:defaultValue="@array/pref_camera_previewsize_default_array"
+            camera:title="@string/pref_camera_previewsize_title"
+            camera:entries="@array/pref_camera_previewsize_entries"
+            camera:entryValues="@array/pref_camera_tb_previewsize_entryvalues" />
+    <IconListPreference
             camera:key="pref_video_quality_key"
             camera:defaultValue="@string/pref_video_quality_default"
             camera:title="@string/pref_video_quality_title"

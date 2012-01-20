@@ -83,59 +83,161 @@
                 late for the translation. Since we show the same label as the
                 second item, we just use the second one instead.
         -->
-        <item>@string/pref_camera_picturesize_entry_320x240</item>
-        <item>@string/pref_camera_picturesize_entry_640x480</item>
-        <item>@string/pref_camera_picturesize_entry_1024x768</item>
-        <item>@string/pref_camera_picturesize_entry_1280x960</item>
-        <item>@string/pref_camera_picturesize_entry_1600x1200</item>
-        <item>@string/pref_camera_picturesize_entry_2016x1512</item>
-        <item>@string/pref_camera_picturesize_entry_2592x1936</item>
-        <item>@string/pref_camera_picturesize_entry_2592x1936</item>
-        <item>@string/pref_camera_picturesize_entry_2592x1936</item>
-        <item>@string/pref_camera_picturesize_entry_3280x2464</item>
-        <item>@string/pref_camera_picturesize_entry_3648x2736</item>
         <item>@string/pref_camera_picturesize_entry_4032x3024</item>
+        <item>@string/pref_camera_picturesize_entry_3648x2736</item>
+        <item>@string/pref_camera_picturesize_entry_3264x2448</item>
+        <item>@string/pref_camera_picturesize_entry_2592x1944</item>
+        <item>@string/pref_camera_picturesize_entry_2048x1536</item>
+        <item>@string/pref_camera_picturesize_entry_2016x1512</item>
+        <item>@string/pref_camera_picturesize_entry_1600x1200</item>
+        <item>@string/pref_camera_picturesize_entry_1280x960</item>
+        <item>@string/pref_camera_picturesize_entry_1024x768</item>
+        <item>@string/pref_camera_picturesize_entry_640x480</item>
+        <item>@string/pref_camera_picturesize_entry_320x240</item>
     </string-array>
-
     <!-- When launching the camera app first time, we will set the picture
          size to the first one in the list that is also supported by the
          driver -->
     <string-array name="pref_camera_picturesize_entryvalues" translatable="false">
-        <item>320x240</item>
-        <item>640x480</item>
-        <item>1024x768</item>
-        <item>1280x960</item>
-        <item>1600x1200</item>
-        <item>2016x1512</item>
-        <item>2560x1920</item>
-        <item>2592x1936</item>
-        <item>2592x1944</item>
-        <item>3280x2464</item>
-        <item>3648x2736</item>
         <item>4032x3024</item>
+        <item>3648x2736</item>
+        <item>3264x2448</item>
+        <item>2592x1944</item>
+        <item>2048x1536</item>
+        <item>2016x1512</item>
+        <item>1600x1200</item>
+        <item>1280x960</item>
+        <item>1024x768</item>
+        <item>640x480</item>
+        <item>320x240</item>
+    </string-array>
+
+    <string-array name="pref_camera_tb_picturesize_entryvalues" translatable="false">
+        <item>4032x6048</item>
+        <item>3648x5472</item>
+        <item>3264x4896</item>
+        <item>2592x3888</item>
+        <item>2048x3072</item>
+        <item>2016x3024</item>
+        <item>1600x2400</item>
+        <item>1280x1920</item>
+        <item>1024x1536</item>
+        <item>640x960</item>
+        <item>320x480</item>
+    </string-array>
+
+    <string-array name="pref_camera_ss_picturesize_entryvalues" translatable="false">
+        <item>8064x3024</item>
+        <item>7296x2736</item>
+        <item>6528x2448</item>
+        <item>5184x1944</item>
+        <item>4096x1536</item>
+        <item>4032x1512</item>
+        <item>3200x1200</item>
+        <item>2560x960</item>
+        <item>2048x768</item>
+        <item>1280x480</item>
+        <item>640x240</item>
+    </string-array>
+
+    <string-array name="pref_camera_previewsize_default_array" translatable="false">
+        <item>640x480</item>
+        <item>1280x480</item>
+        <item>640x960</item>
     </string-array>
 
     <string-array name="pref_camera_previewsize_entries" translatable="false">
-        <item>@string/pref_camera_previewsize_entry_sqcif</item>
-        <item>@string/pref_camera_previewsize_entry_qcif</item>
-        <item>@string/pref_camera_previewsize_entry_cif</item>
-        <item>@string/pref_camera_previewsize_entry_qvga</item>
-        <item>@string/pref_camera_previewsize_entry_vga</item>
-        <item>@string/pref_camera_previewsize_entry_pal</item>
-        <item>@string/pref_camera_previewsize_entry_ntsc</item>
-        <item>@string/pref_camera_previewsize_entry_wvga</item>
+        <item>@string/pref_camera_previewsize_entry_fullhd</item>
         <item>@string/pref_camera_previewsize_entry_hd</item>
+        <item>@string/pref_camera_previewsize_entry_wvga</item>
+        <item>@string/pref_camera_previewsize_entry_ntsc</item>
+        <item>@string/pref_camera_previewsize_entry_pal</item>
+        <item>@string/pref_camera_previewsize_entry_vga</item>
+        <item>@string/pref_camera_previewsize_entry_qvga</item>
+        <item>@string/pref_camera_previewsize_entry_cif</item>
+        <item>@string/pref_camera_previewsize_entry_qcif</item>
+        <item>@string/pref_camera_previewsize_entry_sqcif</item>
     </string-array>
+
     <string-array name="pref_camera_previewsize_entryvalues" translatable="false">
-         <item>128x96</item>
-         <item>176x144</item>
-         <item>352x288</item>
-         <item>320x240</item>
-         <item>640x480</item>
-         <item>768x576</item>
-         <item>720x576</item>
-         <item>800x480</item>
+         <item>1920x1080</item>
          <item>1280x720</item>
+         <item>800x480</item>
+         <item>720x576</item>
+         <item>768x576</item>
+         <item>640x480</item>
+         <item>320x240</item>
+         <item>352x288</item>
+         <item>176x144</item>
+         <item>128x96</item>
+    </string-array>
+
+    <string-array name="pref_camera_tb_previewsize_entryvalues" translatable="false">
+         <item>1920x2160</item>
+         <item>1280x1440</item>
+         <item>800x960</item>
+         <item>720x1152</item>
+         <item>768x1152</item>
+         <item>640x960</item>
+         <item>320x480</item>
+         <item>352x576</item>
+         <item>176x288</item>
+         <item>128x192</item>
+    </string-array>
+
+    <string-array name="pref_camera_ss_previewsize_entryvalues" translatable="false">
+         <item>3840x1080</item>
+         <item>2560x720</item>
+         <item>1600x480</item>
+         <item>1440x576</item>
+         <item>1536x576</item>
+         <item>1280x480</item>
+         <item>640x240</item>
+         <item>704x288</item>
+         <item>352x144</item>
+         <item>256x96</item>
+    </string-array>
+
+    <string-array name="pref_video_preview_layout_entries" translatable="false">
+        <item>@string/pref_camera_layout_entry_ss_subsampled</item>
+        <!-- item>@string/pref_camera_layout_entry_ss_full</item-->
+        <item>@string/pref_camera_layout_entry_tb_subsampled</item>
+        <!-- item>@string/pref_camera_layout_entry_tb_full</item-->
+    </string-array>
+
+    <string-array name="pref_video_preview_layout_entryvalues" translatable="false">
+        <item>ss-subsampled</item>
+        <!-- item>ss-full</item-->
+        <item>tb-subsampled</item>
+        <!-- item>tb-full</item-->
+    </string-array>
+
+    <string-array name="pref_camera_capture_layout_entries" translatable="false">
+        <item>@string/pref_camera_layout_entry_ss_subsampled</item>
+        <item>@string/pref_camera_layout_entry_ss_full</item>
+        <item>@string/pref_camera_layout_entry_tb_subsampled</item>
+        <item>@string/pref_camera_layout_entry_tb_full</item>
+    </string-array>
+
+    <string-array name="pref_camera_capture_layout_entryvalues" translatable="false">
+        <item>ss-subsampled</item>
+        <item>ss-full</item>
+        <item>tb-subsampled</item>
+        <item>tb-full</item>
+    </string-array>
+
+    <string-array name="pref_camera_preview_layout_entries" translatable="false">
+        <item>@string/pref_camera_layout_entry_ss_subsampled</item>
+        <item>@string/pref_camera_layout_entry_ss_full</item>
+        <item>@string/pref_camera_layout_entry_tb_subsampled</item>
+        <item>@string/pref_camera_layout_entry_tb_full</item>
+    </string-array>
+
+    <string-array name="pref_camera_preview_layout_entryvalues" translatable="false">
+        <item>ss-subsampled</item>
+        <item>ss-full</item>
+        <item>tb-subsampled</item>
+        <item>tb-full</item>
     </string-array>
 
     <string-array name="pref_camera_mode_entries" translatable="false">
@@ -201,29 +303,29 @@
 
     <!-- Camera Preferences Video format dialog box entries -->
     <string-array name="pref_camera_video_format_entries" translatable="false">
-        <item>@string/pref_camera_video_format_entry_0_sqcif</item>
-        <item>@string/pref_camera_video_format_entry_1_qcif</item>
-        <item>@string/pref_camera_video_format_entry_2_cif</item>
-        <item>@string/pref_camera_video_format_entry_3_qvga</item>
-        <item>@string/pref_camera_video_format_entry_4_vga</item>
-        <item>@string/pref_camera_video_format_entry_5_ntsc</item>
-        <item>@string/pref_camera_video_format_entry_6_pal</item>
-        <item>@string/pref_camera_video_format_entry_7_wvga</item>
-        <item>@string/pref_camera_video_format_entry_8_720p</item>
         <item>@string/pref_camera_video_format_entry_9_1080p</item>
+        <item>@string/pref_camera_video_format_entry_8_720p</item>
+        <item>@string/pref_camera_video_format_entry_7_wvga</item>
+        <item>@string/pref_camera_video_format_entry_6_pal</item>
+        <item>@string/pref_camera_video_format_entry_5_ntsc</item>
+        <item>@string/pref_camera_video_format_entry_4_vga</item>
+        <item>@string/pref_camera_video_format_entry_3_qvga</item>
+        <item>@string/pref_camera_video_format_entry_2_cif</item>
+        <item>@string/pref_camera_video_format_entry_1_qcif</item>
+        <item>@string/pref_camera_video_format_entry_0_sqcif</item>
     </string-array>
 
     <string-array name="pref_camera_video_format_entryvalues" translatable="false">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>7</item>
-        <item>8</item>
         <item>9</item>
+        <item>8</item>
+        <item>7</item>
+        <item>6</item>
+        <item>5</item>
+        <item>4</item>
+        <item>3</item>
+        <item>2</item>
+        <item>1</item>
+        <item>0</item>
     </string-array>
 
     <!-- Video recording timer entries -->
@@ -800,4 +902,5 @@
         <item>continuous-picture</item>
         <item>auto</item>
     </string-array>
+
 </resources>

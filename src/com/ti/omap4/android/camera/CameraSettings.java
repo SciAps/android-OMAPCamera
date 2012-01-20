@@ -54,6 +54,7 @@ public class CameraSettings {
     public static final String KEY_VSTAB = "pref_camera_vstab_key";
     public static final String KEY_VNF = "pref_camera_vnf_key";
     public static final String KEY_PICTURE_SIZE = "pref_camera_picturesize_key";
+    public static final String KEY_PICTURE_SIZE_2D = "pref_camera_picturesize2d_key";
     public static final String KEY_JPEG_QUALITY = "pref_camera_jpegquality_key";
     public static final String KEY_FOCUS_MODE = "pref_camera_focusmode_key";
     public static final String KEY_FLASH_MODE = "pref_camera_flashmode_key";
@@ -75,6 +76,7 @@ public class CameraSettings {
     public static final String KEY_CONTRAST = "pref_camera_contrast_key";
     public static final String KEY_BRIGHTNESS = "pref_camera_brightness_key";
     public static final String KEY_PREVIEW_SIZE = "pref_camera_previewsize_key";
+    public static final String KEY_PREVIEW_SIZE_2D = "pref_camera_previewsize2d_key";
     public static final String KEY_ANTIBANDING = "pref_camera_antibanding_key";
     public static final String KEY_EXPOSURE_MODE = "pref_camera_exposuremode_key";
     public static final String KEY_PREVIEW_FRAMERATE = "pref_camera_previewframerate_key";
@@ -88,6 +90,31 @@ public class CameraSettings {
     public static final String KEY_AUTO_CONVERGENCE = "pref_camera_autoconvergence_key";
     public static final String KEY_AUTOCONVERGENCE_MODE = "auto-convergence-mode";
     public static final String KEY_AUTOCONVERGENCE_MODE_VALUES = "auto-convergence-mode-values";
+    public static final String KEY_CAPTURE_LAYOUT = "pref_camera_capture_layout_key";
+    public static final String KEY_PREVIEW_LAYOUT = "pref_camera_preview_layout_key";
+    public static final String KEY_CAPTURE_LAYOUT_VALUES = "s3d-cap-frame-layout-values";
+    public static final String KEY_PREVIEW_LAYOUT_VALUES = "s3d-prv-frame-layout-values";
+    public static final String KEY_VIDEO_PREVIEW_LAYOUT = "pref_video_preview_layout_key";
+    public static final String KEY_VIDEO_CAPTURE_LAYOUT = "pref_video_capture_layout_key";
+    public static final String KEY_PREVIEW_SIZES_SS = "pref_camera_ss_previewsize_key";
+    public static final String KEY_PREVIEW_SIZES_TB = "pref_camera_tb_previewsize_key";
+    public static final String KEY_PICTURE_SIZES_SS = "pref_camera_ss_picturesize_key";
+    public static final String KEY_PICTURE_SIZES_TB = "pref_camera_tb_picturesize_key";
+    public static final String KEY_SUPPORTED_PICTURE_TOPBOTTOM_SIZES = "supported-picture-topbottom-size-values";
+    public static final String KEY_SUPPORTED_PICTURE_SIDEBYSIDE_SIZES = "supported-picture-sidebyside-size-values";
+    public static final String KEY_SUPPORTED_PREVIEW_TOPBOTTOM_SIZES = "supported-preview-topbottom-size-values";
+    public static final String KEY_SUPPORTED_PREVIEW_SIDEBYSIDE_SIZES = "supported-preview-sidebyside-size-values";
+    public static final String KEY_SUPPORTED_PICTURE_SUBSAMPLED_SIZES = "supported-picture-subsampled-size-values";
+    public static final String KEY_SUPPORTED_PREVIEW_SUBSAMPLED_SIZES = "supported-preview-subsampled-size-values";
+
+    public static final String TB_FULL_S3D_LAYOUT = "tb-full";
+    public static final String SS_FULL_S3D_LAYOUT = "ss-full";
+    public static final String TB_SUB_S3D_LAYOUT = "tb-subsampled";
+    public static final String SS_SUB_S3D_LAYOUT = "ss-subsampled";
+
+    public static final String KEY_S3D_CAP_FRAME_LAYOUT = "s3d-cap-frame-layout";
+    public static final String KEY_S3D_PRV_FRAME_LAYOUT = "s3d-prv-frame-layout";
+
 
     public static final String KEY_TEMPORAL_BRACKETING = "temporal-bracketing";
     public static final String KEY_CAMERA_FIRST_USE_HINT_SHOWN = "pref_camera_first_use_hint_shown_key";
@@ -168,7 +195,44 @@ public class CameraSettings {
         // When launching the camera app first time, we will set the picture
         // size to the first one in the list defined in "arrays.xml" and is also
         // supported by the driver.
-        List<Size> supported = parameters.getSupportedPictureSizes();
+        List<String> supported = new ArrayList<String>();
+        String supp = null;
+        String captureLayout = parameters.get(KEY_CAPTURE_LAYOUT_VALUES);
+        if (captureLayout !=null && !captureLayout.equals("")) {
+            if (captureLayout.equals(TB_FULL_S3D_LAYOUT)) {
+                supp = parameters.get(KEY_SUPPORTED_PICTURE_TOPBOTTOM_SIZES);
+                if (supp !=null && !supp.equals("")) {
+                    for (String item : supp.split(",")) {
+                        supported.add(item);
+                    }
+                }
+            } else if (captureLayout.equals(SS_FULL_S3D_LAYOUT)) {
+                supp = parameters.get(KEY_SUPPORTED_PICTURE_SIDEBYSIDE_SIZES);
+                if (supp !=null && !supp.equals("")) {
+                    for (String item : supp.split(",")) {
+                        supported.add(item);
+                    }
+                }
+            } else if(captureLayout.equals(SS_SUB_S3D_LAYOUT)|| captureLayout.equals(TB_SUB_S3D_LAYOUT)) {
+                supp = parameters.get(KEY_SUPPORTED_PICTURE_SUBSAMPLED_SIZES);
+                if (supp !=null && !supp.equals("")) {
+                    for (String item : supp.split(",")) {
+                        supported.add(item);
+                    }
+                }
+            } else {
+                List<Size> suppSizes = parameters.getSupportedPictureSizes();
+                if (suppSizes != null) {
+                    supported = sizeListToStringList(suppSizes);
+                }
+            }
+        }else{
+            List<Size> suppSizes = parameters.getSupportedPictureSizes();
+            if (suppSizes != null) {
+                supported = sizeListToStringList(suppSizes);
+            }
+        }
+
         if (supported == null) return;
         for (String candidate : context.getResources().getStringArray(
                 R.array.pref_camera_picturesize_entryvalues)) {
@@ -189,13 +253,15 @@ public class CameraSettings {
     }
 
     public static boolean setCameraPictureSize(
-            String candidate, List<Size> supported, Parameters parameters) {
+            String candidate, List<String> supported, Parameters parameters) {
         int index = candidate.indexOf('x');
         if (index == NOT_FOUND) return false;
         int width = Integer.parseInt(candidate.substring(0, index));
         int height = Integer.parseInt(candidate.substring(index + 1));
-        for (Size size : supported) {
-            if (size.width == width && size.height == height) {
+        for (String item : supported) {
+            int w = Integer.parseInt(item.substring(0, item.indexOf("x")));
+            int h = Integer.parseInt(item.substring(item.indexOf("x") + 1));
+            if (w == width && h == height) {
                 parameters.setPictureSize(width, height);
                 return true;
             }
@@ -203,15 +269,17 @@ public class CameraSettings {
         return false;
     }
 
-public static boolean setCameraPreviewSize(
-          String candidate, List<Size> supported, Parameters parameters) {
+    public static boolean setCameraPreviewSize(
+          String candidate, List<String> supported, Parameters parameters) {
        int index = candidate.indexOf('x');
        if (index == NOT_FOUND) return false;
        int width = Integer.parseInt(candidate.substring(0, index));
        int height = Integer.parseInt(candidate.substring(index + 1));
-       for (Size size: supported) {
-           if (size.width == width && size.height == height) {
-               parameters.setPreviewSize(width, height);
+       for (String item: supported) {
+           int w = Integer.parseInt(item.substring(0, item.indexOf("x")));
+           int h = Integer.parseInt(item.substring(item.indexOf("x") + 1));
+           if (w == width && h == height) {
+               parameters.setPreviewSize(w, h);
                return true;
            }
        }
@@ -221,7 +289,6 @@ public static boolean setCameraPreviewSize(
     private void initPreference(PreferenceGroup group) {
         ListPreference videoQuality = group.findPreference(KEY_VIDEO_QUALITY);
         ListPreference timeLapseInterval = group.findPreference(KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL);
-        ListPreference pictureSize = group.findPreference(KEY_PICTURE_SIZE);
         ListPreference whiteBalance =  group.findPreference(KEY_WHITE_BALANCE);
         ListPreference sceneMode = group.findPreference(KEY_SCENE_MODE);
         ListPreference flashMode = group.findPreference(KEY_FLASH_MODE);
@@ -230,12 +297,13 @@ public static boolean setCameraPreviewSize(
         ListPreference colorEffect = group.findPreference(KEY_COLOR_EFFECT);
         ListPreference autoConvergence = group.findPreference(KEY_AUTO_CONVERGENCE);
         ListPreference iso = group.findPreference(KEY_ISO);
+        ListPreference captureLayout = group.findPreference(KEY_CAPTURE_LAYOUT);
+        ListPreference previewLayout = group.findPreference(KEY_PREVIEW_LAYOUT);
         IconListPreference cameraIdPref =
                 (IconListPreference) group.findPreference(KEY_CAMERA_ID);
         ListPreference videoFlashMode =
                 group.findPreference(KEY_VIDEOCAMERA_FLASH_MODE);
         ListPreference videoEffect = group.findPreference(KEY_VIDEO_EFFECT);
-        ListPreference previewSize = group.findPreference(KEY_PREVIEW_SIZE);
         ListPreference antibanding = group.findPreference(KEY_ANTIBANDING);
         ListPreference vstab = group.findPreference(KEY_VSTAB);
         ListPreference vnf = group.findPreference(KEY_VNF);
@@ -243,7 +311,114 @@ public static boolean setCameraPreviewSize(
         ListPreference previewFramerate = group.findPreference(KEY_PREVIEW_FRAMERATE);
         ListPreference mechanicalMisalignmentCorrection = group.findPreference(KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU);
         ListPreference mode = group.findPreference(KEY_MODE_MENU);
+        ListPreference videoPreviewLayout = group.findPreference(KEY_VIDEO_PREVIEW_LAYOUT);
+        ListPreference videoCaptureLayout = group.findPreference(KEY_VIDEO_CAPTURE_LAYOUT);
+        ListPreference pictureSize = group.findPreference(KEY_PICTURE_SIZE);
+        ListPreference pictureSize2d = group.findPreference(KEY_PICTURE_SIZE_2D);
+        ListPreference previewSize = group.findPreference(KEY_PREVIEW_SIZE);
+        ListPreference previewSize2d = group.findPreference(KEY_PREVIEW_SIZE_2D);
+        ListPreference pictureSizeTB = group.findPreference(KEY_PICTURE_SIZES_TB);
+        ListPreference pictureSizeSS = group.findPreference(KEY_PICTURE_SIZES_SS);
+        ListPreference previewSizeTB = group.findPreference(KEY_PREVIEW_SIZES_TB);
+        ListPreference previewSizeSS = group.findPreference(KEY_PREVIEW_SIZES_SS);
 
+        if (previewSize2d != null) {
+            List<String> supp = new ArrayList<String>();
+            String suppSizes  = mParameters.get(KEY_SUPPORTED_PREVIEW_SUBSAMPLED_SIZES);
+            if (suppSizes !=null && !suppSizes.equals("")) {
+                for (String item : suppSizes.split(",")) {
+                    supp.add(item);
+                }
+            } else {
+                supp = sizeListToStringList(mParameters.getSupportedPreviewSizes());
+            }
+            filterUnsupportedOptions(group, previewSize2d, supp);
+        }
+
+        if (pictureSize2d != null) {
+            List<String> supp = new ArrayList<String>();
+            String suppSizes  = mParameters.get(KEY_SUPPORTED_PICTURE_SUBSAMPLED_SIZES);
+            if (suppSizes !=null && !suppSizes.equals("")) {
+                for (String item : suppSizes.split(",")) {
+                    supp.add(item);
+                }
+            } else {
+                supp = sizeListToStringList(mParameters.getSupportedPictureSizes());
+            }
+            filterUnsupportedOptions(group, pictureSize2d, supp);
+        }
+
+        if (pictureSizeTB !=null) {
+            List<String> supp = new ArrayList<String>();
+            String suppSizes = mParameters.get(KEY_SUPPORTED_PICTURE_TOPBOTTOM_SIZES);
+            if (suppSizes !=null && !suppSizes.equals("")) {
+                for (String item : suppSizes.split(",")) {
+                    supp.add(item);
+                }
+            }
+            filterUnsupportedOptions(group, pictureSizeTB, supp);
+        }
+
+        if (pictureSizeSS !=null) {
+            List<String> supp = new ArrayList<String>();
+            String suppSizes = mParameters.get(KEY_SUPPORTED_PICTURE_SIDEBYSIDE_SIZES);
+            if (suppSizes !=null && !suppSizes.equals("")) {
+                for (String item : suppSizes.split(",")) {
+                    supp.add(item);
+                }
+            }
+            filterUnsupportedOptions(group, pictureSizeSS, supp);
+        }
+
+        if (previewSizeSS !=null) {
+            List<String> supp = new ArrayList<String>();
+            String suppSizes = mParameters.get(KEY_SUPPORTED_PREVIEW_SIDEBYSIDE_SIZES);
+            if (suppSizes !=null && !suppSizes.equals("")) {
+                for (String item : suppSizes.split(",")) {
+                    supp.add(item);
+                }
+            }
+            filterUnsupportedOptions(group, previewSizeSS, supp);
+        }
+
+        if(previewSizeTB !=null){
+            List<String> supp = new ArrayList<String>();
+            String suppSizes = mParameters.get(KEY_SUPPORTED_PREVIEW_TOPBOTTOM_SIZES);
+            if (suppSizes !=null && !suppSizes.equals("")) {
+                for (String item : suppSizes.split(",")) {
+                    supp.add(item);
+                }
+            }
+            filterUnsupportedOptions(group, previewSizeTB, supp);
+        }
+
+        String key_picture_sizes = null;
+        String selectedPictureLayout = mParameters.get(KEY_S3D_CAP_FRAME_LAYOUT);
+        if (selectedPictureLayout !=null && !selectedPictureLayout.equals("")) {
+            if (selectedPictureLayout.equals(TB_FULL_S3D_LAYOUT)) {
+                key_picture_sizes = KEY_PICTURE_SIZES_TB;
+            } else if (selectedPictureLayout.equals(SS_FULL_S3D_LAYOUT)) {
+                key_picture_sizes = KEY_PICTURE_SIZES_SS;
+            } else {
+                key_picture_sizes = KEY_PICTURE_SIZE_2D;
+            }
+        } else {
+            key_picture_sizes = KEY_PICTURE_SIZE_2D;
+        }
+
+        String key_preview_sizes = null;
+        String selectedPreviewLayout = mParameters.get(KEY_S3D_PRV_FRAME_LAYOUT);
+        if (selectedPreviewLayout !=null && !selectedPreviewLayout.equals("")) {
+            if (selectedPreviewLayout.equals(TB_FULL_S3D_LAYOUT)) {
+                key_preview_sizes = KEY_PREVIEW_SIZES_TB;
+            } else if (selectedPreviewLayout.equals(SS_FULL_S3D_LAYOUT)) {
+                key_preview_sizes = KEY_PREVIEW_SIZES_SS;
+            } else {
+                key_preview_sizes = KEY_PREVIEW_SIZE_2D;
+            }
+        } else {
+            key_preview_sizes = KEY_PREVIEW_SIZE_2D;
+        }
         // Since the screen could be loaded from different resources, we need
         // to check if the preference is available here
         if ( vstab != null ) {
@@ -255,13 +430,83 @@ public static boolean setCameraPreviewSize(
         if (videoQuality != null) {
             filterUnsupportedOptions(group, videoQuality, getSupportedVideoQuality());
         }
-        if (pictureSize != null) {
-            filterUnsupportedOptions(group, pictureSize, sizeListToStringList(
-                    mParameters.getSupportedPictureSizes()));
+        if (videoPreviewLayout != null) {
+            ArrayList<String> suppLayout = new ArrayList<String>();
+            String videoLayouts = mParameters.get(KEY_PREVIEW_LAYOUT_VALUES);
+            if (videoLayouts != null && !videoLayouts.equals("") && !videoLayouts.equals("none")) {
+                for (String item : videoLayouts.split(",")) {
+                    suppLayout.add(item);
+                }
+            }
+            filterUnsupportedOptions(group,videoPreviewLayout,suppLayout);
         }
-        if (previewSize != null) {
-            filterUnsupportedOptions(group, previewSize, sizeListToStringList(
-                    mParameters.getSupportedPreviewSizes()));
+
+        if (videoCaptureLayout != null) {
+            ArrayList<String> suppLayout = new ArrayList<String>();
+            String videoLayouts = mParameters.get(KEY_CAPTURE_LAYOUT_VALUES);
+            if (videoLayouts != null && !videoLayouts.equals("")) {
+                for (String item : videoLayouts.split(",")) {
+                    suppLayout.add(item);
+                }
+            }
+            filterUnsupportedOptions(group,videoCaptureLayout,suppLayout);
+        }
+
+        if (captureLayout != null) {
+            ArrayList<String> suppLayout = new ArrayList<String>();
+            String captureLayouts = mParameters.get(KEY_CAPTURE_LAYOUT_VALUES);
+            if (captureLayouts !=null && !captureLayouts.equals("")) {
+                for (String item : captureLayouts.split(",")) {
+                    suppLayout.add(item);
+                }
+                filterUnsupportedOptions(group,captureLayout,suppLayout);
+            }
+        }
+
+        if (previewLayout != null) {
+            ArrayList<String> suppLayout = new ArrayList<String>();
+            String previewLayouts = mParameters.get(KEY_PREVIEW_LAYOUT_VALUES);
+            if (previewLayouts !=null && !previewLayouts.equals("")) {
+                for (String item : previewLayouts.split(",")) {
+                    suppLayout.add(item);
+                }
+                filterUnsupportedOptions(group,previewLayout,suppLayout);
+            }
+        }
+
+        ArrayList<CharSequence[]> allPreviewEntries = new ArrayList<CharSequence[]>();
+        ArrayList<CharSequence[]> allPreviewEntryValues = new ArrayList<CharSequence[]>();
+        allPreviewEntries.add(previewSize2d.getEntries());
+        allPreviewEntries.add(previewSizeTB.getEntries());
+        allPreviewEntries.add(previewSizeSS.getEntries());
+        allPreviewEntryValues.add(previewSize2d.getEntryValues());
+        allPreviewEntryValues.add(previewSizeTB.getEntryValues());
+        allPreviewEntryValues.add(previewSizeSS.getEntryValues());
+
+        ArrayList<CharSequence[]> allPictureEntries = new ArrayList<CharSequence[]>();
+        ArrayList<CharSequence[]> allPictureEntryValues = new ArrayList<CharSequence[]>();
+        allPictureEntries.add(previewSize2d.getEntries());
+        allPictureEntries.add(previewSizeTB.getEntries());
+        allPictureEntries.add(previewSizeSS.getEntries());
+        allPictureEntryValues.add(previewSize2d.getEntryValues());
+        allPictureEntryValues.add(previewSizeTB.getEntryValues());
+        allPictureEntryValues.add(previewSizeSS.getEntryValues());
+
+        ListPreference filteredSizes = group.findPreference(key_picture_sizes);
+        if (filteredSizes != null) {
+            ListPreference pictureSizes = group.findPreference(KEY_PICTURE_SIZE);
+            if (pictureSizes !=null) {
+                pictureSizes.clearAndSetEntries(allPictureEntries, allPictureEntryValues,
+                        filteredSizes.getEntries(), filteredSizes.getEntryValues());
+            }
+        }
+        filteredSizes = group.findPreference(key_preview_sizes);
+        if (filteredSizes != null) {
+            ListPreference previewSizes = group.findPreference(KEY_PREVIEW_SIZE);
+            if (previewSizes !=null) {
+                previewSizes.clearAndSetEntries(allPreviewEntries, allPreviewEntryValues,
+                        filteredSizes.getEntries(), filteredSizes.getEntryValues());
+            }
         }
         if (whiteBalance != null) {
             filterUnsupportedOptions(group,
@@ -432,7 +677,7 @@ public static boolean setCameraPreviewSize(
         filterUnsupportedOptions(group, pref, supported);
     }
 
-    private void filterUnsupportedOptions(PreferenceGroup group,
+    public static void filterUnsupportedOptions(PreferenceGroup group,
             ListPreference pref, List<String> supported) {
 
         // Remove the preference if the parameter is not supported or there is
@@ -469,7 +714,7 @@ public static boolean setCameraPreviewSize(
         }
     }
 
-    private void resetIfInvalid(ListPreference pref) {
+    private static void resetIfInvalid(ListPreference pref) {
         // Set the value to the first entry if it is invalid.
         String value = pref.getValue();
         if (pref.findIndexOfValue(value) == NOT_FOUND) {
@@ -477,11 +722,15 @@ public static boolean setCameraPreviewSize(
         }
     }
 
-    private static List<String> sizeListToStringList(List<Size> sizes) {
+    public static List<String> sizeListToStringList(List<Size> sizes) {
         ArrayList<String> list = new ArrayList<String>();
-        for (Size size : sizes) {
-            list.add(String.format("%dx%d", size.width, size.height));
+
+        if (sizes != null) {
+            for (Size size : sizes) {
+                list.add(String.format("%dx%d", size.width, size.height));
+            }
         }
+
         return list;
     }
 

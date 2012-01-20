@@ -255,8 +255,11 @@
     <string name="pref_camera_picturesize_entry_4032x3024">12M pixels</string>
     <string name="pref_camera_picturesize_entry_3648x2736">10M pixels</string>
     <string name="pref_camera_picturesize_entry_3280x2464">8M pixels</string>
+    <string name="pref_camera_picturesize_entry_3264x2448">8M pixels</string>
     <string name="pref_camera_picturesize_entry_2592x1936">5M pixels</string>
+    <string name="pref_camera_picturesize_entry_2592x1944">5M pixels</string>
     <string name="pref_camera_picturesize_entry_2016x1512">3M pixels</string>
+    <string name="pref_camera_picturesize_entry_2048x1536">3M pixels</string>
     <string name="pref_camera_picturesize_entry_1600x1200">2M pixels</string>
     <string name="pref_camera_picturesize_entry_1280x960">1.3M pixels</string>
     <string name="pref_camera_picturesize_entry_1024x768">1M pixels</string>
@@ -264,7 +267,9 @@
     <string name="pref_camera_picturesize_entry_320x240">QVGA</string>
 
     <string name="pref_camera_previewsize_title">Preview size</string>
-    <string name="pref_camera_previewsize_default">640x480</string>
+    <string name="pref_camera_2d_previewsize_default">640x480</string>
+    <string name ="pref_camera_ss_previewsize_default" translatable="false">1280x480</string>
+    <string name ="pref_camera_tb_previewsize_default" translatable="false">640x960</string>
     <string name="pref_camera_previewsize_entry_sqcif">SQCIF</string>
     <string name="pref_camera_previewsize_entry_qcif">QCIF</string>
     <string name="pref_camera_previewsize_entry_cif">CIF</string>
@@ -274,6 +279,7 @@
     <string name="pref_camera_previewsize_entry_ntsc">NTSC</string>
     <string name="pref_camera_previewsize_entry_wvga">WVGA</string>
     <string name="pref_camera_previewsize_entry_hd">720p</string>
+    <string name="pref_camera_previewsize_entry_fullhd">Full HD</string>
 
     <string name="pref_camera_previewframerate_title">Select FPS</string>
     <string name="pref_camera_previewframerate_default">30</string>
@@ -689,4 +695,24 @@
 
     <!-- TODO: remove the string as it is a work-around solution to bypass the default speak of the element type. -->
     <string name="empty" translatable="false">" "</string>
+
+    <!--  Preview Layouts -->
+    <string name="pref_camera_preview_layout_default" translatable="false">tb-full</string>
+    <string name="pref_camera_preview_layout_title">Preview Layouts</string>
+
+    <string name="pref_video_preview_layout_default" translatable="false">tb-subsampled</string>
+    <string name="pref_video_preview_layout_title">Preview Layouts</string>
+
+    <!--  Capture Layouts -->
+    <string name="pref_camera_capture_layout_default" translatable="false">tb-full</string>
+    <string name="pref_camera_capture_layout_title">Capture Layouts</string>
+
+    <string name="pref_video_capture_layout_default" translatable="false">tb-full</string>
+    <string name="pref_video_capture_layout_title">Capture Layouts</string>
+
+    <!-- Layouts entries -->
+    <string name="pref_camera_layout_entry_tb_full">TB Full</string>
+    <string name="pref_camera_layout_entry_tb_subsampled">TB Subsampled</string>
+    <string name="pref_camera_layout_entry_ss_full">SS Full</string>
+    <string name="pref_camera_layout_entry_ss_subsampled">SS Subsampled</string>
 </resources>

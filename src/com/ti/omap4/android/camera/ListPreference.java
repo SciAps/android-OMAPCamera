@@ -36,7 +36,8 @@ public class ListPreference extends CameraPreference {
     private final String TAG = "ListPreference";
     private final String mKey;
     private String mValue;
-    private final CharSequence[] mDefaultValues;
+    private String mDefaultValue;
+    private CharSequence[] mDefaultValues;
 
     private CharSequence[] mEntries;
     private CharSequence[] mEntryValues;
@@ -86,7 +87,43 @@ public class ListPreference extends CameraPreference {
     public boolean isItemEnabled(int key) {
         return mEntryEnabledFlags[key];
     }
+    private void clearAllEntries(){
+        mEntries = null;
+        mEntryValues = null;
+    }
 
+    private String findEntryByValue(String value,ArrayList<CharSequence[]> allEntries, ArrayList<CharSequence[]> allEntryValues){
+        for (int i=0; i<allEntryValues.size();i++) {
+            for (int j=0;j<allEntryValues.get(i).length;j++) {
+                if (allEntryValues.get(i)[j].equals(value)) {
+                    return allEntries.get(i)[j].toString();
+                }
+            }
+        }
+        return null;
+    }
+
+    public void clearAndSetEntries(ArrayList<CharSequence[]> allEntries, ArrayList<CharSequence[]> allEntryValues,
+                                    CharSequence[] entries, CharSequence[] entryValues ){
+        if (entries.length != entryValues.length) return;
+        if (!mLoaded) {
+            mValue = getSharedPreferences().getString(mKey, findSupportedDefaultValue());
+            mLoaded = true;
+        }
+        String entry = findEntryByValue(mValue, allEntries, allEntryValues);
+        clearAllEntries();
+        mEntries = entries;
+        mEntryValues = entryValues;
+        if (entry != null) {
+            for (int i=0;i<mEntries.length;i++) {
+                if (entry.equals(mEntries[i].toString())) {
+                    mValue = mEntryValues[i].toString();
+                    break;
+                }
+            }
+        }
+        persistStringValue(mValue);
+    }
     public String getKey() {
         return mKey;
     }
@@ -115,6 +152,17 @@ public class ListPreference extends CameraPreference {
                     findSupportedDefaultValue());
             mLoaded = true;
         }
+        if (findIndexOfValue(mValue)<0) {
+            mValue = mEntryValues[0].toString();
+        }
+
+        // These two keys haven't default value in xml
+        if (mKey.equals(CameraSettings.KEY_PICTURE_SIZE)) {
+            if (findIndexOfValue(mDefaultValue)<0) {
+                mDefaultValue = mEntryValues[0].toString();
+            }
+        }
+        if (mDefaultValue == null) mDefaultValue = mValue;
         return mValue;
     }
 
@@ -140,6 +188,19 @@ public class ListPreference extends CameraPreference {
 
     public void setValueIndex(int index) {
         setValue(mEntryValues[index].toString());
+    }
+
+    public void setDefaultValue(String value) {
+        if (findIndexOfValue(value) < 0) {
+            Log.v(TAG, "Unsupported default value: " + value);
+            mDefaultValue = getValue();
+        } else {
+            mDefaultValue = value;
+        }
+    }
+
+    public String getDefaultValue(){
+        return mDefaultValue;
     }
 
     public int findIndexOfValue(String value) {

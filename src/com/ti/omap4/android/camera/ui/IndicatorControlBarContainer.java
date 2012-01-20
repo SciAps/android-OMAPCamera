@@ -16,7 +16,10 @@
 
 package com.ti.omap4.android.camera.ui;
 
+import java.util.ArrayList;
+
 import com.ti.omap4.android.camera.CameraPreference.OnPreferenceChangedListener;
+import com.ti.omap4.android.camera.ListPreference;
 import com.ti.omap4.android.camera.PreferenceGroup;
 import com.ti.omap4.android.camera.R;
 
@@ -176,5 +179,11 @@ public class IndicatorControlBarContainer extends IndicatorControlContainer {
         if (mSecondLevelIndicatorControlBar.getVisibility() == View.VISIBLE) {
             leaveSecondLevelIndicator();
         }
+    }
+
+    @Override
+    public void replace(String key, ListPreference pref,ArrayList<CharSequence[]> allEntries,
+            ArrayList<CharSequence[]> allEntryValues) {
+        mSecondLevelIndicatorControlBar.replace(key, pref, allEntries, allEntryValues);
     }
 }

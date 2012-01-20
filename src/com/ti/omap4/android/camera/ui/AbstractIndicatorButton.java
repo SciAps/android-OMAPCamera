@@ -16,6 +16,9 @@
 
 package com.ti.omap4.android.camera.ui;
 
+import java.util.ArrayList;
+
+import com.ti.omap4.android.camera.ListPreference;
 import com.ti.omap4.android.camera.R;
 
 import android.content.Context;
@@ -169,6 +172,19 @@ public abstract class AbstractIndicatorButton extends RotateImageView implements
                     dismissPopup();
                     break;
             }
+        }
+    }
+
+    public boolean findPref(String key){
+        if (mPopup != null) {
+            return mPopup.findPref(key);
+        }
+        return false;
+    }
+
+    public void replace(String key, ListPreference pref, ArrayList<CharSequence[]> allEntries, ArrayList<CharSequence[]> allEntryValues){
+        if (mPopup != null) {
+            mPopup.replace(key, pref, allEntries, allEntryValues);
         }
     }
 }

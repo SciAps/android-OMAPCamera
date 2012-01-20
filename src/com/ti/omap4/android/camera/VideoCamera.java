@@ -77,6 +77,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -207,6 +208,7 @@ public class VideoCamera extends ActivityBase
     private boolean mResetEffect = true;
     public static final String RESET_EFFECT_EXTRA = "reset_effect";
     public static final String BACKGROUND_URI_GALLERY_EXTRA = "background_uri_gallery";
+    private boolean mIsSnapSupported = false;
 
     private boolean mMediaRecorderRecording = false;
     private long mRecordingStartTime;
@@ -281,6 +283,7 @@ public class VideoCamera extends ActivityBase
     private int mTargetZoomValue;
     private ZoomControl mZoomControl;
     private final ZoomListener mZoomListener = new ZoomListener();
+    private String mPreviewLayout;
 
     private boolean mMeteringAreaSupported;
     private String mTouchConvergence;
@@ -565,6 +568,7 @@ public class VideoCamera extends ActivityBase
                     CameraSettings.KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL};
                     //CameraSettings.KEY_VIDEO_QUALITY}; //Disabling redundant Video Qualily Menu
         final String[] OTHER_SETTING_KEYS = {
+                    CameraSettings.KEY_VIDEO_PREVIEW_LAYOUT,
                     CameraSettings.KEY_VIDEO_FORMAT,
                     CameraSettings.KEY_VIDEO_TIMER,
                     CameraSettings.KEY_AUTO_CONVERGENCE,
@@ -905,8 +909,10 @@ public class VideoCamera extends ActivityBase
     }
 
     private void resizeForPreviewAspectRatio() {
-        mPreviewFrameLayout.setAspectRatio(
-                (double) mProfile.videoFrameWidth / mProfile.videoFrameHeight);
+        if(mPreviewFrameLayout != null){
+            mPreviewFrameLayout.setAspectRatio(
+                    (double) mProfile.videoFrameWidth / mProfile.videoFrameHeight);
+        }
     }
 
     private void resizeForPreviewAspectRatioForPotrait() {
@@ -2095,6 +2101,20 @@ public class VideoCamera extends ActivityBase
         }
         Log.v(TAG," Setting Orientation = "+ mLastOrientation);
 
+        //Layouts
+        String previewLayout = null;
+        if (is2DMode()) {
+            previewLayout = "none";
+        } else {
+            previewLayout = mPreferences.getString(
+                    CameraSettings.KEY_VIDEO_PREVIEW_LAYOUT,
+                    getString(R.string.pref_video_preview_layout_default));
+        }
+        if (previewLayout != null  && !previewLayout.equals(mPreviewLayout)) {
+            mParameters.set(CameraSettings.KEY_S3D_PRV_FRAME_LAYOUT ,previewLayout);
+            mPreviewLayout = previewLayout;
+        }
+
         //Set Video Resolution
 
         String vidFormat = mPreferences.getString(CameraSettings.KEY_VIDEO_FORMAT, (getString(R.string.pref_camera_video_format_default)));
@@ -2176,11 +2196,13 @@ public class VideoCamera extends ActivityBase
         Size optimalSize = Util.getOptimalVideoSnapshotPictureSize(supported,
                 (double) mDesiredPreviewWidth / mDesiredPreviewHeight);
         Size original = mParameters.getPictureSize();
-        if (!original.equals(optimalSize)) {
+        mIsSnapSupported = false;
+        if (optimalSize !=null && !original.equals(optimalSize)) {
+            mIsSnapSupported = true;
             mParameters.setPictureSize(optimalSize.width, optimalSize.height);
+            Log.v(TAG, "Video snapshot size is " + optimalSize.width + "x" +
+                    optimalSize.height);
         }
-        Log.v(TAG, "Video snapshot size is " + optimalSize.width + "x" +
-                optimalSize.height);
 
         // Set JPEG quality.
         int jpegQuality = CameraProfile.getJpegEncodingQualityParameter(mCameraId,
@@ -2188,7 +2210,7 @@ public class VideoCamera extends ActivityBase
         mParameters.setJpegQuality(jpegQuality);
 
         //Set FrameRate
-	String framerate = mPreferences.getString(CameraSettings.KEY_VIDEO_FRAMERATE, (getString(R.string.pref_camera_videoframerate_default)));
+       String framerate = mPreferences.getString(CameraSettings.KEY_VIDEO_FRAMERATE, (getString(R.string.pref_camera_videoframerate_default)));
         int maxFrameRate = Integer.parseInt(framerate);
         Log.i(TAG,"Framerate is set to "+ mProfile.videoFrameRate);
 
@@ -2477,6 +2499,19 @@ public class VideoCamera extends ActivityBase
         }
     }
 
+    private boolean is2DMode(){
+        if (mParameters == null) mParameters = mCameraDevice.getParameters();
+        String currentPreviewLayout = mParameters.get(CameraSettings.KEY_S3D_PRV_FRAME_LAYOUT);
+        // if there isn't selected layout  -> 2d mode
+        if (currentPreviewLayout == null ||
+                currentPreviewLayout.equals("") ||
+                currentPreviewLayout.equals("none")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     private boolean videoPreferencesChanged() {
         Log.v(TAG, "videoPreferencesChanged +");
 
@@ -2493,11 +2528,20 @@ public class VideoCamera extends ActivityBase
                                             (getString(R.string.pref_camera_vnf_default)));
         boolean enableVnf = vnf.equals(mVNFEnable);
 
+
+        boolean layoutChanged = false;
+        if (!is2DMode()) {
+            String previewLayout = mPreferences.getString(
+                    CameraSettings.KEY_VIDEO_PREVIEW_LAYOUT,
+                    getString(R.string.pref_camera_preview_layout_default));
+            layoutChanged = !mPreviewLayout.equals(previewLayout) ? true : false;
+        }
+
         boolean isVstabEnabled = mParameters.getVideoStabilization();
         boolean isVnfEnabled = mVNFEnable.equals(mParameters.get(PARM_VNF));
         boolean isPreviewRestartRequired = false;
 
-        if((isVstabEnabled != enableVstab)||(isVnfEnabled != enableVnf))
+        if((isVstabEnabled != enableVstab)||(isVnfEnabled != enableVnf) || (layoutChanged))
         {
             isPreviewRestartRequired = true;
             Log.v(TAG, "videoPreferencesChanged : isPreviewRestartRequired="+isPreviewRestartRequired);
@@ -2739,28 +2783,30 @@ public class VideoCamera extends ActivityBase
             return mTouchManager.onTouch(e);
         }
 
-        if (mPausing || mSnapshotInProgress
-                || !mMediaRecorderRecording || effectsActive()) {
-            return false;
+        if(mIsSnapSupported){
+            if (mPausing || mSnapshotInProgress
+                    || !mMediaRecorderRecording || effectsActive()) {
+                return false;
+            }
+
+            // Set rotation and gps data.
+            Util.setRotationParameter(mParameters, mCameraId, mOrientation);
+            Location loc = mLocationManager.getCurrentLocation();
+            Util.setGpsParameters(mParameters, loc);
+
+            Size snapshotSize = Util.getOptimalSnapshotSize(mParameters.getSupportedPictureSizes(),
+                                                            mParameters.getPreviewSize());
+            if ( null != snapshotSize ) {
+                mParameters.setPictureSize(snapshotSize.width, snapshotSize.height);
+            }
+
+            mCameraDevice.setParameters(mParameters);
+
+            Log.v(TAG, "Video snapshot start");
+            mCameraDevice.takePicture(null, null, null, new JpegPictureCallback(loc));
+            showVideoSnapshotUI(true);
+            mSnapshotInProgress = true;
         }
-
-        // Set rotation and gps data.
-        Util.setRotationParameter(mParameters, mCameraId, mOrientation);
-        Location loc = mLocationManager.getCurrentLocation();
-        Util.setGpsParameters(mParameters, loc);
-
-        Size snapshotSize = Util.getOptimalSnapshotSize(mParameters.getSupportedPictureSizes(),
-                                                        mParameters.getPreviewSize());
-        if ( null != snapshotSize ) {
-            mParameters.setPictureSize(snapshotSize.width, snapshotSize.height);
-        }
-
-        mCameraDevice.setParameters(mParameters);
-
-        Log.v(TAG, "Video snapshot start");
-        mCameraDevice.takePicture(null, null, null, new JpegPictureCallback(loc));
-        showVideoSnapshotUI(true);
-        mSnapshotInProgress = true;
         return true;
     }
 
@@ -2889,6 +2935,19 @@ public class VideoCamera extends ActivityBase
                 mProfile.videoFrameWidth = 1088;
             }
         }
+
+        if(mParameters != null){
+            String previewLayout = mParameters.get(CameraSettings.KEY_S3D_PRV_FRAME_LAYOUT);
+            if(previewLayout != null && !previewLayout.equals("") && !previewLayout.equals("none")){
+                // 3d mode
+                if(mPreviewLayout.equals(CameraSettings.TB_FULL_S3D_LAYOUT)){
+                    mProfile.videoFrameHeight *= 2;
+                }else if(mPreviewLayout.equals(CameraSettings.SS_FULL_S3D_LAYOUT)){
+                    mProfile.videoFrameWidth *= 2;
+                }
+            }
+        }
+        resizeForPreviewAspectRatio();
     }
 
     private int getIntPreference(String key, int defaultValue) {

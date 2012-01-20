@@ -16,6 +16,9 @@
 
 package com.ti.omap4.android.camera.ui;
 
+import java.util.ArrayList;
+
+import com.ti.omap4.android.camera.ListPreference;
 import com.ti.omap4.android.camera.PreferenceGroup;
 import com.ti.omap4.android.camera.R;
 import com.ti.omap4.android.camera.Util;
@@ -534,10 +537,13 @@ public class IndicatorControlWheel extends IndicatorControl implements
             invalidate();
         }
     }
-
     public void dismissSecondLevelIndicator() {
         if (mCurrentLevel == 1) {
             changeIndicatorsLevel();
         }
+    }
+
+    public void replace(String key, ListPreference pref, ArrayList<CharSequence[]> entries, ArrayList<CharSequence[]> entryValues){
+        super.replace(key, pref, entries, entryValues);
     }
 }

@@ -16,7 +16,10 @@
 
 package com.ti.omap4.android.camera.ui;
 
+import java.util.ArrayList;
+
 import com.ti.omap4.android.camera.IconListPreference;
+import com.ti.omap4.android.camera.ListPreference;
 import com.ti.omap4.android.camera.PreferenceGroup;
 import com.ti.omap4.android.camera.R;
 import com.ti.omap4.android.camera.Util;
@@ -201,5 +204,11 @@ public class SecondLevelIndicatorControlBar extends IndicatorControl implements
         super.setEnabled(enabled);
         mCloseIcon.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
         mCloseIcon.setEnabled(enabled);
+    }
+
+    @Override
+    public void replace(String key, ListPreference pref,ArrayList<CharSequence[]> allEntries,
+            ArrayList<CharSequence[]> allEntryValues){
+        super.replace(key, pref, allEntries, allEntryValues);
     }
 }

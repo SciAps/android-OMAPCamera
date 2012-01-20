@@ -208,4 +208,14 @@ public abstract class IndicatorControl extends RelativeLayout implements
             mCameraPicker.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
         }
     }
+
+    public void replace(String key, ListPreference pref, ArrayList<CharSequence[]> allEntries,
+            ArrayList<CharSequence[]> allEntryValues){
+        for (AbstractIndicatorButton btn : mIndicators) {
+            if (btn.findPref(key)) {
+                btn.replace(key, pref, allEntries, allEntryValues);
+                return;
+            }
+        }
+    }
 }

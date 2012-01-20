@@ -126,6 +126,7 @@ public class OtherSettingsPopup extends AbstractSettingPopup
                     InLineSettingItem settingItem =
                             (InLineSettingItem) mSettingList.getChildAt(j);
                     settingItem.overrideSettings(value);
+                    break;
                 }
             }
         }
@@ -148,6 +149,26 @@ public class OtherSettingsPopup extends AbstractSettingPopup
                 InLineSettingItem settingItem =
                         (InLineSettingItem) mSettingList.getChildAt(i);
                 settingItem.reloadPreference();
+            }
+        }
+    }
+
+    @Override
+    public boolean findPref(String key){
+        for (ListPreference list : mListItem) {
+            if (list.getKey().equals(key)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void replace(String key, ListPreference pref,ArrayList<CharSequence[]> allEntries,ArrayList<CharSequence[]> allEntryValues){
+        for (int i = 0; i < mListItem.size(); i++) {
+            if (mListItem.get(i) != null && mListItem.get(i).getKey().equals(key)) {
+                mListItem.get(i).clearAndSetEntries(allEntries, allEntryValues, pref.getEntries(), pref.getEntryValues());
+                return;
             }
         }
     }

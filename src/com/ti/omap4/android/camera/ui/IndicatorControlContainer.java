@@ -16,7 +16,10 @@
 
 package com.ti.omap4.android.camera.ui;
 
+import java.util.ArrayList;
+
 import com.ti.omap4.android.camera.PreferenceGroup;
+import com.ti.omap4.android.camera.ListPreference;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -33,4 +36,6 @@ public abstract class IndicatorControlContainer extends IndicatorControl
     public abstract void enableZoom(boolean enabled);
 
     public abstract void dismissSecondLevelIndicator();
+
+    public void replace(String key, ListPreference pref, ArrayList<CharSequence[]> allEntries, ArrayList<CharSequence[]> allEntryValues){ }
 }
