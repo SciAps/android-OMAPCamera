@@ -289,20 +289,20 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mCaptureMode = "high-quality";
     private String mGBCE = "off";
     private String mBracketRange;
-    private String mISO;
-    private String mExposureMode;
-    private String mPreviewSize;
-    private String mColorEffect;
-    private String mAntibanding;
-    private String mContrast;
-    private String mBrightness;
+    private String mISO = null;
+    private String mExposureMode = null;
+    private String mPreviewSize = null;
+    private String mColorEffect = null;
+    private String mAntibanding = null;
+    private String mContrast = null;
+    private String mBrightness = null;
     public  static String mIMGscriptTitle;
     private String mLastPreviewFramerate;
-    private String mSaturation;
-    private String mSharpness;
+    private String mSaturation = null;
+    private String mSharpness = null;
     private int mJpegQuality = CameraProfile.QUALITY_HIGH;
-    private String mAutoConvergence;
-    private String mMechanicalMisalignmentCorrection;
+    private String mAutoConvergence = null;
+    private String mMechanicalMisalignmentCorrection = null;
     private long mFocusStartTime;
     private long mCaptureStartTime;
     private long mShutterCallbackTime;
@@ -1894,27 +1894,62 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mDidRegister = true;
     }
 
+    private void initDefaults() {
+        if ( null == mAutoConvergence ) {
+            mAutoConvergence = getString(R.string.pref_camera_autoconvergence_default);
+        }
+
+        if ( null == mMechanicalMisalignmentCorrection ) {
+            mMechanicalMisalignmentCorrection = getString(R.string.pref_camera_mechanical_misalignment_correction_default);
+        }
+
+        if ( null == mContrast ) {
+            mContrast = getString(R.string.pref_camera_contrast_default);
+        }
+
+        if ( null == mBrightness ) {
+            mBrightness = getString(R.string.pref_camera_brightness_default);
+        }
+
+        if ( null == mColorEffect ) {
+            mColorEffect = getString(R.string.pref_camera_coloreffect_default);
+        }
+
+        if ( null == mAntibanding ) {
+            mAntibanding = getString(R.string.pref_camera_antibanding_default);
+        }
+
+        if ( null == mISO ) {
+            mISO = getString(R.string.pref_camera_iso_default);
+        }
+
+        if ( null == mExposureMode ) {
+            mExposureMode = getString(R.string.pref_camera_exposuremode_default);
+        }
+
+        if ( null == mPreviewSize ) {
+            mPreviewSize = getString(R.string.pref_camera_previewsize_default);
+        }
+
+        if ( null == mSaturation ) {
+            mSaturation = getString(R.string.pref_camera_saturation_default);
+        }
+
+        if ( null == mSharpness ) {
+            mSharpness = getString(R.string.pref_camera_sharpness_default);
+        }
+    }
+
     @Override
     protected void doOnResume() {
         if (mOpenCameraFail || mCameraDisabled) return;
 
         mPausing = false;
 
-        mAutoConvergence = getString(R.string.pref_camera_autoconvergence_default);
-        mMechanicalMisalignmentCorrection = getString(R.string.pref_camera_mechanical_misalignment_correction_default);
-
         mJpegPictureCallbackTime = 0;
         mZoomValue = 0;
 
-        mContrast = getString(R.string.pref_camera_contrast_default);
-        mBrightness = getString(R.string.pref_camera_brightness_default);
-        mColorEffect = getString(R.string.pref_camera_coloreffect_default);
-        mAntibanding = getString(R.string.pref_camera_antibanding_default);
-        mISO = getString(R.string.pref_camera_iso_default);
-        mExposureMode = getString(R.string.pref_camera_exposuremode_default);
-        mPreviewSize = getString(R.string.pref_camera_previewsize_default);
-        mSaturation = getString(R.string.pref_camera_saturation_default);
-        mSharpness = getString(R.string.pref_camera_sharpness_default);
+        initDefaults();
 
         // Start the preview if it is not started.
         if (mCameraState == PREVIEW_STOPPED) {
