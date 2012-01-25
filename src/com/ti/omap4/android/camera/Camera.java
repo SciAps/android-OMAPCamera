@@ -265,7 +265,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final String PARM_BURST = "burst-capture";
     private static final String PARM_EXPOSURE_BRACKETING_RANGE = "exp-bracketing-range";
     private static final String EXPOSURE_BRACKETING_RANGE_VALUE = "-30,0,30";
+    private static final String PARM_ZOOM_BRACKETING_RANGE = "zoom-bracketing-range";
     private static final int EXPOSURE_BRACKETING_COUNT = 3;
+    private static final int ZOOM_BRACKETING_COUNT = 10;
     private static final String PARM_TEMPORAL_BRACKETING_RANGE_POS = "temporal-bracketing-range-positive";
     private static final String PARM_TEMPORAL_BRACKETING_RANGE_NEG = "temporal-bracketing-range-negative";
     public static final String PARM_SUPPORTED_ISO_MODES = "iso-mode-values";
@@ -286,6 +288,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mManualConvergence;
     private String mTemporalBracketing;
     private String mExposureBracketing;
+    private String mZoomBracketing;
     private String mHighPerformance;
     private String mHighQuality;
     private String mHighQualityZsl;
@@ -1054,6 +1057,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
                 if (( tempState != FocusManager.TempBracketingStates.RUNNING ) &&
                       !mCaptureMode.equals(mExposureBracketing) &&
+                      !mCaptureMode.equals(mZoomBracketing) &&
                       !mBurstRunning == true) {
                 // We want to show the taken picture for a while, so we wait
                 // for at least 0.5 second before restarting the preview.
@@ -1104,6 +1108,20 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
           //reset burst in case of exposure bracketing
             if (mCaptureMode.equals(mExposureBracketing) && mBurstImages == 0) {
                 mBurstImages = EXPOSURE_BRACKETING_COUNT;
+                mParameters.set(PARM_BURST, mBurstImages);
+                mCameraDevice.setParameters(mParameters);
+            }
+
+            if (mCaptureMode.equals(mZoomBracketing) ) {
+                mBurstImages --;
+                if (mBurstImages == 0 ) {
+                    mHandler.sendEmptyMessageDelayed(RESTART_PREVIEW, 0);
+                }
+            }
+
+          //reset burst in case of zoom bracketing
+            if (mCaptureMode.equals(mZoomBracketing) && mBurstImages == 0) {
+                mBurstImages = ZOOM_BRACKETING_COUNT;
                 mParameters.set(PARM_BURST, mBurstImages);
                 mCameraDevice.setParameters(mParameters);
             }
@@ -1528,6 +1546,11 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mExposureBracketing = temp.findEntryValueByEntry(getString(R.string.pref_camera_mode_entry_exp_bracketing));
             if (mExposureBracketing == null) {
                 mExposureBracketing = "";
+            }
+
+            mZoomBracketing = temp.findEntryValueByEntry(getString(R.string.pref_camera_mode_entry_zoom_bracketing));
+            if (mZoomBracketing == null) {
+                mZoomBracketing = "";
             }
 
             mHighPerformance = temp.findEntryValueByEntry(getString(R.string.pref_camera_mode_entry_hs));
@@ -3368,26 +3391,31 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mTempBracketingEnabled = false;
             params.remove(PARM_EXPOSURE_BRACKETING_RANGE);
             params.set(CameraSettings.KEY_TEMPORAL_BRACKETING, FALSE);
+            params.remove(PARM_ZOOM_BRACKETING_RANGE);
         } else if ( mode.equals(mHighQuality) ) {
             params.set(CameraSettings.KEY_MODE, mHighQuality);
             params.set(PARM_IPP, PARM_IPP_LDCNSF);
             mTempBracketingEnabled = false;
             params.remove(PARM_EXPOSURE_BRACKETING_RANGE);
             params.set(CameraSettings.KEY_TEMPORAL_BRACKETING, FALSE);
+            params.remove(PARM_ZOOM_BRACKETING_RANGE);
         } else if ( mode.equals(mHighQualityZsl) ) {
             params.set(CameraSettings.KEY_MODE, mHighQualityZsl);
             params.set(PARM_IPP, PARM_IPP_NONE);
             mTempBracketingEnabled = false;
             params.remove(PARM_EXPOSURE_BRACKETING_RANGE);
             params.set(CameraSettings.KEY_TEMPORAL_BRACKETING, FALSE);
+            params.remove(PARM_ZOOM_BRACKETING_RANGE);
         } else if ( mode.equals(mTemporalBracketing) ) {
             params.set(CameraSettings.KEY_MODE, mHighPerformance);
             params.set(PARM_IPP, PARM_IPP_NONE);
             params.set(PARM_GBCE, PARM_GBCE_OFF);
+            params.remove(PARM_ZOOM_BRACKETING_RANGE);
 
             //Enable Temporal Bracketing
             mTempBracketingEnabled = true;
             params.remove(PARM_EXPOSURE_BRACKETING_RANGE);
+            params.remove(PARM_ZOOM_BRACKETING_RANGE);
 
         } else if ( mode.equals(mExposureBracketing) ) {
 
@@ -3402,12 +3430,30 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             //Disable Temporal Brackerting
             mTempBracketingEnabled = false;
             params.set(CameraSettings.KEY_TEMPORAL_BRACKETING, FALSE);
+            params.remove(PARM_ZOOM_BRACKETING_RANGE);
+
+        } else if ( mode.equals(mZoomBracketing) ) {
+
+            params.set(CameraSettings.KEY_MODE, mZoomBracketing);
+            //Disable GBCE by default
+            params.set(PARM_GBCE, PARM_GBCE_OFF);
+            params.set(PARM_IPP, PARM_IPP_NONE);
+            params.set(PARM_BURST, ZOOM_BRACKETING_COUNT);
+            params.set(PARM_ZOOM_BRACKETING_RANGE,
+                    getString(R.string.pref_camera_zoom_bracketing_rangevalues));
+            mBurstImages = ZOOM_BRACKETING_COUNT;
+            params.remove(PARM_EXPOSURE_BRACKETING_RANGE);
+
+            //Disable Temporal Brackerting
+            mTempBracketingEnabled = false;
+            params.set(CameraSettings.KEY_TEMPORAL_BRACKETING, FALSE);
 
         } else {
             // Default to HQ with LDC&NSF
             params.set(CameraSettings.KEY_MODE, mHighQuality);
             params.set(PARM_IPP, PARM_IPP_LDCNSF);
             params.remove(PARM_EXPOSURE_BRACKETING_RANGE);
+            params.remove(PARM_ZOOM_BRACKETING_RANGE);
         }
 
         if ( null != mFocusManager ) {

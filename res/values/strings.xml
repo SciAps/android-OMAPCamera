@@ -300,6 +300,7 @@
     <string name="pref_camera_mode_entry_zsl">ZSL</string>
     <string name="pref_camera_mode_entry_temporal_bracketing">Temporal Bracketing</string>
     <string name="pref_camera_mode_entry_exp_bracketing">Exposure Bracketing</string>
+    <string name="pref_camera_mode_entry_zoom_bracketing">Zoom Bracketing</string>
 
     <string name="pref_camera_bracketrange_title">Bracketing Range</string>
     <string name="pref_camera_bracketrange_default">1</string>
@@ -313,6 +314,8 @@
     <string name="pref_camera_burst_entry_5">5</string>
     <string name="pref_camera_burst_entry_10">10</string>
     <string name="pref_camera_burst_entry_15">15</string>
+
+    <string name="pref_camera_zoom_bracketing_rangevalues">5,10,15,20,25,30,35,40,45,60</string>
 
     <string name="pref_camera_gbce_title">Contrast Enhancement</string>
     <string name="pref_camera_gbce_default">off</string>
