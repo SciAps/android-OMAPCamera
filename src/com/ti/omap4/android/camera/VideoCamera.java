@@ -296,6 +296,7 @@ public class VideoCamera extends ActivityBase
     private String mMechanicalMisalignmentCorrection;
 
     private S3DView s3dView;
+    private boolean mS3dViewEnabled = false;
 
     // This Handler is used to post message back onto the main thread of the
     // application
@@ -580,6 +581,7 @@ public class VideoCamera extends ActivityBase
         final String[] OTHER_SETTING_KEYS = {
                     CameraSettings.KEY_VIDEO_PREVIEW_LAYOUT,
                     CameraSettings.KEY_VIDEO_FORMAT,
+                    CameraSettings.KEY_S3D_MENU,
                     CameraSettings.KEY_VIDEO_TIMER,
                     CameraSettings.KEY_AUTO_CONVERGENCE,
                     CameraSettings.KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU,
@@ -1012,7 +1014,7 @@ public class VideoCamera extends ActivityBase
 
         //get selected layout from camera hal; returns "none" in mono mode
         String currentPreviewLayout = mParameters.get(CameraSettings.KEY_S3D_PRV_FRAME_LAYOUT);
-        if (currentPreviewLayout == null) {
+        if (currentPreviewLayout == null || !mS3dViewEnabled) {
             s3dView.setLayout(S3DView.Layout.MONO);
             return;
         }
@@ -2147,6 +2149,9 @@ public class VideoCamera extends ActivityBase
             mParameters.set(CameraSettings.KEY_S3D_PRV_FRAME_LAYOUT ,previewLayout);
             mPreviewLayout = previewLayout;
         }
+
+        mS3dViewEnabled = mPreferences.getString(CameraSettings.KEY_S3D_MENU, "off").equals("off") ? false : true;
+        setSurfaceLayout();
 
         //Set Video Resolution
 

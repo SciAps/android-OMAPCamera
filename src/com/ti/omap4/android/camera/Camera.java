@@ -199,6 +199,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private CameraSound mCameraSound;
 
     private S3DView s3dView;
+    private boolean mS3dViewEnabled = false;
 
     private Runnable mDoSnapRunnable = new Runnable() {
         public void run() {
@@ -1611,6 +1612,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         final String[] OTHER_SETTING_KEYS = {
                 CameraSettings.KEY_CAPTURE_LAYOUT,
                 CameraSettings.KEY_PREVIEW_LAYOUT,
+                CameraSettings.KEY_S3D_MENU,
                 CameraSettings.KEY_AUTO_CONVERGENCE,
                 CameraSettings.KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU,
                 CameraSettings.KEY_RECORD_LOCATION,
@@ -2285,7 +2287,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
         //get selected layout from camera hal; returns "none" in mono mode
         String currentPreviewLayout = mParameters.get(CameraSettings.KEY_S3D_PRV_FRAME_LAYOUT);
-        if (currentPreviewLayout == null) {
+        if (currentPreviewLayout == null || !mS3dViewEnabled) {
             s3dView.setLayout(S3DView.Layout.MONO);
             return;
         }
@@ -2533,6 +2535,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             previewLayoutUpdated = true;
             restartNeeded  = true;
         }
+
+        mS3dViewEnabled = mPreferences.getString(CameraSettings.KEY_S3D_MENU, "off").equals("off") ? false : true;
 
         String captureLayout = null;
         if (is2DMode()) {
@@ -2991,6 +2995,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             Log.v(TAG,"Capture mode set: " + mParameters.get(CameraSettings.KEY_MODE));
         }
 
+        if (!restartNeeded) {
+            setSurfaceLayout();
+        }
         return restartNeeded;
     }
 

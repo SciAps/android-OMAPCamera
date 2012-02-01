@@ -115,6 +115,8 @@ public class CameraSettings {
     public static final String KEY_S3D_CAP_FRAME_LAYOUT = "s3d-cap-frame-layout";
     public static final String KEY_S3D_PRV_FRAME_LAYOUT = "s3d-prv-frame-layout";
 
+    private static final boolean OMAP_ENHANCEMENT_S3D = android.os.SystemProperties.getBoolean("com.ti.omap_enhancement_s3d", false);
+    public static final String KEY_S3D_MENU = "pref_camera_s3d_key";
 
     public static final String KEY_TEMPORAL_BRACKETING = "temporal-bracketing";
     public static final String KEY_CAMERA_FIRST_USE_HINT_SHOWN = "pref_camera_first_use_hint_shown_key";
@@ -321,6 +323,28 @@ public class CameraSettings {
         ListPreference pictureSizeSS = group.findPreference(KEY_PICTURE_SIZES_SS);
         ListPreference previewSizeTB = group.findPreference(KEY_PREVIEW_SIZES_TB);
         ListPreference previewSizeSS = group.findPreference(KEY_PREVIEW_SIZES_SS);
+        ListPreference s3d = group.findPreference(KEY_S3D_MENU);
+
+        if(s3d != null){
+            List<String> supp = new ArrayList<String>();
+            boolean mode2d = false;
+            String suppLayouts = mParameters.get(KEY_PREVIEW_LAYOUT_VALUES);
+            // if there aren't supported layouts  -> 2d mode
+            if(suppLayouts == null ||
+                    suppLayouts.equals("") ||
+                    suppLayouts.equals("none")){
+                mode2d = true;
+            }else{
+                mode2d = false;
+            }
+            if(OMAP_ENHANCEMENT_S3D && !mode2d){
+                supp.add("on");
+                supp.add("off");
+            }else{
+                supp.add("none");
+            }
+            filterUnsupportedOptions(group, s3d, supp);
+        }
 
         if (previewSize2d != null) {
             List<String> supp = new ArrayList<String>();

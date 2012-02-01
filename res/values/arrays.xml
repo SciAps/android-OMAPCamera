@@ -903,4 +903,13 @@
         <item>auto</item>
     </string-array>
 
+    <string-array name="pref_camera_s3d_entries" translatable="false">
+       <item>@string/pref_camera_s3d_on</item>
+       <item>@string/pref_camera_s3d_off</item>
+    </string-array>
+
+    <string-array name="pref_camera_s3d_entryvalues" translatable="false">
+        <item>on</item>
+        <item>off</item>
+    </string-array>
 </resources>
