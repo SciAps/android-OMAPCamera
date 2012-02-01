@@ -2973,19 +2973,6 @@ public class VideoCamera extends ActivityBase
                 mProfile.videoFrameWidth = 1088;
             }
         }
-
-        if(mParameters != null){
-            String previewLayout = mParameters.get(CameraSettings.KEY_S3D_PRV_FRAME_LAYOUT);
-            if(previewLayout != null && !previewLayout.equals("") && !previewLayout.equals("none")){
-                // 3d mode
-                if(mPreviewLayout.equals(CameraSettings.TB_FULL_S3D_LAYOUT)){
-                    mProfile.videoFrameHeight *= 2;
-                }else if(mPreviewLayout.equals(CameraSettings.SS_FULL_S3D_LAYOUT)){
-                    mProfile.videoFrameWidth *= 2;
-                }
-            }
-        }
-        resizeForPreviewAspectRatio();
     }
 
     private int getIntPreference(String key, int defaultValue) {

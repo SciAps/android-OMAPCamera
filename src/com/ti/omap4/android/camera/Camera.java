@@ -2812,6 +2812,13 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             restartNeeded = true;
         }
         Size size = mParameters.getPreviewSize();
+        if (mS3dViewEnabled) {
+            if (mPreviewLayout.equals(CameraSettings.TB_FULL_S3D_LAYOUT)) {
+                size.height /= 2;
+            } else if (mPreviewLayout.equals(CameraSettings.SS_FULL_S3D_LAYOUT)) {
+                size.width /= 2;
+            }
+        }
         mPreviewFrameLayout.setAspectRatio((double) size.width / size.height);
 
         // Since change scene mode may change supported values,
