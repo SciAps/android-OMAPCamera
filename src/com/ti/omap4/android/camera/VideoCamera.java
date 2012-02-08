@@ -1043,10 +1043,6 @@ public class VideoCamera extends ActivityBase
             mEffectsRecorder.startPreview();
         }
 
-        if ( null != mSharePopup ) {
-                mSharePopup.setOrientation(mOrientation);
-        }
-
         mZoomState = ZOOM_STOPPED;
         mPreviewing = true;
     }
