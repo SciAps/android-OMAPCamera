@@ -2862,7 +2862,11 @@ public class VideoCamera extends ActivityBase
         // Check if metering area is supported and touch convergence is selected
         if (mMeteringAreaSupported &&
                 mAutoConvergence.equals(mTouchConvergence)) {
-            return mTouchManager.onTouch(e);
+            if (mS3dViewEnabled) {
+                return mTouchManager.onTouch(e);
+            } else {
+                return mTouchManager.onTouch(e, mPreviewLayout);
+            }
         }
 
         if(mIsSnapSupported){

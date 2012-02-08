@@ -40,6 +40,7 @@ public class TouchManager {
     private int mTouchHeight;
     private Matrix mMatrix;
     Listener mListener;
+    private String mPreviewLayout;
 
     public interface Listener {
         public void setTouchParameters();
@@ -95,13 +96,61 @@ public class TouchManager {
         }
 
         // Convert the coordinates to driver format.
-        calculateTapArea(mTouchWidth, mTouchHeight, 1.5f, x, y, previewWidth, previewHeight,
-                mMeteringArea.get(0).rect);
-
+        if (CameraSettings.TB_FULL_S3D_LAYOUT.equals(mPreviewLayout)) {
+            calculateTapArea(mTouchWidth, mTouchHeight * 2, 1, x, y, previewWidth, previewHeight,
+                    mMeteringArea.get(0).rect);
+        } else if (CameraSettings.SS_FULL_S3D_LAYOUT.equals(mPreviewLayout)) {
+            calculateTapArea(mTouchWidth * 2, mTouchHeight, 1, x, y, previewWidth, previewHeight,
+                    mMeteringArea.get(0).rect);
+        } else {
+            calculateTapArea(mTouchWidth, mTouchHeight, 1, x, y, previewWidth, previewHeight,
+                    mMeteringArea.get(0).rect);
+        }
         // Set the metering area.
         mListener.setTouchParameters();
 
         return true;
+    }
+
+    public boolean onTouch(MotionEvent e, String previewLayout) {
+        float x = e.getX();
+        float y = e.getY();
+        mPreviewLayout = previewLayout;
+        int previewWidth = mPreviewFrame.getWidth();
+        int previewHeight = mPreviewFrame.getHeight();
+        if (CameraSettings.TB_FULL_S3D_LAYOUT.equals(previewLayout)) {
+            if (y < previewHeight / 2) {
+                return onTouch(e);
+            } else {
+                e.setLocation(x, y - previewHeight / 2);
+                return onTouch(e);
+            }
+        } else if (CameraSettings.SS_FULL_S3D_LAYOUT.equals(previewLayout)) {
+            if (x < previewWidth / 2) {
+                return onTouch(e);
+            } else {
+                e.setLocation(x - previewWidth / 2, y);
+                return onTouch(e);
+            }
+        } else if (CameraSettings.SS_SUB_S3D_LAYOUT.equals(previewLayout)) {
+            if (x < previewWidth / 2) {
+                e.setLocation(x * 2, y);
+                return onTouch(e);
+            } else {
+                e.setLocation((x - previewWidth / 2) * 2, y);
+                return onTouch(e);
+            }
+        } else if (CameraSettings.TB_SUB_S3D_LAYOUT.equals(previewLayout)) {
+            if (y < previewHeight / 2) {
+                e.setLocation(x, y * 2);
+                return onTouch(e);
+            } else {
+                e.setLocation(x, (y - previewHeight / 2) * 2);
+                return onTouch(e);
+            }
+        } else {
+            return onTouch(e);
+        }
     }
 
     public List<Area> getMeteringAreas() {

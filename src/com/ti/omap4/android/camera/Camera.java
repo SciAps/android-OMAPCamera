@@ -2149,7 +2149,11 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         // Check if metering area is supported and touch convergence is selected
         if (mMeteringAreaSupported && !cafActive &&
                 mAutoConvergence.equals(mTouchConvergence)) {
-            return mTouchManager.onTouch(e);
+            if (mS3dViewEnabled) {
+                return mTouchManager.onTouch(e);
+            } else {
+                return mTouchManager.onTouch(e, mPreviewLayout);
+            }
         }
 
         // Check if metering area or focus area is supported.
@@ -2160,7 +2164,11 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             return false;
         }
 
-        return mFocusManager.onTouch(e);
+        if (mS3dViewEnabled) {
+            return mFocusManager.onTouch(e);
+        } else {
+            return mFocusManager.onTouch(e, mPreviewLayout);
+        }
     }
 
     @Override
