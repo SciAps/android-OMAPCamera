@@ -88,7 +88,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         View.OnTouchListener, ShutterButton.OnShutterButtonListener,
         SurfaceHolder.Callback, ModePicker.OnModeChangeListener,
         FaceDetectionListener, CameraPreference.OnPreferenceChangedListener,
-        TouchManager.Listener, 
+        TouchManager.Listener,
         LocationManager.Listener, ShutterButton.OnShutterButtonLongPressListener {
 
     private static final String TAG = "camera";
@@ -1895,47 +1895,47 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     }
 
     private void initDefaults() {
-        if ( null == mAutoConvergence ) {
+        if ( null == mAutoConvergence || mPausing ) {
             mAutoConvergence = getString(R.string.pref_camera_autoconvergence_default);
         }
 
-        if ( null == mMechanicalMisalignmentCorrection ) {
+        if ( null == mMechanicalMisalignmentCorrection || mPausing ) {
             mMechanicalMisalignmentCorrection = getString(R.string.pref_camera_mechanical_misalignment_correction_default);
         }
 
-        if ( null == mContrast ) {
+        if ( null == mContrast || mPausing ) {
             mContrast = getString(R.string.pref_camera_contrast_default);
         }
 
-        if ( null == mBrightness ) {
+        if ( null == mBrightness || mPausing ) {
             mBrightness = getString(R.string.pref_camera_brightness_default);
         }
 
-        if ( null == mColorEffect ) {
+        if ( null == mColorEffect || mPausing ) {
             mColorEffect = getString(R.string.pref_camera_coloreffect_default);
         }
 
-        if ( null == mAntibanding ) {
+        if ( null == mAntibanding || mPausing ) {
             mAntibanding = getString(R.string.pref_camera_antibanding_default);
         }
 
-        if ( null == mISO ) {
+        if ( null == mISO || mPausing ) {
             mISO = getString(R.string.pref_camera_iso_default);
         }
 
-        if ( null == mExposureMode ) {
+        if ( null == mExposureMode || mPausing ) {
             mExposureMode = getString(R.string.pref_camera_exposuremode_default);
         }
 
-        if ( null == mPreviewSize ) {
+        if ( null == mPreviewSize || mPausing ) {
             mPreviewSize = getString(R.string.pref_camera_previewsize_default);
         }
 
-        if ( null == mSaturation ) {
+        if ( null == mSaturation || mPausing ) {
             mSaturation = getString(R.string.pref_camera_saturation_default);
         }
 
-        if ( null == mSharpness ) {
+        if ( null == mSharpness || mPausing ) {
             mSharpness = getString(R.string.pref_camera_sharpness_default);
         }
     }
@@ -1944,12 +1944,12 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     protected void doOnResume() {
         if (mOpenCameraFail || mCameraDisabled) return;
 
+        initDefaults();
+
         mPausing = false;
 
         mJpegPictureCallbackTime = 0;
         mZoomValue = 0;
-
-        initDefaults();
 
         // Start the preview if it is not started.
         if (mCameraState == PREVIEW_STOPPED) {
