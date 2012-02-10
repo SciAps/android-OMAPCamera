@@ -49,10 +49,10 @@ public class Storage {
 
     private static final int BUFSIZE = 4096;
 
-    public static Uri addImage(ContentResolver resolver, String title, long date,
+    public static Uri addImage(ContentResolver resolver, String title, String extension, long date,
                 Location location, int orientation, byte[] jpeg, int width, int height) {
         // Save the image.
-        String path = generateFilepath(title);
+        String path = generateFilepath(title, extension);
         FileOutputStream out = null;
         try {
             out = new FileOutputStream(path);
@@ -72,9 +72,9 @@ public class Storage {
         // Insert into MediaStore.
         ContentValues values = new ContentValues(9);
         values.put(ImageColumns.TITLE, title);
-        values.put(ImageColumns.DISPLAY_NAME, title + ".jpg");
+        values.put(ImageColumns.DISPLAY_NAME, title + "." + extension);
         values.put(ImageColumns.DATE_TAKEN, date);
-        values.put(ImageColumns.MIME_TYPE, "image/jpeg");
+        values.put(ImageColumns.MIME_TYPE, "image/" + extension);
         values.put(ImageColumns.ORIENTATION, orientation);
         values.put(ImageColumns.DATA, path);
         values.put(ImageColumns.SIZE, jpeg.length);
@@ -100,8 +100,8 @@ public class Storage {
         return uri;
     }
 
-    public static String generateFilepath(String title) {
-        return DIRECTORY + '/' + title + ".jpg";
+    public static String generateFilepath(String title, String extension) {
+        return DIRECTORY + '/' + title + "." + extension;
     }
 
     public static long getAvailableSpace() {

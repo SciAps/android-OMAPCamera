@@ -315,6 +315,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mPreviewLayout = null;
     private boolean mIsPreviewLayoutInit = false;
     private String mCaptureLayout = null;
+    private String mPictureFormat = null;
     private long mFocusStartTime;
     private long mCaptureStartTime;
     private long mShutterCallbackTime;
@@ -1227,7 +1228,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             }
 
             int orientation = Exif.getOrientation(data);
-            Uri uri = Storage.addImage(mContentResolver, title, dateTaken,
+            Uri uri = Storage.addImage(mContentResolver, title, mPictureFormat, dateTaken,
                     loc, orientation, data, width, height);
             if (uri != null) {
                 boolean needThumbnail;
@@ -1632,6 +1633,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_CAPTURE_LAYOUT,
                 CameraSettings.KEY_PREVIEW_LAYOUT,
                 CameraSettings.KEY_S3D_MENU,
+                CameraSettings.KEY_PICTURE_FORMAT_MENU,
                 CameraSettings.KEY_AUTO_CONVERGENCE,
                 CameraSettings.KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU,
                 CameraSettings.KEY_RECORD_LOCATION,
@@ -1970,6 +1972,10 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
         if ( null == mSharpness || mPausing ) {
             mSharpness = getString(R.string.pref_camera_sharpness_default);
+        }
+
+        if ( null == mPictureFormat ) {
+            mPictureFormat = getString(R.string.pref_camera_picture_format_default);
         }
     }
 
@@ -3004,6 +3010,16 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         } else {
             mParameters.set(PARM_GBCE, PARM_BCE_DISABLE);
             mParameters.set(PARM_GLBCE, PARM_BCE_DISABLE);
+        }
+
+        // Image Capture Pixel Format
+        String pictureFormat = mPreferences.getString(
+                    CameraSettings.KEY_PICTURE_FORMAT_MENU,
+                    getString(R.string.pref_camera_picture_format_default));
+
+        if (!pictureFormat.equals(mPictureFormat)) {
+            mParameters.set(CameraSettings.KEY_PICTURE_FORMAT, pictureFormat);
+            mPictureFormat = pictureFormat;
         }
 
         // Capture mode

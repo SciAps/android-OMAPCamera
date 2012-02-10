@@ -126,6 +126,10 @@ public class CameraSettings {
     public static final String KEY_CAMERA_FIRST_USE_HINT_SHOWN = "pref_camera_first_use_hint_shown_key";
     public static final String KEY_VIDEO_FIRST_USE_HINT_SHOWN = "pref_video_first_use_hint_shown_key";
 
+    public static final String KEY_PICTURE_FORMAT_MENU = "pref_camera_picture_format_key";
+    public static final String KEY_PICTURE_FORMAT = "picture-format";
+    public static final String KEY_SUPPORTED_PICTURE_FORMATS = "picture-format-values";
+
     public static final String EXPOSURE_DEFAULT_VALUE = "0";
 
     public static final int CURRENT_VERSION = 5;
@@ -317,6 +321,7 @@ public class CameraSettings {
         ListPreference previewFramerate = group.findPreference(KEY_PREVIEW_FRAMERATE);
         ListPreference mechanicalMisalignmentCorrection = group.findPreference(KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU);
         ListPreference mode = group.findPreference(KEY_MODE_MENU);
+        ListPreference pictureFormat = group.findPreference(KEY_PICTURE_FORMAT_MENU);
         ListPreference videoPreviewLayout = group.findPreference(KEY_VIDEO_PREVIEW_LAYOUT);
         ListPreference videoCaptureLayout = group.findPreference(KEY_VIDEO_CAPTURE_LAYOUT);
         ListPreference pictureSize = group.findPreference(KEY_PICTURE_SIZE);
@@ -617,6 +622,17 @@ public class CameraSettings {
                 }
             }
             filterUnsupportedOptions(group, mode, suppMode);
+        }
+
+        if (pictureFormat != null) {
+            ArrayList<String> suppPictureFormat = new ArrayList<String>();
+            String pictureFormatValues = mParameters.get(KEY_SUPPORTED_PICTURE_FORMATS);
+            if (pictureFormatValues != null && !pictureFormatValues.equals("")) {
+                for (String item : pictureFormatValues.split(",")) {
+                    suppPictureFormat.add(item);
+                }
+            }
+            filterUnsupportedOptions(group, pictureFormat, suppPictureFormat);
         }
     }
 
