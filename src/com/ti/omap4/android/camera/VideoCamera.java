@@ -532,11 +532,11 @@ public class VideoCamera extends ActivityBase
 
         ListPreference autoConvergencePreference = mPreferenceGroup.findPreference(CameraSettings.KEY_AUTO_CONVERGENCE);
         if (autoConvergencePreference != null) {
-            mTouchConvergence = autoConvergencePreference.findEntryVlaueByEntry(getString(R.string.pref_camera_autoconvergence_entry_mode_touch));
+            mTouchConvergence = autoConvergencePreference.findEntryValueByEntry(getString(R.string.pref_camera_autoconvergence_entry_mode_touch));
             if (mTouchConvergence == null) {
                 mTouchConvergence = "";
             }
-            mManualConvergence = autoConvergencePreference.findEntryVlaueByEntry(getString(R.string.pref_camera_autoconvergence_entry_mode_manual));
+            mManualConvergence = autoConvergencePreference.findEntryValueByEntry(getString(R.string.pref_camera_autoconvergence_entry_mode_manual));
             if (mManualConvergence == null) {
                 mManualConvergence = "";
             }
@@ -544,14 +544,14 @@ public class VideoCamera extends ActivityBase
 
         ListPreference vstab = mPreferenceGroup.findPreference(CameraSettings.KEY_VSTAB);
         if ( vstab != null ) {
-            mVSTABEnable = vstab.findEntryVlaueByEntry(getString(R.string.pref_camera_vstab_entry_on));
-            mVSTABDisable = vstab.findEntryVlaueByEntry(getString(R.string.pref_camera_vstab_entry_off));
+            mVSTABEnable = vstab.findEntryValueByEntry(getString(R.string.pref_camera_vstab_entry_on));
+            mVSTABDisable = vstab.findEntryValueByEntry(getString(R.string.pref_camera_vstab_entry_off));
         }
 
         ListPreference vnf = mPreferenceGroup.findPreference(CameraSettings.KEY_VNF);
         if ( vnf != null ) {
-            mVNFEnable = vnf.findEntryVlaueByEntry(getString(R.string.pref_camera_vnf_entry_on));
-            mVNFDisable = vnf.findEntryVlaueByEntry(getString(R.string.pref_camera_vnf_entry_off));
+            mVNFEnable = vnf.findEntryValueByEntry(getString(R.string.pref_camera_vnf_entry_on));
+            mVNFDisable = vnf.findEntryValueByEntry(getString(R.string.pref_camera_vnf_entry_off));
         }
 
         // if in 2D mode -> sets unknown orientation

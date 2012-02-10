@@ -257,8 +257,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final String PARM_GBCE = "gbce";
     private static final String PARM_GLBCE = "glbce";
     private static final String PARM_GBCE_OFF = "disable";
-    private static final String PARM_BCE_ENABLE = "enable";
-    private static final String PARM_BCE_DISABLE = "disable";
     private static final String PARM_IPP = "ipp";
     private static final String PARM_IPP_LDCNSF = "ldc-nsf";
     private static final String PARM_IPP_NONE = "off";
@@ -272,12 +270,17 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final String PARM_TEMPORAL_BRACKETING_RANGE_NEG = "temporal-bracketing-range-negative";
     public static final String PARM_SUPPORTED_ISO_MODES = "iso-mode-values";
     public static final String PARM_SUPPORTED_EXPOSURE_MODES = "exposure-mode-values";
+    public static final String PARM_SUPPORTED_GBCE = "gbce-supported";
+    public static final String PARM_SUPPORTED_GLBCE = "glbce-supported";
     private static final String PARM_ISO = "iso";
     private static final String PARM_EXPOSURE_MODE = "exposure";
     private static final String PARM_CONTRAST = "contrast";
     private static final String PARM_BRIGHTNESS = "brightness";
     private static final String PARM_SHARPNESS = "sharpness";
     private static final String PARM_SATURATION = "saturation";
+
+    public static final String TRUE = "true";
+    public static final String FALSE = "false";
 
     private String mTouchConvergence;
     private String mManualConvergence;
@@ -1430,7 +1433,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
         ListPreference gbce = group.findPreference(CameraSettings.KEY_GBCE);
         if (gbce != null) {
-            mGBCEOff = gbce.findEntryVlaueByEntry(getString(R.string.pref_camera_gbce_entry_off));
+            mGBCEOff = gbce.findEntryValueByEntry(getString(R.string.pref_camera_gbce_entry_off));
             if (mGBCEOff == null) {
                 mGBCEOff = "";
             }
@@ -1438,11 +1441,11 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
         ListPreference autoConvergencePreference = group.findPreference(CameraSettings.KEY_AUTO_CONVERGENCE);
         if (autoConvergencePreference != null) {
-            mTouchConvergence = autoConvergencePreference.findEntryVlaueByEntry(getString(R.string.pref_camera_autoconvergence_entry_mode_touch));
+            mTouchConvergence = autoConvergencePreference.findEntryValueByEntry(getString(R.string.pref_camera_autoconvergence_entry_mode_touch));
             if (mTouchConvergence == null) {
                 mTouchConvergence = "";
             }
-            mManualConvergence = autoConvergencePreference.findEntryVlaueByEntry(getString(R.string.pref_camera_autoconvergence_entry_mode_manual));
+            mManualConvergence = autoConvergencePreference.findEntryValueByEntry(getString(R.string.pref_camera_autoconvergence_entry_mode_manual));
             if (mManualConvergence == null) {
                 mManualConvergence = "";
             }
@@ -1450,7 +1453,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
         ListPreference exposure = group.findPreference(CameraSettings.KEY_EXPOSURE_MODE_MENU);
         if (exposure != null) {
-            mManualExposure = exposure.findEntryVlaueByEntry(getString(R.string.pref_camera_exposuremode_entry_manual));
+            mManualExposure = exposure.findEntryValueByEntry(getString(R.string.pref_camera_exposuremode_entry_manual));
             if (mManualExposure == null) {
                 mManualExposure = "";
             }
@@ -1458,27 +1461,27 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
         ListPreference temp = group.findPreference(CameraSettings.KEY_MODE_MENU);
         if (temp != null) {
-            mTemporalBracketing = temp.findEntryVlaueByEntry(getString(R.string.pref_camera_mode_entry_temporal_bracketing));
+            mTemporalBracketing = temp.findEntryValueByEntry(getString(R.string.pref_camera_mode_entry_temporal_bracketing));
             if (mTemporalBracketing == null) {
                 mTemporalBracketing = "";
             }
 
-            mExposureBracketing = temp.findEntryVlaueByEntry(getString(R.string.pref_camera_mode_entry_exp_bracketing));
+            mExposureBracketing = temp.findEntryValueByEntry(getString(R.string.pref_camera_mode_entry_exp_bracketing));
             if (mExposureBracketing == null) {
                 mExposureBracketing = "";
             }
 
-            mHighPerformance = temp.findEntryVlaueByEntry(getString(R.string.pref_camera_mode_entry_hs));
+            mHighPerformance = temp.findEntryValueByEntry(getString(R.string.pref_camera_mode_entry_hs));
             if (mHighPerformance == null) {
                 mHighPerformance = "";
             }
 
-            mHighQuality = temp.findEntryVlaueByEntry(getString(R.string.pref_camera_mode_entry_hq));
+            mHighQuality = temp.findEntryValueByEntry(getString(R.string.pref_camera_mode_entry_hq));
             if (mHighQuality == null) {
                 mHighQuality = "";
             }
 
-            mHighQualityZsl = temp.findEntryVlaueByEntry(getString(R.string.pref_camera_mode_entry_zsl));
+            mHighQualityZsl = temp.findEntryValueByEntry(getString(R.string.pref_camera_mode_entry_zsl));
             if (mHighQualityZsl == null) {
                 mHighQualityZsl = "";
             }
@@ -3131,14 +3134,14 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_GBCE, PARM_GBCE_OFF);
 
         if ( PARM_GLBCE.equals(gbce) ) {
-            mParameters.set(PARM_GBCE, PARM_BCE_DISABLE);
-            mParameters.set(PARM_GLBCE, PARM_BCE_ENABLE);
+            mParameters.set(PARM_GBCE, FALSE);
+            mParameters.set(PARM_GLBCE, TRUE);
         } else if ( PARM_GBCE.equals(gbce) ) {
-            mParameters.set(PARM_GBCE, PARM_BCE_ENABLE);
-            mParameters.set(PARM_GLBCE, PARM_BCE_DISABLE);
+            mParameters.set(PARM_GBCE, TRUE);
+            mParameters.set(PARM_GLBCE, FALSE);
         } else {
-            mParameters.set(PARM_GBCE, PARM_BCE_DISABLE);
-            mParameters.set(PARM_GLBCE, PARM_BCE_DISABLE);
+            mParameters.set(PARM_GBCE, FALSE);
+            mParameters.set(PARM_GLBCE, FALSE);
         }
 
         // Image Capture Pixel Format

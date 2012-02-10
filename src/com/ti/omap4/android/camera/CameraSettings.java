@@ -418,6 +418,7 @@ public class CameraSettings {
             }
             filterUnsupportedOptions(group, pictureSizeSS, supp);
         }
+        ListPreference contrastEnhancement = group.findPreference(KEY_GBCE);
 
         if (previewSizeSS !=null) {
             List<String> supp = new ArrayList<String>();
@@ -680,6 +681,10 @@ public class CameraSettings {
             }
             filterUnsupportedOptions(group, pictureFormat, suppPictureFormat);
         }
+
+        if ( contrastEnhancement != null ) {
+            filterContrastEnhancement(group, contrastEnhancement);
+        }
     }
 
     private void buildExposureCompensation(
@@ -746,8 +751,8 @@ public class CameraSettings {
         List<String> supported = new ArrayList<String>();
 
         if ( "true".equals(vnfSupported) ) {
-            supported.add(pref.findEntryVlaueByEntry(enable));
-            supported.add(pref.findEntryVlaueByEntry(disable));
+            supported.add(pref.findEntryValueByEntry(enable));
+            supported.add(pref.findEntryValueByEntry(disable));
         }
 
         filterUnsupportedOptions(group, pref, supported);
@@ -760,9 +765,33 @@ public class CameraSettings {
         List<String> supported = new ArrayList<String>();
 
         if ( vstabSupported ) {
-            supported.add(pref.findEntryVlaueByEntry(enable));
-            supported.add(pref.findEntryVlaueByEntry(disable));
+            supported.add(pref.findEntryValueByEntry(enable));
+            supported.add(pref.findEntryValueByEntry(disable));
         }
+
+        filterUnsupportedOptions(group, pref, supported);
+    }
+
+    private void filterContrastEnhancement(PreferenceGroup group, ListPreference pref) {
+        String gbceSupported = mParameters.get(Camera.PARM_SUPPORTED_GBCE);
+        String glbceSupported = mParameters.get(Camera.PARM_SUPPORTED_GLBCE);
+        String offEntry = mContext.getString(R.string.pref_camera_gbce_entry_off);
+        String gbceEntry = mContext.getString(R.string.pref_camera_gbce_entry_gbce);
+        String glbceEntry = mContext.getString(R.string.pref_camera_gbce_entry_glbce);
+        List<String> supported = new ArrayList<String>();
+
+        // Off is there by default
+        supported.add(pref.findEntryValueByEntry(offEntry));
+
+        if ( ( null == gbceSupported ) ||
+             ( Camera.TRUE.equals(gbceSupported)) ) {
+            supported.add(pref.findEntryValueByEntry(gbceEntry));
+        }
+
+        if ( ( null == glbceSupported ) ||
+             ( Camera.TRUE.equals(glbceSupported)) ) {
+            supported.add(pref.findEntryValueByEntry(glbceEntry));
+           }
 
         filterUnsupportedOptions(group, pref, supported);
     }
