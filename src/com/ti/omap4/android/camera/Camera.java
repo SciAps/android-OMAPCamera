@@ -1256,6 +1256,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             if (t != null) {
                 mThumbnail = t;
                 mThumbnailView.setBitmap(mThumbnail.getBitmap());
+                if (!mIsImageCaptureIntent && !mThumbnail.fromFile()) {
+                    mThumbnail.saveTo(new File(getFilesDir(), Thumbnail.LAST_THUMB_FILENAME));
+                }
             }
             // Share popup may still have the reference to the old thumbnail. Clear it.
             mSharePopup = null;
@@ -2097,9 +2100,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             if (mImageSaver != null) {
                 mImageSaver.finish();
                 mImageSaver = null;
-            }
-            if (!mIsImageCaptureIntent && mThumbnail != null && !mThumbnail.fromFile()) {
-                mThumbnail.saveTo(new File(getFilesDir(), Thumbnail.LAST_THUMB_FILENAME));
             }
         }
 

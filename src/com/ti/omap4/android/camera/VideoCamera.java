@@ -1172,10 +1172,6 @@ public class VideoCamera extends ActivityBase
         }
         resetScreenOn();
 
-        if (!mIsVideoCaptureIntent && mThumbnail != null && !mThumbnail.fromFile()) {
-            mThumbnail.saveTo(new File(getFilesDir(), Thumbnail.LAST_THUMB_FILENAME));
-        }
-
         if (mStorageHint != null) {
             mStorageHint.cancel();
             mStorageHint = null;
@@ -1855,6 +1851,9 @@ public class VideoCamera extends ActivityBase
             if (videoFrame != null) {
                 mThumbnail = new Thumbnail(mCurrentVideoUri, videoFrame, 0);
                 mThumbnailView.setBitmap(mThumbnail.getBitmap());
+                if (!mIsVideoCaptureIntent && !mThumbnail.fromFile()) {
+                    mThumbnail.saveTo(new File(getFilesDir(), Thumbnail.LAST_THUMB_FILENAME));
+                }
                 // Share popup may still have the reference to the old thumbnail. Clear it.
                 mSharePopup = null;
             }
@@ -2927,6 +2926,9 @@ public class VideoCamera extends ActivityBase
             mThumbnail = Thumbnail.createThumbnail(data, orientation, inSampleSize, uri);
             if (mThumbnail != null) {
                 mThumbnailView.setBitmap(mThumbnail.getBitmap());
+                if (!mIsVideoCaptureIntent && !mThumbnail.fromFile()) {
+                    mThumbnail.saveTo(new File(getFilesDir(), Thumbnail.LAST_THUMB_FILENAME));
+                }
             }
             // Share popup may still have the reference to the old thumbnail. Clear it.
             mSharePopup = null;
