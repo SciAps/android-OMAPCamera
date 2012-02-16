@@ -62,7 +62,10 @@ public class ControlPanelLayout extends RelativeLayout {
             // width of the parent.
             measuredSize = (int) (longSideSize - shortSideSize / 3.0 * 4.0);
         } else {
-            Log.e(TAG, "layout_width of ControlPanelLayout should be wrap_content");
+            mode = MeasureSpec.getMode(heightSpec);
+            longSideSize = heightSpecSize;
+            shortSideSize = widthSpecSize;
+            specSize = heightSpecSize;
         }
 
         // Make sure the width is bigger than the minimum width.

@@ -276,6 +276,13 @@ public class SharePopup extends PopupWindow implements View.OnClickListener,
             mComponent.add(component);
         }
 
+        // On phone UI, we have to know how many icons in the grid view before
+        // the view is measured.
+        if (mActivityOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
+            mShareList.setNumColumns(items.size());
+            int width = mContext.getResources().getDimensionPixelSize(R.dimen.share_item_width);
+            mShareList.setColumnWidth(width);
+        }
 
         SimpleAdapter listItemAdapter = new MySimpleAdapter(mContext, items,
                 R.layout.share_icon,
