@@ -99,7 +99,6 @@ public class VideoCamera extends ActivityBase
 
     private static final String TAG = "videocamera";
 
-    private static final int CHECK_DISPLAY_ROTATION = 3;
     private static final int CLEAR_SCREEN_DELAY = 4;
     private static final int UPDATE_RECORD_TIME = 5;
     private static final int ENABLE_SHUTTER_BUTTON = 6;
@@ -246,9 +245,8 @@ public class VideoCamera extends ActivityBase
 
     boolean mPausing = false;
     boolean mPreviewing = false; // True if preview is started.
-    // The display rotation in degrees. This is only valid when mPreviewing is
-    // true.
-    private int mDisplayRotation;
+    // The display rotation in degrees.
+    private int mDisplayRotation = 0;
 
     private ContentResolver mContentResolver;
 
@@ -271,10 +269,6 @@ public class VideoCamera extends ActivityBase
     private int mOrientationCompensation = 0;
     // The orientation compenstaion when we start recording.
     private int mOrientationCompensationAtRecordStart;
-
-    // Orientation to be communicated to Sensor when there is a orientation change
-    private int mLastOrientation = 0;  // No rotation (landscape) by default.
-    private boolean mRotationUpdated = false; // Flag to track orientation updates sent to CameraHAL
 
     private static final int ZOOM_STOPPED = 0;
     private static final int ZOOM_START = 1;
@@ -317,22 +311,6 @@ public class VideoCamera extends ActivityBase
 
                 case UPDATE_RECORD_TIME: {
                     updateRecordingTime();
-                    break;
-                }
-
-                case CHECK_DISPLAY_ROTATION: {
-                    // Restart the preview if display rotation has changed.
-                    // Sometimes this happens when the device is held upside
-                    // down and camera app is opened. Rotation animation will
-                    // take some time and the rotation value we have got may be
-                    // wrong. Framework does not have a callback for this now.
-                    if ((Util.getDisplayRotation(VideoCamera.this) != mDisplayRotation)
-                            && !mMediaRecorderRecording) {
-                        startPreview();
-                    }
-                    if (SystemClock.uptimeMillis() - mOnResumeTime < 5000) {
-                        mHandler.sendEmptyMessageDelayed(CHECK_DISPLAY_ROTATION, 100);
-                    }
                     break;
                 }
 
@@ -550,14 +528,6 @@ public class VideoCamera extends ActivityBase
             mVNFEnable = vnf.findEntryValueByEntry(getString(R.string.pref_camera_vnf_entry_on));
             mVNFDisable = vnf.findEntryValueByEntry(getString(R.string.pref_camera_vnf_entry_off));
         }
-
-        // if in 2D mode -> sets unknown orientation
-        // if in 3D mode -> sets landscape orientation
-        if (is2DMode()) {
-            setRequestedOrientation(mOrientationListener.ORIENTATION_UNKNOWN);
-        } else {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        }
     }
 
     private boolean isRecordingTimerEnabled() {
@@ -647,10 +617,22 @@ public class VideoCamera extends ActivityBase
             mOrientation = Util.roundOrientation(orientation, mOrientation);
             // When the screen is unlocked, display rotation may change. Always
             // calculate the up-to-date orientationCompensation.
+
             int orientationCompensation = mOrientation
                     + Util.getDisplayRotation(VideoCamera.this);
-
             if (mOrientationCompensation != orientationCompensation) {
+                if (is2DMode()) {
+                    Log.v(TAG, ">>>> orient="+mOrientation+", Comp="+orientationCompensation+", dispRot="+Util.getDisplayRotation(VideoCamera.this));
+                    mDisplayRotation = (360 - mOrientation) % 360;
+                    CameraInfo info = CameraHolder.instance().getCameraInfo()[mCameraId];
+                    if (info.facing == CameraInfo.CAMERA_FACING_FRONT) {
+                        mDisplayRotation = (360 - mDisplayRotation ) % 360;
+                    }
+                    if (!mMediaRecorderRecording && (getSensorOrientation() != mDisplayRotation)) {
+                        startPreview();
+                    }
+                }
+
                 mOrientationCompensation = orientationCompensation;
                 if (effectsActive()) {
                     mEffectsRecorder.setOrientationHint(
@@ -764,20 +746,7 @@ public class VideoCamera extends ActivityBase
 
         if (stop) {
             onStopVideoRecording(true);
-            /* Unlock screen Orientation once recording stops
-             * If orientation is set to -1 (UNSPECIFIED), system
-             * orientation is taken into account
-             */
-            if (is2DMode()) {
-                screenOrientation = -1;
-            } else {
-                screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-            }
-            setRequestedOrientation(screenOrientation);
         } else {
-            // Lock the screen Orientation before starting Record.
-            screenOrientation = getCurrentScreenOrientation();
-            setRequestedOrientation(screenOrientation);
             startVideoRecording();
         }
         mShutterButton.setEnabled(false);
@@ -906,7 +875,7 @@ public class VideoCamera extends ActivityBase
         mVideoFramerate = getIntPreference(CameraSettings.KEY_VIDEO_FRAMERATE,CameraSettings.DEFAULT_VIDEO_FRAMERATE_VALUE);
         mVideoBitrate = getIntPreference(CameraSettings.KEY_VIDEO_BITRATE,CameraSettings.DEFAULT_VIDEO_BITRATE_VALUE);
         mAudioEncoder = getIntPreference(CameraSettings.KEY_AUDIO_ENCODER,CameraSettings.DEFAULT_AUDIO_ENCODER_VALUE);
-       mProfile.videoFrameRate = mVideoFramerate;
+        mProfile.videoFrameRate = mVideoFramerate;
         mProfile.videoBitRate = mVideoBitrate;
         mProfile.videoCodec = mVideoEncoder;
         mProfile.audioCodec = mAudioEncoder;
@@ -947,16 +916,23 @@ public class VideoCamera extends ActivityBase
                 ". mDesiredPreviewHeight=" + mDesiredPreviewHeight);
     }
 
-    private void resizeForPreviewAspectRatio() {
-        if(mPreviewFrameLayout != null){
-            mPreviewFrameLayout.setAspectRatio(
-                    (double) mProfile.videoFrameWidth / mProfile.videoFrameHeight);
+    private boolean isOrientationPortrait() {
+        if(mDisplayRotation == 90 || mDisplayRotation == 270) {
+            return true;
         }
+        return false;
     }
 
-    private void resizeForPreviewAspectRatioForPotrait() {
-        mPreviewFrameLayout.setAspectRatio(
-                (double) mProfile.videoFrameHeight / mProfile.videoFrameWidth);
+    private void resizeForPreviewAspectRatio() {
+        if(mPreviewFrameLayout != null) {
+            if(isOrientationPortrait()) {
+                mPreviewFrameLayout.setAspectRatio(
+                    (double) mProfile.videoFrameHeight / mProfile.videoFrameWidth);
+            } else {
+                mPreviewFrameLayout.setAspectRatio(
+                    (double) mProfile.videoFrameWidth / mProfile.videoFrameHeight);
+            }
+        }
     }
 
     @Override
@@ -1032,7 +1008,6 @@ public class VideoCamera extends ActivityBase
 
         if (mPreviewing) {
             mOnResumeTime = SystemClock.uptimeMillis();
-            mHandler.sendEmptyMessageDelayed(CHECK_DISPLAY_ROTATION, 100);
         }
         // Dismiss open menu if exists.
         PopupManager.getInstance(this).notifyShowPopup(null);
@@ -1086,18 +1061,20 @@ public class VideoCamera extends ActivityBase
             }
             mPreviewing = false;
         }
-        /* Check Orientation Status before starting Preview.
+        /* Orientation Status stored in mDisplayRotation.
          * This is necessary as Camera is not listening to orientation Changes
          * So a switch from Camera to Camcorder results in incorrect angle
          */
-        mDisplayRotation = Util.getDisplayRotation(this);
-        if( mDisplayRotation != mLastOrientation && !mRotationUpdated){
-            mLastOrientation = mDisplayRotation;
-            Log.v(TAG," Setting Orientation = "+ mLastOrientation);
-            mRotationUpdated = true;
-        }
-
         setCameraParameters();
+
+        CameraInfo info = CameraHolder.instance().getCameraInfo()[mCameraId];
+        int resultOrientation = mDisplayRotation;
+        if (info.facing == CameraInfo.CAMERA_FACING_FRONT) {
+            resultOrientation = (360 - resultOrientation ) % 360;
+        }
+        // make correction for preview orientation with respect to horizontal/vertical layout
+        resultOrientation = (resultOrientation + (360 - Util.getDisplayRotation(VideoCamera.this))%360)%360;
+        mCameraDevice.setDisplayOrientation(resultOrientation);
 
         if (!effectsActive()) {
             setPreviewDisplay(mSurfaceHolder);
@@ -1157,7 +1134,7 @@ public class VideoCamera extends ActivityBase
     protected void onPause() {
         super.onPause();
         mPausing = true;
-
+        mOrientationListener.disable();
         if (mIndicatorControlContainer != null) {
             mIndicatorControlContainer.dismissSettingPopup();
         }
@@ -1178,10 +1155,7 @@ public class VideoCamera extends ActivityBase
             mStorageHint = null;
         }
 
-        mOrientationListener.disable();
         mLocationManager.recordLocation(false);
-
-        mHandler.removeMessages(CHECK_DISPLAY_ROTATION);
     }
 
     @Override
@@ -1271,8 +1245,7 @@ public class VideoCamera extends ActivityBase
         // changed. Sometimes this happens when the device is held in portrait
         // and camera app is opened. Rotation animation takes some time and
         // display rotation in onCreate may not be what we want.
-        if (mPreviewing && (Util.getDisplayRotation(this) == mDisplayRotation)
-                && holder.isCreating()) {
+        if (mPreviewing && holder.isCreating()) {
             setPreviewDisplay(holder);
         } else if ( Util.getDisplayRotation(this) != mDisplayRotation ) {
             boolean isRecording = mMediaRecorderRecording;
@@ -1292,8 +1265,7 @@ public class VideoCamera extends ActivityBase
         SurfaceView preview = (SurfaceView) findViewById(R.id.camera_preview);
         CameraInfo info = CameraHolder.instance().getCameraInfo()[mCameraId];
         boolean mirror = (info.facing == CameraInfo.CAMERA_FACING_FRONT);
-        int displayRotation = Util.getDisplayRotation(this);
-        int displayOrientation = Util.getDisplayOrientation(displayRotation, mCameraId);
+        int displayOrientation = Util.getDisplayOrientation(mDisplayRotation, mCameraId);
 
         mTouchManager.initialize(preview.getHeight() / 3, preview.getHeight() / 3,
                preview, this, mirror, displayOrientation);
@@ -1432,18 +1404,6 @@ public class VideoCamera extends ActivityBase
 
         // See android.hardware.Camera.Parameters.setRotation for
         // documentation.
-        // Note that mOrientation here is the device orientation, which is the opposite of
-        // what activity.getWindowManager().getDefaultDisplay().getRotation() would return,
-        // which is the orientation the graphics need to rotate in order to render correctly.
-        int rotation = 0;
-        if (mOrientation != OrientationEventListener.ORIENTATION_UNKNOWN) {
-            CameraInfo info = CameraHolder.instance().getCameraInfo()[mCameraId];
-            if (info.facing == CameraInfo.CAMERA_FACING_FRONT) {
-                rotation = (info.orientation - mOrientation + 360) % 360;
-            } else {  // back-facing camera
-                rotation = (info.orientation + mOrientation) % 360;
-            }
-        }
         // Since actual Video is rotated this Hint is not to be insterted in clip meta data
         //mMediaRecorder.setOrientationHint(rotation);
         mOrientationCompensationAtRecordStart = mOrientationCompensation;
@@ -1822,7 +1782,7 @@ public class VideoCamera extends ActivityBase
             if (mCaptureTimeLapse) {
                 // The wheel control is shown only in Landscape Orientation.
                 // So the TimeLapse animation is also shown only in Landscape Orientation
-                if (Util.isTabletUI() && (mLastOrientation == 0 || mLastOrientation == 180)) {
+                if (Util.isTabletUI()) {
                     ((IndicatorControlWheelContainer) mIndicatorControlContainer)
                             .startTimeLapseAnimation(
                                     mTimeBetweenTimeLapseFrameCaptureMs,
@@ -1837,7 +1797,7 @@ public class VideoCamera extends ActivityBase
             }
             if (mReviewControl != null) mReviewControl.setVisibility(View.VISIBLE);
             if (mCaptureTimeLapse) {
-                if (Util.isTabletUI() && (mLastOrientation == 0 || mLastOrientation == 180)) {
+                if (Util.isTabletUI()) {
                     ((IndicatorControlWheelContainer) mIndicatorControlContainer)
                             .stopTimeLapseAnimation();
                 }
@@ -1942,6 +1902,11 @@ public class VideoCamera extends ActivityBase
             // The orientation was fixed during video recording. Now make it
             // reflect the device orientation as video recording is stopped.
             setOrientationIndicator(mOrientationCompensation);
+
+            if (is2DMode() && (getSensorOrientation() != mDisplayRotation)) {
+                startPreview();
+            }
+
             keepScreenOnAwhile();
             if (shouldAddToMediaStoreNow) {
                 addVideoToMediaStore();
@@ -2146,23 +2111,19 @@ public class VideoCamera extends ActivityBase
 
     }
 
+    // Get sensor orientation from Camera Parameters
+    private int getSensorOrientation() {
+        return mParameters.getInt(PARM_SENSOR_ORIENTATION);
+    }
+
     private void setCameraParameters() {
         mParameters = mCameraDevice.getParameters();
 
         CameraInfo info = CameraHolder.instance().getCameraInfo()[mCameraId];
 
         // Set Sensor Orientation
-        //For FRONT Facing Camera, the orientation should be counter clockwise.
-        if (info.facing == CameraInfo.CAMERA_FACING_FRONT){
-            int mOrientationFrontFacingCamera = mLastOrientation;
-            if(mLastOrientation == 90 || mLastOrientation == 270) {
-                    mOrientationFrontFacingCamera = (mLastOrientation + 180) % 360;
-            }
-            mParameters.set(PARM_SENSOR_ORIENTATION,mOrientationFrontFacingCamera);
-        } else {
-            mParameters.set(PARM_SENSOR_ORIENTATION, mLastOrientation);
-        }
-        Log.v(TAG," Setting Orientation = "+ mLastOrientation);
+        mParameters.set(PARM_SENSOR_ORIENTATION, mDisplayRotation);
+        Log.v(TAG," >>>> Setting Orientation = "+ mDisplayRotation);
 
         //Layouts
         String previewLayout = null;
@@ -2482,14 +2443,9 @@ public class VideoCamera extends ActivityBase
     @Override
     public void onConfigurationChanged(Configuration config) {
 
-        int angle = Util.getDisplayRotation(VideoCamera.this);
-        if (angle >= 0){
-             mLastOrientation = angle;
-             Log.v(TAG,"mLastOrientation / display orientation is : " + angle);
-        }
-        else
-           return;
-        mRotationUpdated = true;
+        super.onConfigurationChanged(config);
+        if (mMediaRecorderRecording) return;
+
         //update CameraHAL with new orientation
         // releaseMediaRecorder();
         if(mCameraDevice != null){
@@ -2498,10 +2454,9 @@ public class VideoCamera extends ActivityBase
              * At this stage the new w * h is not known. Hence we
              * calculate new preveiw window by using h * w.
              */
-            resizeForPreviewAspectRatioForPotrait();
+            resizeForPreviewAspectRatio();
             startPreview();
         }
-        super.onConfigurationChanged(config);
     }
 
     public void onOverriddenPreferencesClicked() {
@@ -3025,18 +2980,15 @@ public class VideoCamera extends ActivityBase
             mProfile.videoFrameWidth  = 1920;
             mProfile.videoFrameHeight = 1080;
         }
-        // If orientation is potrait then swap width and Height.
-        if(mLastOrientation == 90 || mLastOrientation == 270)
-        {
+        // If orientation is portrait and actual mode is 2D - then swap width and Height.
+        if(is2DMode() && isOrientationPortrait()) {
             //swap Width and Height
-            if (is2DMode()) {
-                int temp = mProfile.videoFrameHeight;
-                mProfile.videoFrameHeight = mProfile.videoFrameWidth;
-                mProfile.videoFrameWidth = temp;
-            }
+            int temp = mProfile.videoFrameHeight;
+            mProfile.videoFrameHeight = mProfile.videoFrameWidth;
+            mProfile.videoFrameWidth = temp;
+
             // CODEC INPUT : WIDTH should be multiple of 16
-            if (mProfile.videoFrameWidth == 1080)
-            {
+            if (mProfile.videoFrameWidth == 1080) {
                 mProfile.videoFrameWidth = 1088;
             }
         }
@@ -3050,20 +3002,6 @@ public class VideoCamera extends ActivityBase
         } catch (NumberFormatException e) {
         }
         return result;
-    }
-
-    private int getCurrentScreenOrientation(){
-        switch (mLastOrientation){
-            case 0:
-                return 0; // LANDSCAPE
-            case 90:
-                return 9; // POTRAIT
-            case 180:
-                return 8; // REVERSE LANDSCAPE
-            case 270:
-                return 1; // REVERSE POTRAIT
-        }
-        return -1; //UNSPECIFIED
     }
 
     private void showTapToSnapshotToast() {
