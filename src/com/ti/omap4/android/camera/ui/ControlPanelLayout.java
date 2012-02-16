@@ -16,6 +16,7 @@
 
 package com.ti.omap4.android.camera.ui;
 
+import com.ti.omap4.android.camera.Util;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -41,29 +42,45 @@ public class ControlPanelLayout extends RelativeLayout {
         int widthSpecSize = MeasureSpec.getSize(widthSpec);
         int heightSpecSize = MeasureSpec.getSize(heightSpec);
         int widthMode = MeasureSpec.getMode(widthSpec);
-        int measuredWidth = 0;
+        int measuredSize = 0;
         int mode, longSideSize, shortSideSize, specSize;
 
-        if (widthSpecSize > 0 && heightSpecSize > 0 && widthMode == MeasureSpec.AT_MOST) {
+        if(Util.isTabletUI()) {
+           mode = MeasureSpec.getMode(widthSpec);
+           longSideSize = widthSpecSize;
+           shortSideSize = heightSpecSize;
+           specSize = widthSpecSize;
+        } else {
+            mode = MeasureSpec.getMode(heightSpec);
+            longSideSize = heightSpecSize;
+            shortSideSize = widthSpecSize;
+            specSize = heightSpecSize;
+        }
+
+        if (widthSpecSize > 0 && heightSpecSize > 0 && mode == MeasureSpec.AT_MOST) {
             // Calculate how big 4:3 preview occupies. Then deduct it from the
             // width of the parent.
-            measuredWidth = (int) (widthSpecSize - heightSpecSize / 3.0 * 4.0 - 16);
+            measuredSize = (int) (longSideSize - shortSideSize / 3.0 * 4.0);
         } else {
             Log.e(TAG, "layout_width of ControlPanelLayout should be wrap_content");
         }
 
         // Make sure the width is bigger than the minimum width.
         int minWidth = getSuggestedMinimumWidth();
-        if (minWidth > measuredWidth) {
-            measuredWidth = minWidth;
+        if (minWidth > measuredSize) {
+            measuredSize = minWidth;
         }
 
         // The width cannot be bigger than the constraint.
-        if (widthMode == MeasureSpec.AT_MOST && measuredWidth > widthSpecSize) {
-            measuredWidth = widthSpecSize;
+        if (mode == MeasureSpec.AT_MOST && measuredSize > specSize) {
+            measuredSize = specSize;
         }
 
-
-        super.onMeasure(MeasureSpec.makeMeasureSpec(measuredWidth, MeasureSpec.EXACTLY),heightSpec);
+        if(Util.isTabletUI()){
+            widthSpec = MeasureSpec.makeMeasureSpec(measuredSize, MeasureSpec.EXACTLY);
+        } else {
+            heightSpec = MeasureSpec.makeMeasureSpec(measuredSize, MeasureSpec.EXACTLY);
+        }
+        super.onMeasure(widthSpec,heightSpec);
     }
 }
