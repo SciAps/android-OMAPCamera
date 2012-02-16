@@ -2821,18 +2821,21 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             params.set(CameraSettings.KEY_MODE, mHighPerformance);
             params.set(PARM_IPP, PARM_IPP_NONE);
             mTempBracketingEnabled = false;
+            params.remove(PARM_EXPOSURE_BRACKETING_RANGE);
             params.set(CameraSettings.KEY_TEMPORAL_BRACKETING,
                     PARM_TEMPORAL_BRACKETING_DISABLE);
         } else if ( mode.equals(mHighQuality) ) {
             params.set(CameraSettings.KEY_MODE, mHighQuality);
             params.set(PARM_IPP, PARM_IPP_LDCNSF);
             mTempBracketingEnabled = false;
+            params.remove(PARM_EXPOSURE_BRACKETING_RANGE);
             params.set(CameraSettings.KEY_TEMPORAL_BRACKETING,
                     PARM_TEMPORAL_BRACKETING_DISABLE);
         } else if ( mode.equals(mHighQualityZsl) ) {
             params.set(CameraSettings.KEY_MODE, mHighQualityZsl);
             params.set(PARM_IPP, PARM_IPP_NONE);
             mTempBracketingEnabled = false;
+            params.remove(PARM_EXPOSURE_BRACKETING_RANGE);
             params.set(CameraSettings.KEY_TEMPORAL_BRACKETING,
                     PARM_TEMPORAL_BRACKETING_DISABLE);
         } else if ( mode.equals(mTemporalBracketing) ) {
@@ -2842,6 +2845,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
             //Enable Temporal Bracketing
             mTempBracketingEnabled = true;
+            params.remove(PARM_EXPOSURE_BRACKETING_RANGE);
             params.set(CameraSettings.KEY_TEMPORAL_BRACKETING,
                                        PARM_TEMPORAL_BRACKETING_ENABLE);
 
@@ -2865,6 +2869,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             // Default to HQ with LDC&NSF
             params.set(CameraSettings.KEY_MODE, mHighQuality);
             params.set(PARM_IPP, PARM_IPP_LDCNSF);
+            params.remove(PARM_EXPOSURE_BRACKETING_RANGE);
         }
 
         if ( null != mFocusManager ) {
