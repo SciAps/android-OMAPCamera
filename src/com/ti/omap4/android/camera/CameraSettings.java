@@ -313,6 +313,7 @@ public class CameraSettings {
 
     private void initPreference(PreferenceGroup group) {
         ListPreference videoQuality = group.findPreference(KEY_VIDEO_QUALITY);
+        ListPreference videoFormat = group.findPreference(KEY_VIDEO_FORMAT);
         ListPreference timeLapseInterval = group.findPreference(KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL);
         ListPreference whiteBalance =  group.findPreference(KEY_WHITE_BALANCE);
         ListPreference sceneMode = group.findPreference(KEY_SCENE_MODE);
@@ -477,6 +478,33 @@ public class CameraSettings {
         }
         if (videoQuality != null) {
             filterUnsupportedOptions(group, videoQuality, getSupportedVideoQuality());
+        }
+        if (videoFormat != null) {
+            List<String> supp = new ArrayList<String>();
+            String suppPreview  = mParameters.get(KEY_SUPPORTED_PREVIEW_SUBSAMPLED_SIZES);
+            if (suppPreview != null && !suppPreview.equals("")) {
+                for (String previewItem : suppPreview.split(",")) {
+                    int index = 0;
+                    for (String candidate : mContext.getResources().getStringArray(R.array.pref_camera_video_format_sizevalues)) {
+                        if (previewItem.equals(candidate)) {
+                            supp.add(mContext.getResources().getStringArray(R.array.pref_camera_video_format_entryvalues)[index].toString());
+                        }
+                        index++;
+                    }
+                }
+            } else {
+                List<String> supported = sizeListToStringList(mParameters.getSupportedPreviewSizes());
+                for (String previewItem : supported) {
+                    int index = 0;
+                    for (String candidate : mContext.getResources().getStringArray(R.array.pref_camera_video_format_sizevalues)) {
+                        if (previewItem.equals(candidate)) {
+                            supp.add(mContext.getResources().getStringArray(R.array.pref_camera_video_format_entryvalues)[index].toString());
+                        }
+                        index++;
+                    }
+                }
+            }
+            filterUnsupportedOptions(group, videoFormat, supp);
         }
         if (videoPreviewLayout != null) {
             ArrayList<String> suppLayout = new ArrayList<String>();
