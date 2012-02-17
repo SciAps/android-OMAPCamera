@@ -2642,6 +2642,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
              if (previewLayoutUpdated) {
                  ListPreference tbMenuSizes = null;
                  ListPreference ssMenuSizes = null;
+                 CameraSettings settings = new CameraSettings(this, mInitialParams,
+                        mCameraId, CameraHolder.instance().getCameraInfo());
+                 mPreferenceGroup = settings.getPreferenceGroup(R.xml.camera_preferences);
                  ListPreference menu2dSizes = getSupportedListPreference(CameraSettings.KEY_SUPPORTED_PREVIEW_SUBSAMPLED_SIZES,
                          CameraSettings.KEY_PREVIEW_SIZE_2D, mParameters.getSupportedPreviewSizes());
                  if (!is2DMode()) {
