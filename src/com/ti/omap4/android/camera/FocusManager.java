@@ -297,12 +297,18 @@ public class FocusManager {
         // AE area is bigger because exposure is sensitive and
         // easy to over- or underexposure if area is too small.
         if (CameraSettings.TB_FULL_S3D_LAYOUT.equals(mPreviewLayout)) {
+            calculateTapArea(focusWidth, focusHeight * 2, 1f, x, y, previewWidth, previewHeight,
+                    mFocusArea.get(0).rect);
             calculateTapArea(focusWidth, focusHeight * 2, 1, x, y, previewWidth, previewHeight,
                     mMeteringArea.get(0).rect);
         } else if (CameraSettings.SS_FULL_S3D_LAYOUT.equals(mPreviewLayout)) {
+            calculateTapArea(focusWidth * 2, focusHeight, 1f, x, y, previewWidth, previewHeight,
+                    mFocusArea.get(0).rect);
             calculateTapArea(focusWidth * 2, focusHeight, 1, x, y, previewWidth, previewHeight,
                     mMeteringArea.get(0).rect);
         } else {
+            calculateTapArea(focusWidth, focusHeight, 1f, x, y, previewWidth, previewHeight,
+                    mFocusArea.get(0).rect);
             calculateTapArea(focusWidth, focusHeight, 1, x, y, previewWidth, previewHeight,
                     mMeteringArea.get(0).rect);
         }
