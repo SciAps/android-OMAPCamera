@@ -1269,7 +1269,7 @@ public class VideoCamera extends ActivityBase
         if (mPreviewing && (Util.getDisplayRotation(this) == mDisplayRotation)
                 && holder.isCreating()) {
             setPreviewDisplay(holder);
-        } else {
+        } else if ( Util.getDisplayRotation(this) != mDisplayRotation ) {
             boolean isRecording = mMediaRecorderRecording;
             stopVideoRecording();
 
