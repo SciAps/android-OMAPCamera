@@ -14,8 +14,6 @@ LOCAL_REQUIRED_MODULES := libjni_msc
 
 LOCAL_PROGUARD_FLAG_FILES := proguard.flags
 
-LOCAL_JAVA_LIBRARIES := com.ti.s3d
-
 include $(BUILD_PACKAGE)
 
 ifeq ($(strip $(LOCAL_PACKAGE_OVERRIDES)),)

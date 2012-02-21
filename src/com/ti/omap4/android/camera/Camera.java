@@ -85,7 +85,6 @@ import java.util.Collections;
 import java.util.Formatter;
 import java.util.List;
 
-import com.ti.s3d.S3DView;
 
 /** The Camera activity which can preview and take pictures. */
 public class Camera extends ActivityBase implements FocusManager.Listener,
@@ -96,8 +95,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         LocationManager.Listener, ShutterButton.OnShutterButtonLongPressListener {
 
     private static final String TAG = "camera";
-
-    private static final boolean OMAP_ENHANCEMENT_S3D = android.os.SystemProperties.getBoolean("com.ti.omap_enhancement_s3d", false);
 
     private static final int CROP_MSG = 1;
     private static final int FIRST_TIME_INIT = 2;
@@ -201,7 +198,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
     private CameraSound mCameraSound;
 
-    private S3DView s3dView;
+    private S3DViewWrapper s3dView;
     private boolean mS3dViewEnabled = false;
 
     private Runnable mDoSnapRunnable = new Runnable() {
@@ -1524,8 +1521,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         SurfaceHolder holder = preview.getHolder();
         holder.addCallback(this);
 
-        if (OMAP_ENHANCEMENT_S3D)
-            s3dView = new S3DView(holder);
+        s3dView = new S3DViewWrapper(holder);
 
         holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
@@ -2366,24 +2362,24 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     }
 
     private void setSurfaceLayout() {
-        if (!OMAP_ENHANCEMENT_S3D || mParameters == null || s3dView == null) {
+        if (mParameters == null || s3dView == null) {
             return;
         }
 
         //get selected layout from camera hal; returns "none" in mono mode
         String currentPreviewLayout = mParameters.get(CameraSettings.KEY_S3D_PRV_FRAME_LAYOUT);
         if (currentPreviewLayout == null || !mS3dViewEnabled) {
-            s3dView.setLayout(S3DView.Layout.MONO);
+            s3dView.setMonoLayout();
             return;
         }
         if (currentPreviewLayout.equals(CameraSettings.TB_FULL_S3D_LAYOUT) ||
             currentPreviewLayout.equals(CameraSettings.TB_SUB_S3D_LAYOUT)) {
-            s3dView.setLayout(S3DView.Layout.TOPBOTTOM_L);
+            s3dView.setTopBottomLayout();
         } else if (currentPreviewLayout.equals(CameraSettings.SS_FULL_S3D_LAYOUT) ||
                    currentPreviewLayout.equals(CameraSettings.SS_SUB_S3D_LAYOUT)) {
-            s3dView.setLayout(S3DView.Layout.SIDE_BY_SIDE_LR);
+            s3dView.setSideBySideLayout();
         } else {
-            s3dView.setLayout(S3DView.Layout.MONO);
+            s3dView.setMonoLayout();
         }
     }
 

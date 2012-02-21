@@ -17,3 +17,5 @@
 -keep class * extends android.app.Activity {
   @com.ti.omap4.android.camera.OnClickAttr <methods>;
 }
+
+-dontnote com.ti.omap4.android.camera.S3DViewWrapper
