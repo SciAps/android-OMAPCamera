@@ -219,8 +219,9 @@ public class CameraSettings {
         // size to the first one in the list defined in "arrays.xml" and is also
         // supported by the driver.
         List<String> supported = new ArrayList<String>();
+        int pictureEntryValues = R.array.pref_camera_picturesize_entryvalues;
         String supp = null;
-        String captureLayout = parameters.get(KEY_CAPTURE_LAYOUT_VALUES);
+        String captureLayout = parameters.get(KEY_S3D_CAP_FRAME_LAYOUT);
         if (captureLayout !=null && !captureLayout.equals("")) {
             if (captureLayout.equals(TB_FULL_S3D_LAYOUT)) {
                 supp = parameters.get(KEY_SUPPORTED_PICTURE_TOPBOTTOM_SIZES);
@@ -229,6 +230,7 @@ public class CameraSettings {
                         supported.add(item);
                     }
                 }
+                pictureEntryValues = R.array.pref_camera_tb_picturesize_entryvalues;
             } else if (captureLayout.equals(SS_FULL_S3D_LAYOUT)) {
                 supp = parameters.get(KEY_SUPPORTED_PICTURE_SIDEBYSIDE_SIZES);
                 if (supp !=null && !supp.equals("")) {
@@ -236,6 +238,7 @@ public class CameraSettings {
                         supported.add(item);
                     }
                 }
+                pictureEntryValues = R.array.pref_camera_ss_picturesize_entryvalues;
             } else if(captureLayout.equals(SS_SUB_S3D_LAYOUT)|| captureLayout.equals(TB_SUB_S3D_LAYOUT)) {
                 supp = parameters.get(KEY_SUPPORTED_PICTURE_SUBSAMPLED_SIZES);
                 if (supp !=null && !supp.equals("")) {
@@ -257,8 +260,7 @@ public class CameraSettings {
         }
 
         if (supported == null) return;
-        for (String candidate : context.getResources().getStringArray(
-                R.array.pref_camera_picturesize_entryvalues)) {
+        for (String candidate : context.getResources().getStringArray(pictureEntryValues)) {
             if (setCameraPictureSize(candidate, supported, parameters)) {
                 SharedPreferences.Editor editor = ComboPreferences
                         .get(context).edit();
