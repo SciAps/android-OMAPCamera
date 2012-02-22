@@ -314,6 +314,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mMechanicalMisalignmentCorrection = null;
     private String mPreviewLayout = null;
     private boolean mIsPreviewLayoutInit = false;
+    private boolean mIsCaptureLayoutInit = false;
     private String mCaptureLayout = null;
     private String mPictureFormat = null;
     private long mFocusStartTime;
@@ -2644,20 +2645,28 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_CAPTURE_LAYOUT,
                 getString(R.string.pref_camera_capture_layout_default));
         }
-        if (!mCaptureLayout.equals(captureLayout)) {
+        if (captureLayout != null && !mCaptureLayout.equals(captureLayout)) {
+            if (!mIsCaptureLayoutInit) {
+                mInitialParams.set(CameraSettings.KEY_S3D_CAP_FRAME_LAYOUT, captureLayout);
+                CameraSettings settings = new CameraSettings(this, mInitialParams,
+                        mCameraId, CameraHolder.instance().getCameraInfo());
+                mPreferenceGroup = settings.getPreferenceGroup(R.xml.camera_preferences);
+                mIsCaptureLayoutInit = true;
+            }
             mParameters.set(CameraSettings.KEY_S3D_CAP_FRAME_LAYOUT, captureLayout);
             mCaptureLayout = captureLayout;
             captureLayoutUpdated = true;
         }
 
         if ((previewLayoutUpdated || captureLayoutUpdated) && mPreferenceGroup !=null) {
-            // Update preview size UI with the new sizes
+            CameraSettings settings = new CameraSettings(this, mInitialParams,
+                    mCameraId, CameraHolder.instance().getCameraInfo());
+             mPreferenceGroup = settings.getPreferenceGroup(R.xml.camera_preferences);
+
+             // Update preview size UI with the new sizes
              if (previewLayoutUpdated) {
                  ListPreference tbMenuSizes = null;
                  ListPreference ssMenuSizes = null;
-                 CameraSettings settings = new CameraSettings(this, mInitialParams,
-                        mCameraId, CameraHolder.instance().getCameraInfo());
-                 mPreferenceGroup = settings.getPreferenceGroup(R.xml.camera_preferences);
                  ListPreference menu2dSizes = getSupportedListPreference(CameraSettings.KEY_SUPPORTED_PREVIEW_SUBSAMPLED_SIZES,
                          CameraSettings.KEY_PREVIEW_SIZE_2D);
                  if (!is2DMode()) {

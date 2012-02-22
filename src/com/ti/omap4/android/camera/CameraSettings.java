@@ -561,12 +561,15 @@ public class CameraSettings {
 
         ArrayList<CharSequence[]> allPictureEntries = new ArrayList<CharSequence[]>();
         ArrayList<CharSequence[]> allPictureEntryValues = new ArrayList<CharSequence[]>();
-        allPictureEntries.add(previewSize2d.getEntries());
-        allPictureEntries.add(previewSizeTB.getEntries());
-        allPictureEntries.add(previewSizeSS.getEntries());
-        allPictureEntryValues.add(previewSize2d.getEntryValues());
-        allPictureEntryValues.add(previewSizeTB.getEntryValues());
-        allPictureEntryValues.add(previewSizeSS.getEntryValues());
+
+        if(pictureSize2d != null  && pictureSizeTB != null && pictureSizeSS != null){
+            allPictureEntries.add(pictureSize2d.getEntries());
+            allPictureEntries.add(pictureSizeTB.getEntries());
+            allPictureEntries.add(pictureSizeSS.getEntries());
+            allPictureEntryValues.add(pictureSize2d.getEntryValues());
+            allPictureEntryValues.add(pictureSizeTB.getEntryValues());
+            allPictureEntryValues.add(pictureSizeSS.getEntryValues());
+        }
 
         ListPreference filteredSizes = group.findPreference(key_picture_sizes);
         if (filteredSizes != null) {
