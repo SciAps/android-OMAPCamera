@@ -111,9 +111,11 @@ public class ListPreference extends CameraPreference {
             mLoaded = true;
         }
         String entry = findEntryByValue(mValue, allEntries, allEntryValues);
-        clearAllEntries();
-        mEntries = entries;
-        mEntryValues = entryValues;
+        if (entries != null && entryValues != null && entries.length > 0 && entryValues.length > 0) {
+            clearAllEntries();
+            mEntries = entries;
+            mEntryValues = entryValues;
+        }
         if (entry != null) {
             for (int i=0;i<mEntries.length;i++) {
                 if (entry.equals(mEntries[i].toString())) {
