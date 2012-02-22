@@ -2542,7 +2542,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         return null;
     }
 
-    private ListPreference getSupportedListPreference(String supportedKey, String menuKey, List<Size> sizes){
+    private ListPreference getSupportedListPreference(String supportedKey, String menuKey){
         List<String> supported = new ArrayList<String>();
         ListPreference menu = mPreferenceGroup.findPreference(menuKey);
         if (menu == null) return null;
@@ -2553,9 +2553,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                         supported.add(item);
                     }
                 }
-        }
-        if (sizes != null) {
-            supported = CameraSettings.sizeListToStringList(sizes);
         }
         CameraSettings.filterUnsupportedOptions(mPreferenceGroup, menu, supported);
         return menu;
@@ -2642,10 +2639,10 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                         mCameraId, CameraHolder.instance().getCameraInfo());
                  mPreferenceGroup = settings.getPreferenceGroup(R.xml.camera_preferences);
                  ListPreference menu2dSizes = getSupportedListPreference(CameraSettings.KEY_SUPPORTED_PREVIEW_SUBSAMPLED_SIZES,
-                         CameraSettings.KEY_PREVIEW_SIZE_2D, mParameters.getSupportedPreviewSizes());
+                         CameraSettings.KEY_PREVIEW_SIZE_2D);
                  if (!is2DMode()) {
-                     tbMenuSizes =  getSupportedListPreference(CameraSettings.KEY_SUPPORTED_PREVIEW_TOPBOTTOM_SIZES,CameraSettings.KEY_PREVIEW_SIZES_TB,null);
-                     ssMenuSizes =  getSupportedListPreference(CameraSettings.KEY_SUPPORTED_PREVIEW_SIDEBYSIDE_SIZES,CameraSettings.KEY_PREVIEW_SIZES_SS,null);
+                     tbMenuSizes =  getSupportedListPreference(CameraSettings.KEY_SUPPORTED_PREVIEW_TOPBOTTOM_SIZES,CameraSettings.KEY_PREVIEW_SIZES_TB);
+                     ssMenuSizes =  getSupportedListPreference(CameraSettings.KEY_SUPPORTED_PREVIEW_SIDEBYSIDE_SIZES,CameraSettings.KEY_PREVIEW_SIZES_SS);
                  }
                  ListPreference newPreviewSizes = null;
                  if (mPreviewLayout.equals(CameraSettings.SS_FULL_S3D_LAYOUT)) {
@@ -2674,12 +2671,12 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             // Update picture size UI with the new sizes
              if (captureLayoutUpdated) {
                  ListPreference menu2dSizes = getSupportedListPreference(CameraSettings.KEY_SUPPORTED_PICTURE_SUBSAMPLED_SIZES,
-                         CameraSettings.KEY_PICTURE_SIZE_2D, mParameters.getSupportedPictureSizes());
+                         CameraSettings.KEY_PICTURE_SIZE_2D);
                  ListPreference tbMenuSizes = null;
                  ListPreference ssMenuSizes = null;
                  if (!is2DMode()) {
-                     tbMenuSizes =  getSupportedListPreference(CameraSettings.KEY_SUPPORTED_PICTURE_TOPBOTTOM_SIZES,CameraSettings.KEY_PICTURE_SIZES_TB,null);
-                     ssMenuSizes =  getSupportedListPreference(CameraSettings.KEY_SUPPORTED_PICTURE_SIDEBYSIDE_SIZES,CameraSettings.KEY_PICTURE_SIZES_SS,null);
+                     tbMenuSizes =  getSupportedListPreference(CameraSettings.KEY_SUPPORTED_PICTURE_TOPBOTTOM_SIZES,CameraSettings.KEY_PICTURE_SIZES_TB);
+                     ssMenuSizes =  getSupportedListPreference(CameraSettings.KEY_SUPPORTED_PICTURE_SIDEBYSIDE_SIZES,CameraSettings.KEY_PICTURE_SIZES_SS);
                  }
                  ListPreference newPictureSizes = null;
                  if (mCaptureLayout.equals(CameraSettings.SS_FULL_S3D_LAYOUT)) {
