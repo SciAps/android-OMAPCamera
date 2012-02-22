@@ -2028,6 +2028,26 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         if ( null == mPictureFormat ) {
             mPictureFormat = getString(R.string.pref_camera_picture_format_default);
         }
+
+        // Preview layout and size
+        if (mPausing) {
+            mPreviewLayout = getString(R.string.pref_camera_preview_layout_default);
+            mCaptureLayout = getString(R.string.pref_camera_capture_layout_default);
+
+            String[] previewDefaults = getResources().getStringArray(R.array.pref_camera_previewsize_default_array);
+            String defaultPreviewSize = "";
+            if (mPreviewLayout.equals(CameraSettings.TB_FULL_S3D_LAYOUT)) {
+                String[] tbPreviewSizes = getResources().getStringArray(R.array.pref_camera_tb_previewsize_entryvalues);
+                defaultPreviewSize = elementExists(previewDefaults, tbPreviewSizes);
+            } else if (mPreviewLayout.equals(CameraSettings.SS_FULL_S3D_LAYOUT)) {
+                String[] ssPreviewSizes = getResources().getStringArray(R.array.pref_camera_ss_previewsize_entryvalues);
+                defaultPreviewSize = elementExists(previewDefaults, ssPreviewSizes);
+            } else {
+                String[] previewSizes2D = getResources().getStringArray(R.array.pref_camera_previewsize_entryvalues);
+                defaultPreviewSize = elementExists(previewDefaults, previewSizes2D);
+            }
+            mPreviewSize = defaultPreviewSize;
+        }
     }
 
     @Override
