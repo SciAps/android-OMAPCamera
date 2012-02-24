@@ -2041,6 +2041,11 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mPictureFormat = getString(R.string.pref_camera_picture_format_default);
         }
 
+        if (mParameters.isZoomSupported()) {
+            mZoomValue = 0;
+            mZoomControl.setZoomIndex(mZoomValue);
+            mZoomControl.startZoomControl();
+        }
         // Preview layout and size
         if (mPausing) {
             mPreviewLayout = null;
@@ -3614,7 +3619,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         if (mParameters.isZoomSupported()) {
             mZoomValue = 0;
             setCameraParametersWhenIdle(UPDATE_PARAM_ZOOM);
-            mZoomControl.setZoomIndex(0);
+            mZoomControl.setZoomIndex(mZoomValue);
+            mZoomControl.startZoomControl();
         }
         if (mIndicatorControlContainer != null) {
             mIndicatorControlContainer.dismissSettingPopup();
