@@ -38,7 +38,7 @@ abstract public class ActivityBase extends Activity {
     private int mResultCodeForTesting;
     private boolean mOnResumePending;
     private Intent mResultDataForTesting;
-    protected Camera mCameraDevice;
+    protected Camera mCameraDevice = null;
 
     @Override
     public void onCreate(Bundle icicle) {

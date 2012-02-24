@@ -108,6 +108,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final int RESTART_PREVIEW = 10;
     public static final int MANUAL_CONVERGENCE_CHANGED = 11;
     public static final int MANUAL_GAIN_EXPOSURE_CHANGED = 12;
+    public static final int RELEASE_CAMERA = 13;
     // The subset of parameters we need to update in setCameraParameters().
     private static final int UPDATE_PARAM_INITIALIZE = 1;
     private static final int UPDATE_PARAM_ZOOM = 2;
@@ -120,6 +121,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private int mUpdateSet;
 
     private static final int SCREEN_DELAY = 2 * 60 * 1000;
+    private static final int CAMERA_RELEASE_DELAY = 3000;
 
     private static final int ZOOM_STOPPED = 0;
     private static final int ZOOM_START = 1;
@@ -476,6 +478,11 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                     if (mCameraDevice != null) {
                         mCameraDevice.setParameters(mParameters);
                     }
+                    break;
+                }
+                case RELEASE_CAMERA: {
+                    stopPreview();
+                    closeCamera();
                     break;
                 }
             }
@@ -971,6 +978,12 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         public void onPictureTaken(
                 final byte [] jpegData, final android.hardware.Camera camera) {
             if (mPausing) {
+                if (mBurstImages > 0) {
+                    resetBurst();
+                    mBurstImages = 0;
+                    mHandler.sendEmptyMessageDelayed(RELEASE_CAMERA,
+                                                     CAMERA_RELEASE_DELAY);
+                }
                 return;
             }
 
@@ -1064,12 +1077,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             if (mBurstRunning) {
                 mBurstImages --;
                 if (mBurstImages == 0) {
-                    mParameters.set(PARM_BURST, 0);
-                    mCameraDevice.setParameters(mParameters);
-                    Editor editor = mPreferences.edit();
-                    editor.putString(CameraSettings.KEY_BURST, "0");
-                    editor.apply();
-                    mIndicatorControlContainer.reloadPreferences();
+                    resetBurst();
                     mBurstRunning = false;
                     mHandler.sendEmptyMessageDelayed(RESTART_PREVIEW, 0);
                 }
@@ -1149,7 +1157,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     // onPause() or showSharePopup()) because the time to finishing a long queue
     // of work may be too long.
     private class ImageSaver extends Thread {
-        private static final int QUEUE_LIMIT = 3;
+        private static final int QUEUE_LIMIT = 15;
 
         private ArrayList<SaveRequest> mQueue;
         private Thumbnail mPendingThumbnail;
@@ -2044,6 +2052,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     protected void doOnResume() {
         if (mOpenCameraFail || mCameraDisabled) return;
 
+        mHandler.removeMessages(RELEASE_CAMERA);
+
         initDefaults();
 
         mPausing = false;
@@ -2054,7 +2064,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         // Start the preview if it is not started.
         if (mCameraState == PREVIEW_STOPPED) {
             try {
-                mCameraDevice = Util.openCamera(this, mCameraId);
+                if ( null == mCameraDevice ) {
+                    mCameraDevice = Util.openCamera(this, mCameraId);
+                }
                 initializeCapabilities();
                 resetExposureCompensation();
                 startPreview(true);
@@ -2090,10 +2102,26 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     @Override
     protected void onPause() {
         mPausing = true;
-        stopPreview();
-        // Close the camera now because other activities may need to use it.
-        closeCamera();
+
+        // Delay Camera release if
+        // burst is still running
+        if ( !mBurstRunning ) {
+            stopPreview();
+            closeCamera();
+        } else {
+            try {
+                mCameraDevice.startPreview();
+            } catch (Throwable ex) {
+                closeCamera();
+                throw new RuntimeException("startPreview failed", ex);
+            }
+
+            setCameraState(IDLE);
+            mBurstRunning = false;
+        }
+
         if (mCameraSound != null) mCameraSound.release();
+
         resetScreenOn();
 
         // Clear UI.
@@ -3476,6 +3504,15 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     public void onUserInteraction() {
         super.onUserInteraction();
         keepScreenOnAwhile();
+    }
+
+    private void resetBurst() {
+        mParameters.set(PARM_BURST, 0);
+        mCameraDevice.setParameters(mParameters);
+        Editor editor = mPreferences.edit();
+        editor.putString(CameraSettings.KEY_BURST, "0");
+        editor.apply();
+        mIndicatorControlContainer.reloadPreferences();
     }
 
     private void resetScreenOn() {
