@@ -263,8 +263,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final String PARM_IPP_LDCNSF = "ldc-nsf";
     private static final String PARM_IPP_NONE = "off";
     private static final String PARM_BURST = "burst-capture";
-    private static final String PARM_TEMPORAL_BRACKETING_ENABLE = "enable";
-    private static final String PARM_TEMPORAL_BRACKETING_DISABLE = "disable";
     private static final String PARM_EXPOSURE_BRACKETING_RANGE = "exp-bracketing-range";
     private static final String EXPOSURE_BRACKETING_RANGE_VALUE = "-30,0,30";
     private static final int EXPOSURE_BRACKETING_COUNT = 3;
@@ -2524,15 +2522,13 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     }
 
     private void startTemporalBracketing() {
-        mParameters.set(CameraSettings.KEY_TEMPORAL_BRACKETING,
-                PARM_TEMPORAL_BRACKETING_ENABLE);
+        mParameters.set(CameraSettings.KEY_TEMPORAL_BRACKETING, TRUE);
         mCameraDevice.setParameters(mParameters);
     }
 
     private void stopTemporalBracketing() {
         mFocusManager.setTempBracketingState(FocusManager.TempBracketingStates.OFF);
-        mParameters.set(CameraSettings.KEY_TEMPORAL_BRACKETING,
-                PARM_TEMPORAL_BRACKETING_DISABLE);
+        mParameters.set(CameraSettings.KEY_TEMPORAL_BRACKETING, FALSE);
         mCameraDevice.setParameters(mParameters);
         mParameters.remove(CameraSettings.KEY_TEMPORAL_BRACKETING);
     }
@@ -3339,22 +3335,19 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             params.set(PARM_IPP, PARM_IPP_NONE);
             mTempBracketingEnabled = false;
             params.remove(PARM_EXPOSURE_BRACKETING_RANGE);
-            params.set(CameraSettings.KEY_TEMPORAL_BRACKETING,
-                    PARM_TEMPORAL_BRACKETING_DISABLE);
+            params.set(CameraSettings.KEY_TEMPORAL_BRACKETING, FALSE);
         } else if ( mode.equals(mHighQuality) ) {
             params.set(CameraSettings.KEY_MODE, mHighQuality);
             params.set(PARM_IPP, PARM_IPP_LDCNSF);
             mTempBracketingEnabled = false;
             params.remove(PARM_EXPOSURE_BRACKETING_RANGE);
-            params.set(CameraSettings.KEY_TEMPORAL_BRACKETING,
-                    PARM_TEMPORAL_BRACKETING_DISABLE);
+            params.set(CameraSettings.KEY_TEMPORAL_BRACKETING, FALSE);
         } else if ( mode.equals(mHighQualityZsl) ) {
             params.set(CameraSettings.KEY_MODE, mHighQualityZsl);
             params.set(PARM_IPP, PARM_IPP_NONE);
             mTempBracketingEnabled = false;
             params.remove(PARM_EXPOSURE_BRACKETING_RANGE);
-            params.set(CameraSettings.KEY_TEMPORAL_BRACKETING,
-                    PARM_TEMPORAL_BRACKETING_DISABLE);
+            params.set(CameraSettings.KEY_TEMPORAL_BRACKETING, FALSE);
         } else if ( mode.equals(mTemporalBracketing) ) {
             params.set(CameraSettings.KEY_MODE, mHighPerformance);
             params.set(PARM_IPP, PARM_IPP_NONE);
@@ -3371,14 +3364,12 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             params.set(PARM_GBCE, PARM_GBCE_OFF);
             params.set(PARM_IPP, PARM_IPP_NONE);
             params.set(PARM_BURST, EXPOSURE_BRACKETING_COUNT);
-            params.set(PARM_EXPOSURE_BRACKETING_RANGE,
-                              EXPOSURE_BRACKETING_RANGE_VALUE);
+            params.set(PARM_EXPOSURE_BRACKETING_RANGE, EXPOSURE_BRACKETING_RANGE_VALUE);
             mBurstImages = EXPOSURE_BRACKETING_COUNT;
 
             //Disable Temporal Brackerting
             mTempBracketingEnabled = false;
-            params.set(CameraSettings.KEY_TEMPORAL_BRACKETING,
-                                       PARM_TEMPORAL_BRACKETING_DISABLE);
+            params.set(CameraSettings.KEY_TEMPORAL_BRACKETING, FALSE);
 
         } else {
             // Default to HQ with LDC&NSF
