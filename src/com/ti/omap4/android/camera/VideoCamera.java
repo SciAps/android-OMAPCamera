@@ -963,6 +963,10 @@ public class VideoCamera extends ActivityBase
         mAutoConvergence = getString(R.string.pref_camera_autoconvergence_default);
         mMechanicalMisalignmentCorrection = getString(R.string.pref_camera_mechanical_misalignment_correction_default);
 
+        if (mPausing) {
+            mPreviewLayout = null;
+        }
+
         mPausing = false;
         mZoomValue = 0;
 
