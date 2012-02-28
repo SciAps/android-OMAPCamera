@@ -727,6 +727,7 @@
     <string name="pref_camera_layout_entry_ss_full">SS Full</string>
     <string name="pref_camera_layout_entry_ss_subsampled">SS Subsampled</string>
 
+    <string name="pref_camera_s3d_default" translatable="false">on</string>
     <string name="pref_camera_s3d_title">S3D View</string>
     <string name="pref_camera_s3d_on">On</string>
     <string name="pref_camera_s3d_off">Off</string>

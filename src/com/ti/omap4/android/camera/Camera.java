@@ -2372,21 +2372,19 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     }
 
     private void setSurfaceLayout() {
-        if (mParameters == null || s3dView == null) {
+        if (mPreviewLayout == null || s3dView == null) {
             return;
         }
 
-        //get selected layout from camera hal; returns "none" in mono mode
-        String currentPreviewLayout = mParameters.get(CameraSettings.KEY_S3D_PRV_FRAME_LAYOUT);
-        if (currentPreviewLayout == null || !mS3dViewEnabled) {
+        if (!mS3dViewEnabled) {
             s3dView.setMonoLayout();
             return;
         }
-        if (currentPreviewLayout.equals(CameraSettings.TB_FULL_S3D_LAYOUT) ||
-            currentPreviewLayout.equals(CameraSettings.TB_SUB_S3D_LAYOUT)) {
+        if (mPreviewLayout.equals(CameraSettings.TB_FULL_S3D_LAYOUT) ||
+            mPreviewLayout.equals(CameraSettings.TB_SUB_S3D_LAYOUT)) {
             s3dView.setTopBottomLayout();
-        } else if (currentPreviewLayout.equals(CameraSettings.SS_FULL_S3D_LAYOUT) ||
-                   currentPreviewLayout.equals(CameraSettings.SS_SUB_S3D_LAYOUT)) {
+        } else if (mPreviewLayout.equals(CameraSettings.SS_FULL_S3D_LAYOUT) ||
+                   mPreviewLayout.equals(CameraSettings.SS_SUB_S3D_LAYOUT)) {
             s3dView.setSideBySideLayout();
         } else {
             s3dView.setMonoLayout();
@@ -2624,7 +2622,14 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             restartNeeded  = true;
         }
 
-        mS3dViewEnabled = mPreferences.getString(CameraSettings.KEY_S3D_MENU, "off").equals("off") ? false : true;
+        if (!is2DMode()) {
+            String s3dViewEnabled = mPreferences.getString(
+                    CameraSettings.KEY_S3D_MENU,
+                    getString(R.string.pref_camera_s3d_default));
+            mS3dViewEnabled = s3dViewEnabled.equals("on");
+        } else {
+            mS3dViewEnabled = false;
+        }
 
         String captureLayout = null;
         if (is2DMode()) {
