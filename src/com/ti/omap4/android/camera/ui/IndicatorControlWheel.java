@@ -61,8 +61,14 @@ public class IndicatorControlWheel extends IndicatorControl implements
     private static final int FIRST_LEVEL_SECTOR_DEGREES = 45;
     private static final int SECOND_LEVEL_START_DEGREES = 60;
     private static final int SECOND_LEVEL_END_DEGREES = 300;
+    private static final int MIN_ZOOM_CONTROL_DEGREES = 90;
     private static final int MAX_ZOOM_CONTROL_DEGREES = 264;
     private static final int CLOSE_ICON_DEFAULT_DEGREES = 315;
+
+    private static final double MIN_ZOOM_CONTROL_RADIANS = Math.toRadians(MIN_ZOOM_CONTROL_DEGREES);
+    private static final double MAX_ZOOM_CONTROL_RADIANS = Math.toRadians(MAX_ZOOM_CONTROL_DEGREES);
+    private static final double FIRST_LEVEL_START_RADIANS = Math.toRadians(FIRST_LEVEL_START_DEGREES);
+    private static final double FIRST_LEVEL_END_RADIANS = Math.toRadians(FIRST_LEVEL_END_DEGREES);
 
     private static final int ANIMATION_TIME = 300; // milliseconds
 
@@ -239,10 +245,12 @@ public class IndicatorControlWheel extends IndicatorControl implements
                     - halfTouchSectorRadians)) {
                 return (startIndex + index + 1);
             }
-
-            // It must be for zoom control if the touch event is in the visible
-            // range and not for other indicator buttons.
-            if ((mCurrentLevel == 0) && (mZoomControl != null)) return 0;
+        }
+        //Check if touch event in zoom control range
+        if((mCurrentLevel == 0) && (mZoomControl != null)&&
+                (delta >= (MIN_ZOOM_CONTROL_RADIANS - halfTouchSectorRadians)) &&
+                (delta <= (MAX_ZOOM_CONTROL_RADIANS + halfTouchSectorRadians))) {
+            return 0;
         }
         return -1;
     }
@@ -325,7 +333,7 @@ public class IndicatorControlWheel extends IndicatorControl implements
         // We also need to rotate the zoom control wheel as well.
         if (mZoomControl != null) {
             mZoomControl.rotate(mChildRadians[0]
-                    - Math.toRadians(MAX_ZOOM_CONTROL_DEGREES));
+                    - MAX_ZOOM_CONTROL_RADIANS);
         }
     }
 
@@ -376,19 +384,19 @@ public class IndicatorControlWheel extends IndicatorControl implements
 
     private void presetFirstLevelChildRadians() {
         // Set the visible range in the first-level indicator wheel.
-        mStartVisibleRadians[0] = Math.toRadians(FIRST_LEVEL_START_DEGREES);
+        mStartVisibleRadians[0] = FIRST_LEVEL_START_RADIANS;
         mTouchSectorRadians[0] = HIGHLIGHT_RADIANS;
-        mEndVisibleRadians[0] = Math.toRadians(FIRST_LEVEL_END_DEGREES);
+        mEndVisibleRadians[0] = FIRST_LEVEL_END_RADIANS;
 
         // Set the angle of each component in the first-level indicator wheel.
         int startIndex = 0;
         if (mZoomControl != null) {
-            mChildRadians[startIndex++] = Math.toRadians(MAX_ZOOM_CONTROL_DEGREES);
+            mChildRadians[startIndex++] = MAX_ZOOM_CONTROL_RADIANS;
         }
         if (mCameraPicker != null) {
-            mChildRadians[startIndex++] = Math.toRadians(FIRST_LEVEL_START_DEGREES);
+            mChildRadians[startIndex++] = FIRST_LEVEL_START_RADIANS;
         }
-        mChildRadians[startIndex++] = Math.toRadians(FIRST_LEVEL_END_DEGREES);
+        mChildRadians[startIndex++] = FIRST_LEVEL_END_RADIANS;
     }
 
     private void presetSecondLevelChildRadians() {
