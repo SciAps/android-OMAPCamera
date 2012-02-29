@@ -2050,6 +2050,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mZoomControl.setZoomIndex(mZoomValue);
             mZoomControl.startZoomControl();
         }
+
         // Preview layout and size
         if (mPausing) {
             mPreviewLayout = null;
@@ -2559,10 +2560,12 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private void updateCameraParametersInitialize() {
         // Reset preview frame rate to the maximum because it may be lowered by
         // video camera application.
-        List<Integer> frameRates = mParameters.getSupportedPreviewFrameRates();
+        List<int[]> frameRates = mParameters.getSupportedPreviewFpsRange();
         if (frameRates != null) {
-            Integer max = Collections.max(frameRates);
-            mParameters.setPreviewFrameRate(max);
+            int last = frameRates.size() - 1;
+            int min = (frameRates.get(last))[mParameters.PREVIEW_FPS_MIN_INDEX];
+            int max = (frameRates.get(last))[mParameters.PREVIEW_FPS_MAX_INDEX];
+            mParameters.setPreviewFpsRange(min,max);
         }
 
         mParameters.setRecordingHint(false);
