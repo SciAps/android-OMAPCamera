@@ -76,7 +76,7 @@ public class Util {
     // Orientation hysteresis amount used in rounding, in degrees
     public static final int ORIENTATION_HYSTERESIS = 5;
 
-    public static final String REVIEW_ACTION = "com.ti.omap4.android.camera.action.REVIEW";
+    public static final String REVIEW_ACTION = "com.android.camera.action.REVIEW";
 
     // Private intent extras. Test only.
     private static final String EXTRAS_CAMERA_FACING =
