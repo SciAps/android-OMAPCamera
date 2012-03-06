@@ -77,23 +77,22 @@ public class ManualConvergenceSettings extends Dialog {
                 public void onClick(View v) {
                     if (mConvergenceValue != mManualConvergence) {
                         Message msg = new Message();
-                        msg.obj = (Integer) (mManualConvergence + mMinConvergence);
+                        msg.obj = (Integer) (mManualConvergence);
                         msg.what = Camera.MANUAL_CONVERGENCE_CHANGED;
                         cameraHandler.sendMessage(msg);
                     }
-                dismiss();
+                    dismiss();
                 }
         });
 
         manualConvergenceControl.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                public void onProgressChanged(SeekBar seekBar,
-                    int progress, boolean fromUser) {
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                     manualConvergenceCaption = (TextView) findViewById(R.id.convergence_caption);
-                    mManualConvergence = progress;
-                        String sCaption = context.getString(R.string.settings_manual_convergence_caption);
-                        sCaption = sCaption + " " + Integer.toString(mManualConvergence+mMinConvergence);
-                        manualConvergenceCaption.setText(sCaption);
-                    }
+                    mManualConvergence = progress + mMinConvergence;
+                    String sCaption = context.getString(R.string.settings_manual_convergence_caption);
+                    sCaption = sCaption + " " + Integer.toString(mManualConvergence);
+                    manualConvergenceCaption.setText(sCaption);
+                }
             public void onStartTrackingTouch(SeekBar seekBar) {
             }
             public void onStopTrackingTouch(SeekBar seekBar) {
