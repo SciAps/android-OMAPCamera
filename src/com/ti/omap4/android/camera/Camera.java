@@ -2713,10 +2713,14 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                  allEntries.add(menu2dSizes.getEntries());
                  allEntryValues.add(menu2dSizes.getEntryValues());
                  if (!is2DMode()) {
-                     allEntries.add(tbMenuSizes.getEntries());
-                     allEntries.add(ssMenuSizes.getEntries());
-                     allEntryValues.add(tbMenuSizes.getEntryValues());
-                     allEntryValues.add(ssMenuSizes.getEntryValues());
+                     if (tbMenuSizes != null) {
+                         allEntries.add(tbMenuSizes.getEntries());
+                         allEntryValues.add(tbMenuSizes.getEntryValues());
+                     }
+                     if (ssMenuSizes != null) {
+                         allEntries.add(ssMenuSizes.getEntries());
+                         allEntryValues.add(ssMenuSizes.getEntryValues());
+                     }
                  }
 
                  if (mIndicatorControlContainer != null ) {
@@ -2749,10 +2753,14 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                      allEntryValues.add(menu2dSizes.getEntryValues());
                  }
                  if (!is2DMode()) {
-                     allEntries.add(tbMenuSizes.getEntries());
-                     allEntries.add(ssMenuSizes.getEntries());
-                     allEntryValues.add(tbMenuSizes.getEntryValues());
-                     allEntryValues.add(ssMenuSizes.getEntryValues());
+                     if (tbMenuSizes != null) {
+                         allEntries.add(tbMenuSizes.getEntries());
+                         allEntryValues.add(tbMenuSizes.getEntryValues());
+                     }
+                     if (ssMenuSizes != null) {
+                         allEntries.add(ssMenuSizes.getEntries());
+                         allEntryValues.add(ssMenuSizes.getEntryValues());
+                     }
                  }
 
                  if (mIndicatorControlContainer != null ) {
