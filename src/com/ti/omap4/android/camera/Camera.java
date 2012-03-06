@@ -1069,8 +1069,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 mBurstImages --;
                 if (mBurstImages == 0 ) {
                     mHandler.sendEmptyMessageDelayed(RESTART_PREVIEW, 0);
-                    mFocusManager.setTempBracketingState(FocusManager.TempBracketingStates.OFF);
                     mTempBracketingEnabled = true;
+                    stopTemporalBracketing();
                 }
             }
 
@@ -1094,12 +1094,16 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mAutoFocusTime = System.currentTimeMillis() - mFocusStartTime;
             Log.v(TAG, "mAutoFocusTime = " + mAutoFocusTime + "ms");
             setCameraState(IDLE);
-            mFocusManager.onAutoFocus(focused);
+
             // If focus completes and the snapshot is not started, enable the
             // controls.
             if (mFocusManager.isFocusCompleted() && (!mTempBracketingEnabled)) {
                 enableCameraControls(true);
+            } else if ( mTempBracketingEnabled ) {
+                startTemporalBracketing();
             }
+
+            mFocusManager.onAutoFocus(focused);
         }
     }
 
@@ -2518,9 +2522,28 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         }
     }
 
+    private void startTemporalBracketing() {
+        mParameters.set(CameraSettings.KEY_TEMPORAL_BRACKETING,
+                PARM_TEMPORAL_BRACKETING_ENABLE);
+        mCameraDevice.setParameters(mParameters);
+    }
+
+    private void stopTemporalBracketing() {
+        mFocusManager.setTempBracketingState(FocusManager.TempBracketingStates.OFF);
+        mParameters.set(CameraSettings.KEY_TEMPORAL_BRACKETING,
+                PARM_TEMPORAL_BRACKETING_DISABLE);
+        mCameraDevice.setParameters(mParameters);
+        mParameters.remove(CameraSettings.KEY_TEMPORAL_BRACKETING);
+    }
+
     private void stopPreview() {
         if (mCameraDevice != null && mCameraState != PREVIEW_STOPPED) {
             Log.v(TAG, "stopPreview");
+
+            if ( mTempBracketingEnabled ) {
+                stopTemporalBracketing();
+            }
+
             mCameraDevice.cancelAutoFocus(); // Reset the focus.
             mCameraDevice.stopPreview();
             mFaceDetectionStarted = false;
@@ -3337,8 +3360,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             //Enable Temporal Bracketing
             mTempBracketingEnabled = true;
             params.remove(PARM_EXPOSURE_BRACKETING_RANGE);
-            params.set(CameraSettings.KEY_TEMPORAL_BRACKETING,
-                                       PARM_TEMPORAL_BRACKETING_ENABLE);
 
         } else if ( mode.equals(mExposureBracketing) ) {
 
