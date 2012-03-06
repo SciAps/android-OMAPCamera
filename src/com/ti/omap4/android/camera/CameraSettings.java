@@ -272,9 +272,41 @@ public class CameraSettings {
         Log.e(TAG, "No supported picture size found");
     }
 
+    public static void initialFrameRate(Context context, Parameters parameters) {
+        List<Integer> supported = parameters.getSupportedPreviewFrameRates();
+        for (String candidate : context.getResources().getStringArray(R.array.pref_camera_previewframerate_entryvalues)) {
+            if (setCameraFrameRate(candidate, supported, parameters)) {
+                SharedPreferences.Editor editor = ComboPreferences
+                        .get(context).edit();
+                editor.putString(KEY_PREVIEW_FRAMERATE, candidate);
+                editor.apply();
+                return;
+            }
+        }
+    }
+
     public static void removePreferenceFromScreen(
             PreferenceGroup group, String key) {
         removePreference(group, key);
+    }
+
+    public static boolean setCameraFrameRate(String candidate,List<Integer> supported, Parameters parameters) {
+        int intCandidate = Integer.parseInt(candidate);
+        if (supported.indexOf(intCandidate) >= 0) {
+            List<int[]> supportedRanges = parameters.getSupportedPreviewFpsRange();
+            boolean isRangeSupported = false;
+            for (int[] arr : supportedRanges) {
+                if (((intCandidate * 1000) == arr[0]) && ((intCandidate * 1000) == arr[1])) {
+                    isRangeSupported = true;
+                    break;
+                }
+            }
+            if (isRangeSupported) {
+                parameters.setPreviewFpsRange(intCandidate * 1000, intCandidate * 1000);
+                return true;
+            }
+        }
+        return false;
     }
 
     public static boolean setCameraPictureSize(

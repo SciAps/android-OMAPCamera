@@ -2832,12 +2832,13 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
         // Set Preview Framerate
         String framerate =  mPreferences.getString(
-                    CameraSettings.KEY_PREVIEW_FRAMERATE,
-                    getString(R.string.pref_camera_previewframerate_default));
+                CameraSettings.KEY_PREVIEW_FRAMERATE, null);
 
-        if ( !framerate.equals(mLastPreviewFramerate) ) {
-            mParameters.setPreviewFpsRange(Integer.parseInt(framerate)*1000,
-                                           Integer.parseInt(framerate)*1000);
+        if ( framerate == null ) {
+            CameraSettings.initialFrameRate(this, mParameters);
+        } else if (!framerate.equals(mLastPreviewFramerate) ) {
+            mParameters.setPreviewFpsRange(Integer.parseInt(framerate) * 1000,
+                    Integer.parseInt(framerate) * 1000);
             mLastPreviewFramerate = framerate;
             restartNeeded = true;
         }
