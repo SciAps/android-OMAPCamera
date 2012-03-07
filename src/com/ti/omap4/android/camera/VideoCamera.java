@@ -185,8 +185,6 @@ public class VideoCamera extends ActivityBase
     private boolean mOpenCameraFail = false;
     private boolean mCameraDisabled = false;
 
-    private boolean mRecordingTimerEnabled = true;
-
     private long mStorageSpace;
 
     private static final String PARM_VNF = "vnf";
@@ -560,6 +558,12 @@ public class VideoCamera extends ActivityBase
         } else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
+    }
+
+    private boolean isRecordingTimerEnabled() {
+        final String timer = mPreferences.getString(CameraSettings.KEY_VIDEO_TIMER,
+                getString(R.string.pref_camera_video_timer_default));
+        return Boolean.parseBoolean(timer);
     }
 
     private void loadCameraPreferences() {
@@ -1810,7 +1814,7 @@ public class VideoCamera extends ActivityBase
             mIndicatorControlContainer.dismissSecondLevelIndicator();
             if (mThumbnailView != null) mThumbnailView.setEnabled(false);
             mShutterButton.setBackgroundResource(R.drawable.btn_shutter_video_recording);
-            if ( mRecordingTimerEnabled ) {
+            if ( isRecordingTimerEnabled() ) {
                 mRecordingTimeView.setText("");
                 mRecordingTimeView.setVisibility(View.VISIBLE);
             }
@@ -1828,7 +1832,7 @@ public class VideoCamera extends ActivityBase
         } else {
             if (mThumbnailView != null) mThumbnailView.setEnabled(true);
             mShutterButton.setBackgroundResource(R.drawable.btn_shutter_video);
-            if ( mRecordingTimerEnabled ) {
+            if ( isRecordingTimerEnabled() ) {
                 mRecordingTimeView.setVisibility(View.GONE);
             }
             if (mReviewControl != null) mReviewControl.setVisibility(View.VISIBLE);
@@ -2600,10 +2604,6 @@ public class VideoCamera extends ActivityBase
 
     private boolean videoPreferencesChanged() {
         Log.v(TAG, "videoPreferencesChanged +");
-
-        String timer = mPreferences.getString(CameraSettings.KEY_VIDEO_TIMER,
-                                              getString(R.string.pref_camera_video_timer_default));
-        mRecordingTimerEnabled = Boolean.parseBoolean(timer);
 
         // We need to restart the preview if VSTAB or VNF mode is changed.
         String vstab = mPreferences.getString(CameraSettings.KEY_VSTAB,
