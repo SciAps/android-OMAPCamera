@@ -1697,12 +1697,13 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     }
 
     private void overrideCameraSettings(final String flashMode,
-            final String whiteBalance, final String focusMode) {
+            final String whiteBalance, final String focusMode, final String exposure) {
         if (mIndicatorControlContainer != null) {
             mIndicatorControlContainer.overrideSettings(
                     CameraSettings.KEY_FLASH_MODE, flashMode,
                     CameraSettings.KEY_WHITE_BALANCE, whiteBalance,
-                    CameraSettings.KEY_FOCUS_MODE, focusMode);
+                    CameraSettings.KEY_FOCUS_MODE, focusMode,
+                    CameraSettings.KEY_EXPOSURE_COMPENSATION_MENU, exposure);
         }
     }
 
@@ -1733,23 +1734,15 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         }
     }
 
-    private void overrideCameraExposure(final String exposure) {
-        if (mIndicatorControlContainer != null) {
-            mIndicatorControlContainer.overrideSettings(
-                    CameraSettings.KEY_EXPOSURE_COMPENSATION_MENU, exposure);
-        }
-    }
-
     private void updateSceneModeUI() {
         // If scene mode is set, we cannot set flash mode, white balance, and
         // focus mode, instead, we read it from driver
         if (!Parameters.SCENE_MODE_AUTO.equals(mSceneMode)) {
             overrideCameraSettings(mParameters.getFlashMode(),
-                    mParameters.getWhiteBalance(), mParameters.getFocusMode());
-            overrideCameraExposure(getString(R.string.pref_exposure_default));
+                    mParameters.getWhiteBalance(), mParameters.getFocusMode(),
+                    getString(R.string.pref_exposure_default));
         } else {
-            overrideCameraSettings(null, null, null);
-            overrideCameraExposure(null);
+            overrideCameraSettings(null, null, null, null);
         }
 
         // GBCE/GLBCE is only available when in HQ mode
