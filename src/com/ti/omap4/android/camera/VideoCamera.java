@@ -215,7 +215,6 @@ public class VideoCamera extends ActivityBase
     private boolean mResetEffect = true;
     public static final String RESET_EFFECT_EXTRA = "reset_effect";
     public static final String BACKGROUND_URI_GALLERY_EXTRA = "background_uri_gallery";
-    private boolean mIsSnapSupported = false;
 
     private boolean mMediaRecorderRecording = false;
     private long mRecordingStartTime;
@@ -2279,16 +2278,16 @@ public class VideoCamera extends ActivityBase
         // The logic here is different from the logic in still-mode camera.
         // There we determine the preview size based on the picture size, but
         // here we determine the picture size based on the preview size.
-        List<Size> supported = mParameters.getSupportedPictureSizes();
-        Size optimalSize = Util.getOptimalVideoSnapshotPictureSize(supported,
-                (double) mDesiredPreviewWidth / mDesiredPreviewHeight);
-        Size original = mParameters.getPictureSize();
-        mIsSnapSupported = false;
-        if (optimalSize !=null && !original.equals(optimalSize)) {
-            mIsSnapSupported = true;
-            mParameters.setPictureSize(optimalSize.width, optimalSize.height);
-            Log.v(TAG, "Video snapshot size is " + optimalSize.width + "x" +
-                    optimalSize.height);
+        if (mParameters.isVideoSnapshotSupported()) {
+            List<Size> supported = mParameters.getSupportedPictureSizes();
+            Size optimalSize = Util.getOptimalVideoSnapshotPictureSize(supported,
+                    (double) mDesiredPreviewWidth / mDesiredPreviewHeight);
+            Size original = mParameters.getPictureSize();
+            if (!original.equals(optimalSize)) {
+                mParameters.setPictureSize(optimalSize.width, optimalSize.height);
+                Log.v(TAG, "Video snapshot size is " + optimalSize.width + "x" +
+                        optimalSize.height);
+            }
         }
 
         // Set JPEG quality.
@@ -2874,7 +2873,7 @@ public class VideoCamera extends ActivityBase
             }
         }
 
-        if(mIsSnapSupported){
+        if (mParameters.isVideoSnapshotSupported()) {
             if (mPausing || mSnapshotInProgress
                     || !mMediaRecorderRecording || effectsActive()) {
                 return false;
