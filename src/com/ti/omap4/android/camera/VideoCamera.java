@@ -2364,6 +2364,16 @@ public class VideoCamera extends ActivityBase
         mParameters.set(PARM_VNF, vnf);
         Log.v(TAG,"VNF Set to ["+ vnf +"]");
 
+        // Set exposure compensation
+        int value = CameraSettings.readExposure(mPreferences);
+        int max = mParameters.getMaxExposureCompensation();
+        int min = mParameters.getMinExposureCompensation();
+        if (value >= min && value <= max) {
+            mParameters.setExposureCompensation(value);
+        } else {
+            Log.w(TAG, "invalid exposure range: " + value);
+        }
+
         mCameraDevice.setParameters(mParameters);
         // Keep preview size up to date.
         mParameters = mCameraDevice.getParameters();
