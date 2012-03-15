@@ -484,7 +484,6 @@ public class VideoCamera extends ActivityBase
 
         mTouchManager = new TouchManager();
 
-
         // Make sure preview is started.
         try {
             startPreviewThread.join();
@@ -500,6 +499,7 @@ public class VideoCamera extends ActivityBase
         }
 
         showTimeLapseUI(mCaptureTimeLapse);
+        findViewById(R.id.camera_preview).setOnTouchListener(this);
         initializeVideoSnapshot();
         resizeForPreviewAspectRatio();
 
@@ -939,7 +939,10 @@ public class VideoCamera extends ActivityBase
     protected void doOnResume() {
         if (mOpenCameraFail || mCameraDisabled) return;
 
-        mAutoConvergence = getString(R.string.pref_camera_autoconvergence_default);
+        if ( null == mAutoConvergence || mPausing ) {
+            mAutoConvergence = getString(R.string.pref_camera_autoconvergence_default);
+        }
+
         mMechanicalMisalignmentCorrection = getString(R.string.pref_camera_mechanical_misalignment_correction_default);
 
         if (mPausing) {
@@ -2801,7 +2804,6 @@ public class VideoCamera extends ActivityBase
 
     private void initializeVideoSnapshot() {
         if (mParameters.isVideoSnapshotSupported() && !mIsVideoCaptureIntent) {
-            findViewById(R.id.camera_preview).setOnTouchListener(this);
             // Show the tap to focus toast if this is the first start.
             if (mPreferences.getBoolean(
                         CameraSettings.KEY_VIDEO_FIRST_USE_HINT_SHOWN, true)) {
