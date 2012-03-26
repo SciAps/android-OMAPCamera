@@ -294,6 +294,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
     // Limits ZSL capture size due to some hardware limitations
     private static final String PARM_ZSL_SIZE = "2016x1512";
+    private static final String PARM_ZSL_SIZE_14MP = "4416x3312";
 
     private int mBurstImages = 0;
     private boolean mTempBracketingEnabled = false;
@@ -1643,9 +1644,16 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         if ( mCameraId == CameraHolder.instance().getBackCameraId() ) {
             // We limit the picture size during ZSL on
             // the back facing sensor.
+
             Editor editor = mPreferences.edit();
             editor.putString(CameraSettings.KEY_PICTURE_SIZE, PARM_ZSL_SIZE);
             editor.apply();
+
+            if ( CameraSettings.sizeListToStringList(
+                mParameters.getSupportedPictureSizes()).contains(PARM_ZSL_SIZE_14MP) ) {
+                editor.putString(CameraSettings.KEY_PICTURE_SIZE, PARM_ZSL_SIZE_14MP);
+                editor.apply();
+            }
 
             if (mIndicatorControlContainer != null) {
                 mIndicatorControlContainer.reloadPreferences();
