@@ -382,6 +382,16 @@ public class CameraSettings {
         ListPreference previewSizeSS = group.findPreference(KEY_PREVIEW_SIZES_SS);
         ListPreference s3d = group.findPreference(KEY_S3D_MENU);
 
+        if (pictureSize.getEntryValues().length != pictureSizeSS.getEntryValues().length ||
+                pictureSize.getEntryValues().length != pictureSizeTB.getEntryValues().length ||
+                pictureSize.getEntries().length != pictureSize.getEntryValues().length ||
+                previewSize.getEntryValues().length != previewSizeSS.getEntryValues().length ||
+                previewSize.getEntryValues().length != previewSizeTB.getEntryValues().length ||
+                previewSize.getEntries().length != previewSize.getEntryValues().length) {
+            Log.e(TAG, "Preview or picture entries length are not with the same size with entry values! Please check arrays.xml!");
+            return;
+        }
+
         if(s3d != null){
             List<String> supp = new ArrayList<String>();
             boolean mode2d = false;

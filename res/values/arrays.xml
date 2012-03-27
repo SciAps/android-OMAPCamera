@@ -115,6 +115,7 @@
     </string-array>
 
     <string-array name="pref_camera_tb_picturesize_entryvalues" translatable="false">
+        <item>4416x6624</item>
         <item>4032x6048</item>
         <item>3648x5472</item>
         <item>3264x4896</item>
@@ -129,6 +130,7 @@
     </string-array>
 
     <string-array name="pref_camera_ss_picturesize_entryvalues" translatable="false">
+        <item>8832x3312</item>
         <item>8064x3024</item>
         <item>7296x2736</item>
         <item>6528x2448</item>
