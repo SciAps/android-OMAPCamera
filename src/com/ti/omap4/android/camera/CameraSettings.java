@@ -343,6 +343,15 @@ public class CameraSettings {
        return false;
     }
 
+    private void checkPreferenceSizeMatches(ListPreference a, ListPreference b) {
+        if (a != null && b != null) {
+            if (a.getEntryValues().length != b.getEntryValues().length) {
+                throw new RuntimeException("Preference list sizes do not match for keys: " +
+                        a.getKey() + " and " + b.getKey() + ". Check the arrays.xml");
+            }
+        }
+    }
+
     private void initPreference(PreferenceGroup group) {
         ListPreference videoQuality = group.findPreference(KEY_VIDEO_QUALITY);
         ListPreference videoFormat = group.findPreference(KEY_VIDEO_FORMAT);
@@ -382,15 +391,10 @@ public class CameraSettings {
         ListPreference previewSizeSS = group.findPreference(KEY_PREVIEW_SIZES_SS);
         ListPreference s3d = group.findPreference(KEY_S3D_MENU);
 
-        if (pictureSize.getEntryValues().length != pictureSizeSS.getEntryValues().length ||
-                pictureSize.getEntryValues().length != pictureSizeTB.getEntryValues().length ||
-                pictureSize.getEntries().length != pictureSize.getEntryValues().length ||
-                previewSize.getEntryValues().length != previewSizeSS.getEntryValues().length ||
-                previewSize.getEntryValues().length != previewSizeTB.getEntryValues().length ||
-                previewSize.getEntries().length != previewSize.getEntryValues().length) {
-            Log.e(TAG, "Preview or picture entries length are not with the same size with entry values! Please check arrays.xml!");
-            return;
-        }
+        checkPreferenceSizeMatches(previewSize, previewSizeTB);
+        checkPreferenceSizeMatches(previewSize, previewSizeSS);
+        checkPreferenceSizeMatches(pictureSize, pictureSizeTB);
+        checkPreferenceSizeMatches(pictureSize, pictureSizeSS);
 
         if(s3d != null){
             List<String> supp = new ArrayList<String>();
