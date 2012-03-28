@@ -2163,8 +2163,6 @@ public class VideoCamera extends ActivityBase
 
         mParameters.setPreviewSize(mProfile.videoFrameWidth, mProfile.videoFrameHeight);
         filterVideoBitrateItems(mProfile.videoFrameWidth*mProfile.videoFrameHeight);
-        mCameraDevice.setParameters(mParameters);
-        //mParameters.setPreviewFrameRate(mProfile.videoFrameRate);
 
         // Set flash mode.
         String flashMode = mPreferences.getString(
@@ -2295,11 +2293,7 @@ public class VideoCamera extends ActivityBase
         }
        mProfile.videoFrameRate = maxFrameRate;
        mParameters.setPreviewFpsRange(minFrameRate*1000, maxFrameRate*1000);
-        try {
-            mCameraDevice.setParameters(mParameters);
-       } catch (Throwable ex) {
-            throw new RuntimeException("setParameters failed", ex);
-        }
+
         // Set Bitrate
         String bitrate = mPreferences.getString(CameraSettings.KEY_VIDEO_BITRATE, (getString(R.string.pref_camera_videobitrate_default)));
        mProfile.videoBitRate = Integer.parseInt(bitrate);
