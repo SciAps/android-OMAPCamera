@@ -2758,7 +2758,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         }
 
         if ((previewLayoutUpdated || captureLayoutUpdated) && mPreferenceGroup !=null) {
-            CameraSettings settings = new CameraSettings(this, mInitialParams,
+            CameraSettings settings = new CameraSettings(this, mParameters,
                     mCameraId, CameraHolder.instance().getCameraInfo());
              mPreferenceGroup = settings.getPreferenceGroup(R.xml.camera_preferences);
 
