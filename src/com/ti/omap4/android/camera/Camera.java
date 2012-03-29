@@ -2651,6 +2651,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         boolean restartNeeded = false;
         boolean previewLayoutUpdated = false;
         boolean captureLayoutUpdated = false;
+        boolean controlUpdateNeeded = false;
 
         if (mAeLockSupported) {
             mParameters.setAutoExposureLock(mFocusManager.getAeAwbLock());
@@ -3009,7 +3010,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             }
             CameraSettings.setCameraPreviewSize(previewSize, supported, mParameters);
             mPreviewSize = previewSize;
-            enableCameraControls(true);
             restartNeeded = true;
         }
         Size size = mParameters.getPreviewSize();
@@ -3020,7 +3020,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 size.width /= 2;
             }
         }
-        mPreviewFrameLayout.setAspectRatio((double) size.width / size.height);
+        if (mPreviewFrameLayout.setAspectRatio((double) size.width / size.height)) {
+            controlUpdateNeeded = true;
+        }
 
         // Exposure mode
         String exposureMode = mPreferences.getString(
@@ -3276,6 +3278,10 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
         if (!restartNeeded) {
             setSurfaceLayout();
+        }
+
+        if ((mIndicatorControlContainer != null) && (controlUpdateNeeded)) {
+            mIndicatorControlContainer.requestLayout();
         }
         return restartNeeded;
     }

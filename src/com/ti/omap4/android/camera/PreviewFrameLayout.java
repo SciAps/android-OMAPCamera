@@ -40,7 +40,8 @@ public class PreviewFrameLayout extends RelativeLayout {
         setAspectRatio(4.0 / 3.0);
     }
 
-    public void setAspectRatio(double ratio) {
+    /** Return true if Aspect ratio changed */
+    public boolean setAspectRatio(double ratio) {
         if (ratio <= 0.0) throw new IllegalArgumentException();
 
         if (((Activity) getContext()).getRequestedOrientation()
@@ -51,7 +52,9 @@ public class PreviewFrameLayout extends RelativeLayout {
         if (mAspectRatio != ratio) {
             mAspectRatio = ratio;
             requestLayout();
+            return true;
         }
+        return false;
     }
 
     public void showBorder(boolean enabled) {
