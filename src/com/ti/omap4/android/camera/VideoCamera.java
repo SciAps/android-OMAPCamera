@@ -1665,6 +1665,11 @@ public class VideoCamera extends ActivityBase
                 switchToOtherMode(ModePicker.MODE_PANORAMA);
             }
         });
+        MenuHelper.addSwitchModeMenuItem(menu, ModePicker.MODE_CPCAM, new Runnable() {
+            public void run() {
+                switchToOtherMode(ModePicker.MODE_CPCAM);
+            }
+        });
 
         if (mNumberOfCameras > 1) {
             menu.add(R.string.switch_camera_id)
