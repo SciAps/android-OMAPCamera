@@ -760,6 +760,16 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 return;
             }
 
+            // ignore if touched outside of preview area
+            int previewFrameLocation[] = new int[2];
+            mPreviewFrame.getLocationInWindow(previewFrameLocation);
+            final android.graphics.Rect previewFrameRect = new android.graphics.Rect(
+                    previewFrameLocation[0], previewFrameLocation[1],
+                    mPreviewFrame.getWidth(), mPreviewFrame.getHeight());
+            if (!previewFrameRect.contains((int)e.getX(), (int)e.getY())) {
+                return;
+            }
+
             // Do not trigger touch focus if popup window is opened.
             if (mIndicatorControlContainer.getActiveSettingPopup() != null) return;
 
