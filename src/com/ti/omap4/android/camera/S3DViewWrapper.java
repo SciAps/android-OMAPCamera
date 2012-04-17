@@ -18,6 +18,7 @@ package com.ti.omap4.android.camera;
 
 import android.os.SystemProperties;
 import android.view.SurfaceHolder;
+import android.util.Log;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -39,6 +40,7 @@ public class S3DViewWrapper {
     private Object sideBySide;
 
     private static final boolean OMAP_ENHANCEMENT_S3D = SystemProperties.getBoolean("com.ti.omap_enhancement_s3d", false);
+    private static final String TAG = "S3DViewWrapper";
 
     public S3DViewWrapper(SurfaceHolder holder) {
         this.holder = holder;
@@ -73,23 +75,51 @@ public class S3DViewWrapper {
         if (s3dView != null) {
             try {
                 setLayoutMethod.invoke(s3dView, mono);
-            } catch (Exception e) {}
+            } catch (Exception e) {
+                Log.e(TAG, "Error setting Mono stereo layout");
+            }
         }
     }
 
     public void setSideBySideLayout() {
         if (s3dView != null) {
-            try {
-                setLayoutMethod.invoke(s3dView, sideBySide);
-            } catch (Exception e) {}
+            // If display orientation is portrait then side-by-side layout
+            // should be transformed to top-bottom beacuse of the rotated
+            // preview. This is the case for Blaze
+            if (Util.isTabletUI()) {
+                try {
+                    setLayoutMethod.invoke(s3dView, sideBySide);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error setting Side-by-Side stereo layout");
+                }
+            } else {
+                try {
+                    setLayoutMethod.invoke(s3dView, topBottom);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error setting Top-Bottom stereo layout");
+                }
+            }
         }
     }
 
     public void setTopBottomLayout() {
         if (s3dView != null) {
-            try {
-                setLayoutMethod.invoke(s3dView, topBottom);
-            } catch (Exception e) {}
+            // If display orientation is portrait then top-bottom layout
+            // should be transformed to side-by-side beacuse of the rotated
+            // preview. This is the case for Blaze
+            if (Util.isTabletUI()) {
+                try {
+                    setLayoutMethod.invoke(s3dView, topBottom);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error setting Top-Bottom stereo layout");
+                }
+            } else {
+                try {
+                    setLayoutMethod.invoke(s3dView, sideBySide);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error setting Side-by-Side stereo layout");
+                }
+            }
         }
     }
 }
