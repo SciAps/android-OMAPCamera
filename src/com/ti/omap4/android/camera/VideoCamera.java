@@ -1161,6 +1161,8 @@ public class VideoCamera extends ActivityBase
         }
 
         mLocationManager.recordLocation(false);
+
+        mThumbnail = null;
     }
 
     @Override

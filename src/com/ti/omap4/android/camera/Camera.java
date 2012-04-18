@@ -2260,6 +2260,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mHandler.removeMessages(CHECK_DISPLAY_ROTATION);
         mFocusManager.removeMessages();
 
+        mThumbnail = null;
         super.onPause();
     }
 
