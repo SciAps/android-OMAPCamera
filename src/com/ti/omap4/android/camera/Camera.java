@@ -2151,6 +2151,22 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mJpegPictureCallbackTime = 0;
         mZoomValue = 0;
 
+        if (mPreviewFrame != null && mPreviewFrame.getVisibility() == View.INVISIBLE) {
+            int childId = mPreviewFrameLayout.indexOfChild(mPreviewFrame);
+            mPreviewFrameLayout.removeView(mPreviewFrame);
+            SurfaceView preview = new SurfaceView(this);
+            preview.setId(R.id.camera_preview);
+            mPreviewFrameLayout.addView(preview, childId);
+            preview.setOnTouchListener(this);
+            preview.getHolder().addCallback(this);
+            mPreviewFrame = preview;
+            s3dView = new S3DViewWrapper(preview.getHolder());
+            CameraInfo info = CameraHolder.instance().getCameraInfo()[mCameraId];
+            boolean mirror = (info.facing == CameraInfo.CAMERA_FACING_FRONT);
+            mFocusManager.initialize(mFocusAreaIndicator, mPreviewFrame, mFaceView, this,
+                    mirror, mDisplayOrientation);
+        }
+
         // Start the preview if it is not started.
         if (mCameraState == PREVIEW_STOPPED) {
             try {
@@ -2256,6 +2272,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mThumbnail = null;
         if (mSurfaceHolder != null) {
             mSurfaceHolder.getSurface().release();
+            if (mPreviewFrame != null) {
+                mPreviewFrame.setVisibility(View.INVISIBLE);
+            }
         }
         super.onPause();
     }

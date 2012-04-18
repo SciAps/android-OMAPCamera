@@ -939,6 +939,18 @@ public class VideoCamera extends ActivityBase
     protected void doOnResume() {
         if (mOpenCameraFail || mCameraDisabled) return;
 
+        SurfaceView currentPreview = (SurfaceView)findViewById(R.id.camera_preview);
+        if (currentPreview.getVisibility() == View.INVISIBLE) {
+            int childId = mPreviewFrameLayout.indexOfChild(currentPreview);
+            mPreviewFrameLayout.removeView(currentPreview);
+            SurfaceView preview = new SurfaceView(this);
+            preview.setId(R.id.camera_preview);
+            mPreviewFrameLayout.addView(preview, childId);
+            preview.getHolder().addCallback(this);
+            preview.setOnTouchListener(this);
+            s3dView = new S3DViewWrapper(preview.getHolder());
+        }
+
         if ( null == mAutoConvergence || mPausing ) {
             mAutoConvergence = getString(R.string.pref_camera_autoconvergence_default);
         }
@@ -1165,6 +1177,10 @@ public class VideoCamera extends ActivityBase
         mThumbnail = null;
         if (mSurfaceHolder != null) {
             mSurfaceHolder.getSurface().release();
+            SurfaceView preview = (SurfaceView)findViewById(R.id.camera_preview);
+            if (preview != null) {
+                preview.setVisibility(View.INVISIBLE);
+            }
         }
     }
 
