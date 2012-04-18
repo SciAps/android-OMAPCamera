@@ -2254,6 +2254,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mFocusManager.removeMessages();
 
         mThumbnail = null;
+        if (mSurfaceHolder != null) {
+            mSurfaceHolder.getSurface().release();
+        }
         super.onPause();
     }
 

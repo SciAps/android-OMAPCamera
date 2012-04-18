@@ -1163,6 +1163,9 @@ public class VideoCamera extends ActivityBase
         mLocationManager.recordLocation(false);
 
         mThumbnail = null;
+        if (mSurfaceHolder != null) {
+            mSurfaceHolder.getSurface().release();
+        }
     }
 
     @Override
