@@ -70,6 +70,7 @@ public class InLineSettingKnob extends InLineSettingItem {
             } else if (event.getAction() == MotionEvent.ACTION_UP
                     || event.getAction() == MotionEvent.ACTION_CANCEL) {
                 mNext = false;
+                mHandler.removeCallbacks(mRunnable);
             }
             return false;
         }
@@ -87,6 +88,7 @@ public class InLineSettingKnob extends InLineSettingItem {
             } else if (event.getAction() == MotionEvent.ACTION_UP
                     || event.getAction() == MotionEvent.ACTION_CANCEL) {
                 mPrevious = false;
+                mHandler.removeCallbacks(mRunnable);
             }
             return false;
         }
