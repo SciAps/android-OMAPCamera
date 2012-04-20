@@ -99,7 +99,6 @@ public class CameraSettings {
     public static final String KEY_CAPTURE_LAYOUT_VALUES = "s3d-cap-frame-layout-values";
     public static final String KEY_PREVIEW_LAYOUT_VALUES = "s3d-prv-frame-layout-values";
     public static final String KEY_VIDEO_PREVIEW_LAYOUT = "pref_video_preview_layout_key";
-    public static final String KEY_VIDEO_CAPTURE_LAYOUT = "pref_video_capture_layout_key";
     public static final String KEY_PREVIEW_SIZES_SS = "pref_camera_ss_previewsize_key";
     public static final String KEY_PREVIEW_SIZES_TB = "pref_camera_tb_previewsize_key";
     public static final String KEY_PICTURE_SIZES_SS = "pref_camera_ss_picturesize_key";
@@ -384,7 +383,6 @@ public class CameraSettings {
         ListPreference mode = group.findPreference(KEY_MODE_MENU);
         ListPreference pictureFormat = group.findPreference(KEY_PICTURE_FORMAT_MENU);
         ListPreference videoPreviewLayout = group.findPreference(KEY_VIDEO_PREVIEW_LAYOUT);
-        ListPreference videoCaptureLayout = group.findPreference(KEY_VIDEO_CAPTURE_LAYOUT);
         ListPreference pictureSize = group.findPreference(KEY_PICTURE_SIZE);
         ListPreference pictureSize2d = group.findPreference(KEY_PICTURE_SIZE_2D);
         ListPreference previewSize = group.findPreference(KEY_PREVIEW_SIZE);
@@ -566,17 +564,6 @@ public class CameraSettings {
                 }
             }
             filterUnsupportedOptions(group,videoPreviewLayout,suppLayout);
-        }
-
-        if (videoCaptureLayout != null) {
-            ArrayList<String> suppLayout = new ArrayList<String>();
-            String videoLayouts = mParameters.get(KEY_CAPTURE_LAYOUT_VALUES);
-            if (videoLayouts != null && !videoLayouts.equals("")) {
-                for (String item : videoLayouts.split(",")) {
-                    suppLayout.add(item);
-                }
-            }
-            filterUnsupportedOptions(group,videoCaptureLayout,suppLayout);
         }
 
         if (captureLayout != null) {
