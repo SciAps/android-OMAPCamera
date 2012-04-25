@@ -83,8 +83,8 @@ public class CameraSettings {
     public static final String KEY_SATURATION = "pref_camera_saturation_key";
     public static final String KEY_SHARPNESS = "pref_camera_sharpness_key";
 
+    public static final String KEY_MECHANICAL_MISALIGNMENT_CORRECTION_SUPPORTED = "mechanical-misalignment-correction-supported";
     public static final String KEY_MECHANICAL_MISALIGNMENT_CORRECTION = "mechanical-misalignment-correction";
-    public static final String KEY_MECHANICAL_MISALIGNMENT_CORRECTION_VALUES = "mechanical-misalignment-correction-values";
     public static final String KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU="pref_camera_mechanical_misalignment_correction_key";
 
     public static final String KEY_AUTO_CONVERGENCE = "pref_camera_autoconvergence_key";
@@ -745,12 +745,14 @@ public class CameraSettings {
         }
 
         if(mechanicalMisalignmentCorrection !=null){
+            final String mechanicalMisalignmentSupported =
+                    mParameters.get(KEY_MECHANICAL_MISALIGNMENT_CORRECTION_SUPPORTED);
             ArrayList<String> suppMechanicalMisalignmentCorrection = new ArrayList<String>();
-            String mechanicalMisalignmentCorrectionValues = mParameters.get(KEY_MECHANICAL_MISALIGNMENT_CORRECTION_VALUES);
-            if(mechanicalMisalignmentCorrectionValues != null && !mechanicalMisalignmentCorrectionValues.equals("")){
-                for(String item : mechanicalMisalignmentCorrectionValues.split(",")){
-                    suppMechanicalMisalignmentCorrection.add(item);
-                }
+            if ( mechanicalMisalignmentSupported.equals(Camera.TRUE) ) {
+                final String enable = mContext.getString(R.string.pref_camera_mechanical_misalignment_correction_enable);
+                final String disable = mContext.getString(R.string.pref_camera_mechanical_misalignment_correction_disable);
+                suppMechanicalMisalignmentCorrection.add(mechanicalMisalignmentCorrection.findEntryValueByEntry(enable));
+                suppMechanicalMisalignmentCorrection.add(mechanicalMisalignmentCorrection.findEntryValueByEntry(disable));
             }
             filterUnsupportedOptions(group, mechanicalMisalignmentCorrection, suppMechanicalMisalignmentCorrection);
         }

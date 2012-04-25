@@ -945,8 +945,8 @@
      </string-array>
 
      <string-array name="pref_camera_mechanical_misalignment_correction_entryvalues" translatable="false">
-        <item>enable</item>
-        <item>disable</item>
+        <item>true</item>
+        <item>false</item>
      </string-array>
 
     <!-- Default focus mode setting.-->

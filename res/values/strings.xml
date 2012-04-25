@@ -700,7 +700,7 @@
     <string name="pref_camera_autoconvergence_entry_mode_disable">Disable</string>
 
      <!--  Mechanical Misalignment Correction mode setting -->
-    <string name="pref_camera_mechanical_misalignment_correction_default" translatable="false">enable</string>
+    <string name="pref_camera_mechanical_misalignment_correction_default" translatable="false">true</string>
 
     <!-- Settings screen, Mechanical Misalignment Correction title -->
     <string name="pref_camera_mechanical_misalignment_correction_title">SMALC</string>
