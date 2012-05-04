@@ -143,6 +143,8 @@ public class CameraSettings {
     public static final String KEY_PICTURE_FORMAT = "picture-format";
     public static final String KEY_SUPPORTED_PICTURE_FORMATS = "picture-format-values";
 
+    public static final String KEY_SUPPORTED_PREVIEW_FRAMERATES_EXT = "preview-fps-ext-values";
+
     public static final String EXPOSURE_DEFAULT_VALUE = "0";
 
     public static final int CURRENT_VERSION = 5;
@@ -644,13 +646,16 @@ public class CameraSettings {
             filterUnsupportedOptionsInt(group,
                     previewFramerate, mParameters.getSupportedPreviewFrameRates());
         }
+
+        List<Integer> fpsList = getSupportedFramerates(mParameters);
+
         if (videoFramerate != null) {
             filterUnsupportedOptionsInt(group,
-                    videoFramerate, mParameters.getSupportedPreviewFrameRates());
+                    videoFramerate, fpsList);
         }
         if (videoMinFramerate != null) {
             filterUnsupportedOptionsInt(group,
-                    videoMinFramerate, mParameters.getSupportedPreviewFrameRates());
+                    videoMinFramerate, fpsList);
         }
         if (sceneMode != null) {
             filterUnsupportedOptions(group,
@@ -1054,6 +1059,43 @@ public class CameraSettings {
         // initial picture size is that of the back camera.
         initialCameraPictureSize(context, parameters);
         writePreferredCameraId(preferences, currentCameraId);
+    }
+
+    private static List<Integer> getSupportedFramerates(Parameters params) {
+        List<Integer> fpsList = params.getSupportedPreviewFrameRates();
+        String extendedFramerates = params.get(KEY_SUPPORTED_PREVIEW_FRAMERATES_EXT);
+        if ( null != extendedFramerates ) {
+            List<Integer> extFPSList = parseToIntList(extendedFramerates);
+            if ( null != extFPSList ) {
+                fpsList.addAll(extFPSList);
+            }
+        }
+
+        return fpsList;
+    }
+
+    private static List<Integer> parseToIntList(String str) {
+        if ( null == str ) {
+            throw new RuntimeException("Invalid argument");
+        }
+
+        StringTokenizer tokenizer = new StringTokenizer(str, ",");
+        ArrayList<Integer> intList = new ArrayList<Integer>();
+
+        while (tokenizer.hasMoreElements()) {
+            String token = tokenizer.nextToken();
+            try {
+                intList.add(Integer.parseInt(token));
+            } catch(NumberFormatException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if ( intList.isEmpty() ) {
+            return null;
+        }
+
+        return intList;
     }
 
     public List<String> parseToList(String str) {
