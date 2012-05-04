@@ -376,6 +376,8 @@ public class CameraSettings {
         ListPreference vnf = group.findPreference(KEY_VNF);
         ListPreference exposureMode = group.findPreference(KEY_EXPOSURE_MODE_MENU);
         ListPreference previewFramerate = group.findPreference(KEY_PREVIEW_FRAMERATE);
+        ListPreference videoFramerate = group.findPreference(KEY_VIDEO_FRAMERATE);
+        ListPreference videoMinFramerate = group.findPreference(KEY_VIDEO_MINFRAMERATE);
         ListPreference mechanicalMisalignmentCorrection = group.findPreference(KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU);
         ListPreference mode = group.findPreference(KEY_MODE_MENU);
         ListPreference pictureFormat = group.findPreference(KEY_PICTURE_FORMAT_MENU);
@@ -641,6 +643,14 @@ public class CameraSettings {
         if (previewFramerate != null) {
             filterUnsupportedOptionsInt(group,
                     previewFramerate, mParameters.getSupportedPreviewFrameRates());
+        }
+        if (videoFramerate != null) {
+            filterUnsupportedOptionsInt(group,
+                    videoFramerate, mParameters.getSupportedPreviewFrameRates());
+        }
+        if (videoMinFramerate != null) {
+            filterUnsupportedOptionsInt(group,
+                    videoMinFramerate, mParameters.getSupportedPreviewFrameRates());
         }
         if (sceneMode != null) {
             filterUnsupportedOptions(group,

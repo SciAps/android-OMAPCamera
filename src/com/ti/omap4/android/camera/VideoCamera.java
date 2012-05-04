@@ -2068,24 +2068,6 @@ public class VideoCamera extends ActivityBase
         return supported == null ? false : supported.indexOf(value) >= 0;
     }
 
-    private int getMaxSupportedFPS(Parameters params) {
-        Integer res = -1;
-
-        if ( null != params) {
-
-            List<Integer> supportedFPS = params.getSupportedPreviewFrameRates();
-            if ( 0 < supportedFPS.size() ) {
-                for ( int i = 0 ; i < supportedFPS.size() ; i++ ) {
-                    if ( res < supportedFPS.get(i) ) {
-                        res = supportedFPS.get(i);
-                    }
-                }
-            }
-        }
-
-        return res;
-    }
-
     private void filterVideoBitrateItems(int resolution) {
         if (mPreferenceGroup == null) return;
 
@@ -2277,19 +2259,6 @@ public class VideoCamera extends ActivityBase
         String minframerate = mPreferences.getString(CameraSettings.KEY_VIDEO_MINFRAMERATE, (getString(R.string.pref_camera_videominframerate_default)));
         Log.v(TAG,"MIN Framerate is set to "+ minframerate);
         int minFrameRate = Integer.parseInt(minframerate);
-
-        int maxFPS = getMaxSupportedFPS(mParameters);
-        if ( 0 < maxFPS) {
-            if(minFrameRate > maxFPS){
-                   minFrameRate = maxFPS;
-            }
-            if(maxFrameRate > maxFPS){
-                   maxFrameRate = maxFPS;
-            }
-        } else {
-            Log.e(TAG, "Camera does not support any valid framerates");
-            throw new RuntimeException("Invalid camera parameters");
-        }
 
         if (minFrameRate > maxFrameRate)
         {
