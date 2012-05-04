@@ -2211,7 +2211,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
         // Delay Camera release if
         // burst is still running
-        if ( !mBurstRunning ) {
+        if ( !mBurstRunning || mCameraState != SNAPSHOT_IN_PROGRESS ) {
             stopPreview();
             closeCamera();
         } else {
