@@ -1132,6 +1132,7 @@ public class VideoCamera extends ActivityBase
     private void finishRecorderAndCloseCamera() {
         // This is similar to what mShutterButton.performClick() does,
         // but not quite the same.
+        boolean checkThumbnail = false;
         if (mMediaRecorderRecording) {
             mEffectsDisplayResult = true;
             if (mIsVideoCaptureIntent) {
@@ -1139,12 +1140,16 @@ public class VideoCamera extends ActivityBase
                 if (!effectsActive()) showAlert();
             } else {
                 stopVideoRecording();
-                if (!effectsActive()) getThumbnail();
+                checkThumbnail = true;
             }
         } else {
             stopVideoRecording();
         }
         closeCamera();
+
+        // Getting thumbnail takes time, move it after closeCamera() to speedup memory freeing.
+        // Otherwise instant switching to playback application will trigger OOM.
+        if (checkThumbnail && !effectsActive()) getThumbnail();
     }
 
     @Override
