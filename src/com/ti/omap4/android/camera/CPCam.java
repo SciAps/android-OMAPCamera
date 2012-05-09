@@ -17,7 +17,7 @@
 package com.ti.omap4.android.camera;
 
 import com.ti.omap4.android.camera.ui.CameraPicker;
-import com.ti.omap4.android.camera.ui.FaceView;
+import com.ti.omap4.android.camera.ui.CPCamFaceView;
 import com.ti.omap4.android.camera.ui.IndicatorControlContainer;
 import com.ti.omap4.android.camera.ui.PopupManager;
 import com.ti.omap4.android.camera.ui.ManualConvergenceSettings;
@@ -44,12 +44,12 @@ import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.graphics.SurfaceTexture.OnFrameAvailableListener;
 import android.hardware.Camera.CameraInfo;
-import android.hardware.Camera.Face;
-import android.hardware.Camera.FaceDetectionListener;
-import android.hardware.Camera.Parameters;
-import android.hardware.Camera.PictureCallback;
-import android.hardware.Camera.Size;
-//import android.hardware.CameraSound;
+import com.ti.omap.android.cpcam.CPCam.Face;
+import com.ti.omap.android.cpcam.CPCam.FaceDetectionListener;
+import com.ti.omap.android.cpcam.CPCam.Parameters;
+import com.ti.omap.android.cpcam.CPCam.PictureCallback;
+import com.ti.omap.android.cpcam.CPCam.Size;
+import android.hardware.CameraSound;
 import android.location.Location;
 import android.media.CameraProfile;
 import android.net.Uri;
@@ -59,6 +59,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.MessageQueue;
+import android.os.Process;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -94,12 +95,11 @@ import java.util.Collections;
 import java.util.Formatter;
 import java.util.List;
 
-
 /** The Camera activity which can preview and take pictures. */
-public class CPCam extends ActivityBase implements FocusManager.Listener,
+public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         View.OnTouchListener, ShutterButton.OnShutterButtonListener,
         SurfaceHolder.Callback, ModePicker.OnModeChangeListener,
-        FaceDetectionListener, CameraPreference.OnPreferenceChangedListener,
+        FaceDetectionListener,CameraPreference.OnPreferenceChangedListener,
         TouchManager.Listener, SurfaceTexture.OnFrameAvailableListener,
         LocationManager.Listener, ShutterButton.OnShutterButtonLongPressListener {
 
@@ -126,10 +126,14 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
     private static final int UPDATE_PARAM_ALL = -1;
 
     //CPCam
+    private com.ti.omap.android.cpcam.CPCam mCPCamDevice;
     private String mShotParamsGain = "400"; //Default values
     private String mShotParamsExposure = "10000";
+    private Bitmap outBitmap;
     private SurfaceTexture mTapOut;
+    private SurfaceTexture mTapIn;
     Context mContext;
+    private int mFrameWidth,mFrameHeight;
     // When setCameraParametersWhenIdle() is called, we accumulate the subsets
     // needed to be updated in mUpdateSet.
     private int mUpdateSet;
@@ -149,9 +153,9 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
     private int mTargetZoomValue;
     private ZoomControl mZoomControl;
 
-    private Parameters mParameters;
-    private Parameters mInitialParams;
-    private Parameters mShotParams;
+    private com.ti.omap.android.cpcam.CPCam.Parameters mParameters;
+    private com.ti.omap.android.cpcam.CPCam.Parameters mInitialParams;
+    private com.ti.omap.android.cpcam.CPCam.Parameters mShotParams;
     private boolean mFocusAreaSupported;
 
     private MyOrientationEventListener mOrientationListener;
@@ -187,7 +191,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
     // An imageview showing showing the last captured picture thumbnail.
     private RotateImageView mThumbnailView;
     private ModePicker mModePicker;
-    private FaceView mFaceView;
+    private CPCamFaceView mFaceView;
     private RotateLayout mFocusAreaIndicator;
     private Rotatable mReviewCancelButton;
     private Rotatable mReviewDoneButton;
@@ -204,9 +208,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
     // We use a thread in ImageSaver to do the work of saving images and
     // generating thumbnails. This reduces the shot-to-shot time.
     private ImageSaver mImageSaver;
-
-//    private CameraSound mCameraSound;
-
+    private CameraSound mCameraSound;
     private S3DViewWrapper s3dView;
     private boolean mS3dViewEnabled = false;
 
@@ -257,15 +259,15 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
             new RawPictureCallback();
     private final AutoFocusCallback mAutoFocusCallback =
             new AutoFocusCallback();
+    private final JpegPictureCallback mJpegCallback =
+            new JpegPictureCallback(null);
     private final ZoomListener mZoomListener = new ZoomListener();
-    private final CameraErrorCallback mErrorCallback = new CameraErrorCallback();
-
+    private final CPCameraErrorCallback mErrorCallback = new CPCameraErrorCallback();
     private static final String PARM_SENSOR_ORIENTATION = "sensor-orientation";
 
     public static final String TRUE = "true";
     public static final String FALSE = "false";
 
-    private String mCpCam;
     private String mManualExposure;
 
     private String mCaptureMode = "cp-cam";
@@ -298,7 +300,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
     private TouchManager mTouchManager;
 
     // This handles everything about focus.
-    private FocusManager mFocusManager;
+    private CPCamFocusManager mFocusManager;
     private Toast mNotSelectableToast;
     private boolean mTouchFocusEnabled = false;
 
@@ -456,7 +458,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
         mFocusAreaIndicator = (RotateLayout) findViewById(R.id.focus_indicator_rotate_layout);
         CameraInfo info = CameraHolder.instance().getCameraInfo()[mCameraId];
         boolean mirror = (info.facing == CameraInfo.CAMERA_FACING_FRONT);
-        mFocusManager.initialize(mFocusAreaIndicator, mPreviewFrame, mFaceView, this,
+        mFocusManager.initialize(mFocusAreaIndicator, mPreviewFrame, null, this,
                 mirror, mDisplayOrientation);
         mImageSaver = new ImageSaver();
         Util.initializeScreenBrightness(getWindow(), getContentResolver());
@@ -466,15 +468,21 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
         startFaceDetection();
         // Show the tap to focus toast if this is the first start.
         if (mFocusAreaSupported &&
-                mPreferences.getBoolean(CameraSettings.KEY_CAMERA_FIRST_USE_HINT_SHOWN, true)) {
+                mPreferences.getBoolean(CPCameraSettings.KEY_CAMERA_FIRST_USE_HINT_SHOWN, true)) {
             // Delay the toast for one second to wait for orientation.
             mHandler.sendEmptyMessageDelayed(SHOW_TAP_TO_FOCUS_TOAST, 1000);
         }
 
         mFirstTimeInitialized = true;
         addIdleHandler();
+        mTapOut = new SurfaceTexture(0, false, EGL10.EGL_NONE);
         mTapOut.setOnFrameAvailableListener(this);
 
+        try {
+            mCPCamDevice.setBufferSource(null, mTapOut);
+        } catch (IOException ioe) {
+            Log.e(TAG, "Error trying to setBufferSource!");
+        }
     }
 
     private void addIdleHandler() {
@@ -552,7 +560,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
                 mTargetZoomValue = -1;
                 if (mZoomState == ZOOM_START) {
                     mZoomState = ZOOM_STOPPING;
-                    mCameraDevice.stopSmoothZoom();
+                    mCPCamDevice.stopSmoothZoom();
                 }
             }
         }
@@ -560,7 +568,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
 
     private void initializeZoom() {
         // Get the parameter to make sure we have the up-to-date zoom value.
-        mParameters = mCameraDevice.getParameters();
+        mParameters = mCPCamDevice.getParameters();
         if (!mParameters.isZoomSupported()) return;
         mZoomMax = mParameters.getMaxZoom();
         // Currently we use immediate zoom for fast zooming to get better UX and
@@ -571,7 +579,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
         mZoomControl.setOnZoomChangeListener(new ZoomChangeListener());
 
         mGestureDetector = new GestureDetector(this, new ZoomGestureListener());
-        mCameraDevice.setZoomChangeListener(mZoomListener);
+        mCPCamDevice.setZoomChangeListener(mZoomListener);
     }
 
     private void onZoomValueChanged(int index) {
@@ -583,11 +591,11 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
                 mTargetZoomValue = index;
                 if (mZoomState == ZOOM_START) {
                     mZoomState = ZOOM_STOPPING;
-                    mCameraDevice.stopSmoothZoom();
+                    mCPCamDevice.stopSmoothZoom();
                 }
             } else if (mZoomState == ZOOM_STOPPED && mZoomValue != index) {
                 mTargetZoomValue = index;
-                mCameraDevice.startSmoothZoom(index);
+                mCPCamDevice.startSmoothZoom(index);
                 mZoomState = ZOOM_START;
             }
         } else {
@@ -599,18 +607,18 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
     @Override
     public void startFaceDetection() {
         if (mFaceDetectionStarted || mCameraState != IDLE) return;
-        if ( ( mParameters.getMaxNumDetectedFaces() > 0 ) && ( null != mCameraDevice )) {
+        if ( ( mParameters.getMaxNumDetectedFaces() > 0 ) && ( null != mCPCamDevice )) {
             mFaceDetectionStarted = true;
-            mFaceView = (FaceView) findViewById(R.id.face_view);
+            mFaceView = (CPCamFaceView) findViewById(R.id.cpcam_face_view);
             mFaceView.clear();
             mFaceView.setVisibility(View.VISIBLE);
             mFaceView.setDisplayOrientation(mDisplayOrientation);
             CameraInfo info = CameraHolder.instance().getCameraInfo()[mCameraId];
             mFaceView.setMirror(info.facing == CameraInfo.CAMERA_FACING_FRONT);
             mFaceView.resume();
-            mCameraDevice.setFaceDetectionListener(this);
+            mCPCamDevice.setFaceDetectionListener(this);
             try {
-                mCameraDevice.startFaceDetection();
+                mCPCamDevice.startFaceDetection();
             } catch ( RuntimeException e ) {
                 Log.e(TAG, "Face detection already started. ", e);
                 return;
@@ -623,9 +631,9 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
         if (!mFaceDetectionStarted) return;
         if (mParameters.getMaxNumDetectedFaces() > 0) {
             mFaceDetectionStarted = false;
-            mCameraDevice.setFaceDetectionListener(null);
+            mCPCamDevice.setFaceDetectionListener(null);
             try {
-                mCameraDevice.stopFaceDetection();
+                mCPCamDevice.stopFaceDetection();
             } catch (RuntimeException e) {
                 e.printStackTrace();
                 Log.e(TAG, "Face detection already stopped!");
@@ -636,28 +644,21 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
 
     public void popupExposureGainSliders() {
 
-
-        // CPCam manual exposure and gain sliders
+        // CPCAm manual exposure and gain sliders
             ManualGainExposureSettings manualGainExposureDialog = null;
-            int expMin = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_MIN));
-            int expMax = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_MAX));
-            int expStep = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_STEP));
-            int isoMin = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_MIN));
-            int isoMax = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_MAX));
-            int isoStep = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_STEP));
-            int expValue = Integer.parseInt(mParameters.get(CameraSettings.KEY_MANUAL_EXPOSURE));
-            int isoValue = Integer.parseInt(mParameters.get(CameraSettings.KEY_MANUAL_GAIN_ISO));
+            int expMin = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_MIN));
+            int expMax = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_MAX));
+            int expStep = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_STEP));
+            int isoMin = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_MIN));
+            int isoMax = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_MAX));
+            int isoStep = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_STEP));
+            int expValue = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_MANUAL_EXPOSURE));
+            int isoValue = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_MANUAL_GAIN_ISO));
 
             manualGainExposureDialog = new ManualGainExposureSettings(this, mHandler,
                     expValue, isoValue,expMin, expMax,
                     isoMin, isoMax,expStep,isoStep);
-//            Editor edit = mPreferences.edit();
-//            edit.putString(CameraSettings.KEY_EXPOSURE_MODE_MENU, exposureMode);
-//            edit.commit();
             manualGainExposureDialog.show();
-
-
-
     }
 
     private class PopupGestureListener
@@ -737,7 +738,6 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
              (mGestureDetector != null && mGestureDetector.onTouchEvent(m)) ) {
             return true;
         }
-        //manualGainExposureDialog.show();
         return super.dispatchTouchEvent(m);
     }
 
@@ -807,13 +807,13 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
     private void updateOnScreenIndicators() {
         boolean isAutoScene = !(Parameters.SCENE_MODE_AUTO.equals(mParameters.getSceneMode()));
         updateSceneOnScreenIndicator(isAutoScene);
-        updateExposureOnScreenIndicator(CameraSettings.readExposure(mPreferences));
+        updateExposureOnScreenIndicator(CPCameraSettings.readExposure(mPreferences));
         updateFlashOnScreenIndicator(mParameters.getFlashMode());
         updateWhiteBalanceOnScreenIndicator(mParameters.getWhiteBalance());
         updateFocusOnScreenIndicator(mParameters.getFocusMode());
     }
     private final class ShutterCallback
-            implements android.hardware.Camera.ShutterCallback {
+            implements com.ti.omap.android.cpcam.CPCam.ShutterCallback {
         public void onShutter() {
             mShutterCallbackTime = System.currentTimeMillis();
             mShutterLag = mShutterCallbackTime - mCaptureStartTime;
@@ -824,7 +824,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
 
     private final class PostViewPictureCallback implements PictureCallback {
         public void onPictureTaken(
-                byte [] data, android.hardware.Camera camera) {
+                byte [] data, com.ti.omap.android.cpcam.CPCam camera) {
             mPostViewPictureCallbackTime = System.currentTimeMillis();
             Log.v(TAG, "mShutterToPostViewCallbackTime = "
                     + (mPostViewPictureCallbackTime - mShutterCallbackTime)
@@ -834,7 +834,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
 
     private final class RawPictureCallback implements PictureCallback {
         public void onPictureTaken(
-                byte [] rawData, android.hardware.Camera camera) {
+                byte [] rawData, com.ti.omap.android.cpcam.CPCam camera) {
             mRawPictureCallbackTime = System.currentTimeMillis();
             Log.v(TAG, "mShutterToRawCallbackTime = "
                     + (mRawPictureCallbackTime - mShutterCallbackTime) + "ms");
@@ -849,12 +849,20 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
         }
 
         public void onPictureTaken(
-                final byte [] jpegData, final android.hardware.Camera camera) {
+                final byte [] jpegData, final com.ti.omap.android.cpcam.CPCam camera) {
             if (mPausing) {
                 return;
             }
+            // WA: Re-create SurfaceTexture before next shot
+            try {
+                camera.setBufferSource(null, null);
+                mTapOut.release();
+                mTapOut = new SurfaceTexture(0, false, EGL10.EGL_NONE);
+                mTapOut.setOnFrameAvailableListener(CPCam.this);
+                camera.setBufferSource(null, mTapOut);
+            } catch(IOException e) { e.printStackTrace(); }
 
-            FocusManager.TempBracketingStates tempState = mFocusManager.getTempBracketingState();
+            CPCamFocusManager.TempBracketingStates tempState = mFocusManager.getTempBracketingState();
             mJpegPictureCallbackTime = System.currentTimeMillis();
             // If postview callback has arrived, the captured image is displayed
             // in postview callback. If not, the captured image is displayed in
@@ -876,7 +884,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
             if (!mIsImageCaptureIntent) {
                 enableCameraControls(true);
 
-                if (( tempState != FocusManager.TempBracketingStates.RUNNING ) &&
+                if (( tempState != CPCamFocusManager.TempBracketingStates.RUNNING ) &&
                       !mBurstRunning == true) {
                 // We want to show the taken picture for a while, so we wait
                 // for at least 0.5 second before restarting the preview.
@@ -916,14 +924,13 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
                         + mJpegCallbackFinishTime + "ms");
                 mJpegPictureCallbackTime = 0;
             }
-
         }
     }
 
     private final class AutoFocusCallback
-            implements android.hardware.Camera.AutoFocusCallback {
+            implements com.ti.omap.android.cpcam.CPCam.AutoFocusCallback {
         public void onAutoFocus(
-                boolean focused, android.hardware.Camera camera) {
+                boolean focused, com.ti.omap.android.cpcam.CPCam camera) {
             if (mPausing) return;
 
             mAutoFocusTime = System.currentTimeMillis() - mFocusStartTime;
@@ -941,10 +948,10 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
     }
 
     private final class ZoomListener
-            implements android.hardware.Camera.OnZoomChangeListener {
+            implements com.ti.omap.android.cpcam.CPCam.OnZoomChangeListener {
         @Override
         public void onZoomChange(
-            int value, boolean stopped, android.hardware.Camera camera) {
+            int value, boolean stopped, com.ti.omap.android.cpcam.CPCam camera) {
             Log.v(TAG, "Zoom changed: value=" + value + ". stopped="+ stopped);
             mZoomValue = value;
 
@@ -957,7 +964,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
 
             if (stopped && mZoomState != ZOOM_STOPPED) {
                 if (mTargetZoomValue != -1 && value != mTargetZoomValue) {
-                    mCameraDevice.startSmoothZoom(mTargetZoomValue);
+                    mCPCamDevice.startSmoothZoom(mTargetZoomValue);
                     mZoomState = ZOOM_START;
                 } else {
                     mZoomState = ZOOM_STOPPED;
@@ -1172,26 +1179,35 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
     @Override
     public boolean capture() {
         synchronized (mCameraStateLock) {
-            Log.v(TAG,"Capture()");
+            Log.d(TAG,"Capture()");
             // If we are already in the middle of taking a snapshot then ignore.
-            if (mCameraState == SNAPSHOT_IN_PROGRESS || mCameraDevice == null) {
+            if (mCameraState == SNAPSHOT_IN_PROGRESS || mCPCamDevice == null) {
                 return false;
             }
             mCaptureStartTime = System.currentTimeMillis();
             mPostViewPictureCallbackTime = 0;
             mJpegImageData = null;
-
             // Set rotation and gps data.
-            Util.setRotationParameter(mParameters, mCameraId, mOrientation);
+            Util.setRotationParameterCPCam(mParameters, mCameraId, mOrientation);
             Location loc = mLocationManager.getCurrentLocation();
-            Util.setGpsParameters(mParameters, loc);
+            Util.setGpsParametersCPCam(mParameters, loc);
             if (canSetParameters()) {
-                mCameraDevice.setParameters(mParameters);
+                mParameters.setPictureFormat(ImageFormat.NV21);
+                mParameters.setPictureSize(mFrameWidth, mFrameHeight);
+                mCPCamDevice.setParameters(mParameters);
+                if(mShotParams == null) {
+                    //If shot params are not set, put default values
+                    mShotParams = mCPCamDevice.getParameters();
+                    mShotParams.set(CPCameraSettings.KEY_SHOTPARAMS_EXP_GAIN_PAIRS,
+                            "(40000,400)");
+                       mShotParams.set(CPCameraSettings.KEY_SHOTPARAMS_BURST, 1);
+                } else {
+                    mCPCamDevice.setParameters(mShotParams);
+                }
             }
 
             try {
-                    mCameraDevice.takePicture(mShutterCallback, mRawPictureCallback,
-                            mPostViewPictureCallback, null);
+                mCPCamDevice.takePicture(null, null,null,mJpegCallback,mShotParams);
             } catch (RuntimeException e ) {
                 e.printStackTrace();
                 return false;
@@ -1209,14 +1225,13 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
 
     @Override
     public void setTouchParameters() {
-        mParameters = mCameraDevice.getParameters();
-        mParameters.setMeteringAreas(mTouchManager.getMeteringAreas());
-        mCameraDevice.setParameters(mParameters);
+        mParameters = mCPCamDevice.getParameters();
+        mCPCamDevice.setParameters(mParameters);
     }
 
     @Override
     public void playSound(int soundId) {
-//        mCameraSound.playSound(soundId);
+        mCameraSound.playSound(soundId);
     }
 
     private boolean saveDataToFile(String filePath, byte[] data) {
@@ -1234,8 +1249,8 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
 
     private void getPreferredCameraId() {
         mPreferences = new ComboPreferences(this);
-        CameraSettings.upgradeGlobalPreferences(mPreferences.getGlobal());
-        mCameraId = CameraSettings.readPreferredCameraId(mPreferences);
+        CPCameraSettings.upgradeGlobalPreferences(mPreferences.getGlobal());
+        mCameraId = CPCameraSettings.readPreferredCameraId(mPreferences);
 
         // Testing purpose. Launch a specific camera through the intent extras.
         int intentCameraId = Util.getCameraFacingIntentExtras(this);
@@ -1247,7 +1262,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
     Thread mCameraOpenThread = new Thread(new Runnable() {
         public void run() {
             try {
-                mCameraDevice = Util.openCamera(CPCam.this, mCameraId);
+                mCPCamDevice = Util.openCPCamera(CPCam.this, mCameraId);
             } catch (CameraHardwareException e) {
                 mOpenCameraFail = true;
             } catch (CameraDisabledException e) {
@@ -1269,37 +1284,31 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
         getPreferredCameraId();
         String[] defaultFocusModes = getResources().getStringArray(
                 R.array.pref_camera_focusmode_default_array);
-        mFocusManager = new FocusManager(mPreferences, defaultFocusModes);
-
+        mFocusManager = new CPCamFocusManager(mPreferences, defaultFocusModes);
+        mContext = this;
         /*
          * To reduce startup time, we start the camera open and preview threads.
          * We make sure the preview is started at the end of onCreate.
          */
         mCameraOpenThread.start();
-        // Capture mode
 
         PreferenceInflater inflater = new PreferenceInflater(this);
         PreferenceGroup group =
                 (PreferenceGroup) inflater.inflate(R.xml.camera_preferences);
 
-        ListPreference temp = group.findPreference(CameraSettings.KEY_MODE_MENU);
+        ListPreference temp = group.findPreference(CPCameraSettings.KEY_MODE_MENU);
 
-        ListPreference exposure = group.findPreference(CameraSettings.KEY_EXPOSURE_MODE_MENU);
+        ListPreference exposure = group.findPreference(CPCameraSettings.KEY_EXPOSURE_MODE_MENU);
         if (exposure != null) {
             mManualExposure = exposure.findEntryValueByEntry(getString(R.string.pref_camera_exposuremode_entry_manual));
             if (mManualExposure == null) {
                 mManualExposure = "";
             }
         }
-        ListPreference cpcam_manual_exp_gain = group.findPreference(CameraSettings.KEY_SHOTPARAMS_MANUAL_EXPOSURE_GAIN_POPUP_SLIDERS);
-
-            mCpCam= temp.findEntryValueByEntry(getString(R.string.pref_camera_mode_entry_cpcam));
-            if (mCpCam == null) {
-                mCpCam = "";
-            }
+        ListPreference cpcam_manual_exp_gain = group.findPreference(CPCameraSettings.KEY_SHOTPARAMS_MANUAL_EXPOSURE_GAIN_POPUP_SLIDERS);
 
         getPreferredCameraId();
-        mFocusManager = new FocusManager(mPreferences,
+        mFocusManager = new CPCamFocusManager(mPreferences,
                 defaultFocusModes);
         mTouchManager = new TouchManager();
 
@@ -1319,7 +1328,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
         mCaptureLayout = getString(R.string.pref_camera_capture_layout_default);
 
         mPreferences.setLocalId(this, mCameraId);
-        CameraSettings.upgradeLocalPreferences(mPreferences.getLocal());
+        CPCameraSettings.upgradeLocalPreferences(mPreferences.getLocal());
 
         mNumberOfCameras = CameraHolder.instance().getNumberOfCameras();
         mQuickCapture = getIntent().getBooleanExtra(EXTRA_QUICK_CAPTURE, false);
@@ -1374,12 +1383,10 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
                 // ignore
             }
         }
-
         // Do this after starting preview because it depends on camera
         // parameters.
         initializeIndicatorControl();
-//        mCameraSound = new CameraSound();
-
+        mCameraSound = new CameraSound();
         // Make sure preview is started.
         try {
             mCameraPreviewThread.join();
@@ -1393,22 +1400,22 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
             final String whiteBalance, final String focusMode) {
         if (mIndicatorControlContainer != null) {
             mIndicatorControlContainer.overrideSettings(
-                    CameraSettings.KEY_FLASH_MODE, flashMode,
-                    CameraSettings.KEY_WHITE_BALANCE, whiteBalance,
-                    CameraSettings.KEY_FOCUS_MODE, focusMode);
+                    CPCameraSettings.KEY_FLASH_MODE, flashMode,
+                    CPCameraSettings.KEY_WHITE_BALANCE, whiteBalance,
+                    CPCameraSettings.KEY_FOCUS_MODE, focusMode);
         }
     }
 
     private void overrideCameraExposure(final String exposure) {
         if (mIndicatorControlContainer != null) {
             mIndicatorControlContainer.overrideSettings(
-                    CameraSettings.KEY_EXPOSURE_COMPENSATION_MENU, exposure);
+                    CPCameraSettings.KEY_EXPOSURE_COMPENSATION_MENU, exposure);
         }
     }
 
 
     private void loadCameraPreferences() {
-        CameraSettings settings = new CameraSettings(this, mInitialParams,
+        CPCameraSettings settings = new CPCameraSettings((Activity)this, mInitialParams,
                 mCameraId, CameraHolder.instance().getCameraInfo());
         mPreferenceGroup = settings.getPreferenceGroup(R.xml.camera_preferences);
     }
@@ -1420,7 +1427,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
         if (mIndicatorControlContainer == null) return;
         loadCameraPreferences();
         final String[] SETTING_KEYS = {
-                CameraSettings.KEY_SHOTPARAMS_MANUAL_EXPOSURE_GAIN_POPUP_SLIDERS
+                CPCameraSettings.KEY_SHOTPARAMS_MANUAL_EXPOSURE_GAIN_POPUP_SLIDERS
         };
         final String[] OTHER_SETTING_KEYS = {};
 
@@ -1482,7 +1489,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
 
     private void setOrientationIndicator(int orientation) {
         Rotatable[] indicators = {mThumbnailView, mModePicker, mSharePopup,
-                mIndicatorControlContainer, mZoomControl, mFocusAreaIndicator, mFaceView,
+                mIndicatorControlContainer, mZoomControl, mFocusAreaIndicator, null,
                 mReviewCancelButton, mReviewDoneButton, mRotateDialog, mOnScreenIndicators};
         for (Rotatable indicator : indicators) {
             if (indicator != null) indicator.setOrientation(orientation);
@@ -1657,7 +1664,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
     @Override
     public void onShutterButtonLongPressed() {
         if (mPausing || mCameraState == SNAPSHOT_IN_PROGRESS
-                || mCameraDevice == null || mPicturesRemaining <= 0) return;
+                || mCPCamDevice == null || mPicturesRemaining <= 0) return;
 
         Log.v(TAG, "onShutterButtonLongPressed");
         mFocusManager.shutterLongPressed();
@@ -1733,8 +1740,8 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
         // Start the preview if it is not started.
         if (mCameraState == PREVIEW_STOPPED) {
             try {
-                if ( null == mCameraDevice ) {
-                    mCameraDevice = Util.openCamera(this, mCameraId);
+                if ( null == mCPCamDevice ) {
+                    mCPCamDevice = Util.openCPCamera(this, mCameraId);
                 }
                 initializeCapabilities();
                 startPreview(true);
@@ -1778,7 +1785,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
             closeCamera();
         } else {
             try {
-                mCameraDevice.startPreview();
+                mCPCamDevice.startPreview();
             } catch (Throwable ex) {
                 closeCamera();
                 throw new RuntimeException("startPreview failed", ex);
@@ -1788,7 +1795,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
             mBurstRunning = false;
         }
 
-//        if (mCameraSound != null) mCameraSound.release();
+        if (mCameraSound != null) mCameraSound.release();
 
         resetScreenOn();
 
@@ -1862,7 +1869,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
             if ( mCameraState == IDLE ) {
                 mFocusStartTime = System.currentTimeMillis();
                 try {
-                    mCameraDevice.autoFocus(mAutoFocusCallback);
+                    mCPCamDevice.autoFocus(mAutoFocusCallback);
                 } catch ( RuntimeException e ) {
                     e.printStackTrace();
                     return false;
@@ -1877,7 +1884,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
 
     @Override
     public void cancelAutoFocus() {
-        mCameraDevice.cancelAutoFocus();
+        mCPCamDevice.cancelAutoFocus();
         setCameraState(IDLE);
         setCameraParameters(UPDATE_PARAM_PREFERENCE);
     }
@@ -1885,7 +1892,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
     // Preview area is touched. Handle touch focus and touch convergence
     @Override
     public boolean onTouch(View v, MotionEvent e) {
-        if (mPausing || mCameraDevice == null || !mFirstTimeInitialized
+        if (mPausing || mCPCamDevice == null || !mFirstTimeInitialized
                 || mCameraState == SNAPSHOT_IN_PROGRESS) {
             return false;
         }
@@ -1966,15 +1973,15 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
 
         Log.v(TAG, "surfaceChanged. w=" + w + ". h=" + h);
 
-        // We need to save the holder for later use, even when the mCameraDevice
+        // We need to save the holder for later use, even when the mCPCamDevice
         // is null. This could happen if onResume() is invoked after this
         // function.
         mSurfaceHolder = holder;
 
-        // The mCameraDevice will be null if it fails to connect to the camera
+        // The mCPCamDevice will be null if it fails to connect to the camera
         // hardware. In this case we will show a dialog and then finish the
         // activity, so it's OK to ignore it.
-        if (mCameraDevice == null) return;
+        if (mCPCamDevice == null) return;
 
         // Sometimes surfaceChanged is called after onPause or before onResume.
         // Ignore it.
@@ -2039,11 +2046,11 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
             s3dView.setMonoLayout();
             return;
         }
-        if (mPreviewLayout.equals(CameraSettings.TB_FULL_S3D_LAYOUT) ||
-            mPreviewLayout.equals(CameraSettings.TB_SUB_S3D_LAYOUT)) {
+        if (mPreviewLayout.equals(CPCameraSettings.TB_FULL_S3D_LAYOUT) ||
+            mPreviewLayout.equals(CPCameraSettings.TB_SUB_S3D_LAYOUT)) {
             s3dView.setTopBottomLayout();
-        } else if (mPreviewLayout.equals(CameraSettings.SS_FULL_S3D_LAYOUT) ||
-                   mPreviewLayout.equals(CameraSettings.SS_SUB_S3D_LAYOUT)) {
+        } else if (mPreviewLayout.equals(CPCameraSettings.SS_FULL_S3D_LAYOUT) ||
+                   mPreviewLayout.equals(CPCameraSettings.SS_SUB_S3D_LAYOUT)) {
             s3dView.setSideBySideLayout();
         } else {
             s3dView.setMonoLayout();
@@ -2051,13 +2058,13 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
     }
 
     private void closeCamera() {
-        if (mCameraDevice != null) {
-            CameraHolder.instance().release();
+        if (mCPCamDevice != null) {
+            CameraHolder.instance().CPCamInstanceRelease();
             mFaceDetectionStarted = false;
-            mCameraDevice.setZoomChangeListener(null);
-            mCameraDevice.setFaceDetectionListener(null);
-            mCameraDevice.setErrorCallback(null);
-            mCameraDevice = null;
+            mCPCamDevice.setZoomChangeListener(null);
+            mCPCamDevice.setFaceDetectionListener(null);
+            mCPCamDevice.setErrorCallback(null);
+            mCPCamDevice = null;
             setCameraState(PREVIEW_STOPPED);
             mFocusManager.onCameraReleased();
         }
@@ -2065,7 +2072,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
 
     private void setPreviewDisplay(SurfaceHolder holder) {
         try {
-            mCameraDevice.setPreviewDisplay(holder);
+            mCPCamDevice.setPreviewDisplay(holder);
         } catch (Throwable ex) {
             closeCamera();
             throw new RuntimeException("setPreviewDisplay failed", ex);
@@ -2076,7 +2083,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
     private void setDisplayOrientation() {
         mDisplayRotation = Util.getDisplayRotation(this);
         mDisplayOrientation = Util.getDisplayOrientation(mDisplayRotation, mCameraId);
-        mCameraDevice.setDisplayOrientation(mDisplayOrientation);
+        mCPCamDevice.setDisplayOrientation(mDisplayOrientation);
         if (mFaceView != null) {
             mFaceView.setDisplayOrientation(mDisplayOrientation);
         }
@@ -2087,7 +2094,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
 
         mFocusManager.resetTouchFocus();
 
-        mCameraDevice.setErrorCallback(mErrorCallback);
+        mCPCamDevice.setErrorCallback(mErrorCallback);
 
         // If we're previewing already, stop the preview first (this will blank
         // the screen).
@@ -2100,7 +2107,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
             // If the focus mode is continuous autofocus, call cancelAutoFocus to
             // resume it because it may have been paused by autoFocus call.
             if (Parameters.FOCUS_MODE_CONTINUOUS_PICTURE.equals(mFocusManager.getFocusMode())) {
-                mCameraDevice.cancelAutoFocus();
+                mCPCamDevice.cancelAutoFocus();
             }
             mFocusManager.setAeAwbLock(false); // Unlock AE and AWB.
         }
@@ -2123,7 +2130,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
 
         try {
             Log.v(TAG, "startPreview");
-            mCameraDevice.startPreview();
+            mCPCamDevice.startPreview();
         } catch (Throwable ex) {
             closeCamera();
             throw new RuntimeException("startPreview failed", ex);
@@ -2139,11 +2146,11 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
     }
 
      private void stopPreview() {
-        if (mCameraDevice != null && mCameraState != PREVIEW_STOPPED) {
+        if (mCPCamDevice != null && mCameraState != PREVIEW_STOPPED) {
             Log.v(TAG, "stopPreview");
 
-            mCameraDevice.cancelAutoFocus(); // Reset the focus.
-            mCameraDevice.stopPreview();
+            mCPCamDevice.cancelAutoFocus(); // Reset the focus.
+            mCPCamDevice.stopPreview();
             mFaceDetectionStarted = false;
         }
         setCameraState(PREVIEW_STOPPED);
@@ -2183,8 +2190,8 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
     }
 
     private boolean is2DMode(){
-        if (mParameters == null) mParameters = mCameraDevice.getParameters();
-        String currentPreviewLayout = mParameters.get(CameraSettings.KEY_S3D_PRV_FRAME_LAYOUT);
+        if (mParameters == null) mParameters = mCPCamDevice.getParameters();
+        String currentPreviewLayout = mParameters.get(CPCameraSettings.KEY_S3D_PRV_FRAME_LAYOUT);
         // if there isn't selected layout  -> 2d mode
         if (currentPreviewLayout == null ||
                 currentPreviewLayout.equals("") ||
@@ -2218,7 +2225,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
                     }
                 }
         }
-        CameraSettings.filterUnsupportedOptions(mPreferenceGroup, menu, supported);
+        CPCameraSettings.filterUnsupportedOptions(mPreferenceGroup, menu, supported);
         return menu;
     }
 
@@ -2227,36 +2234,27 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
         boolean previewLayoutUpdated = false;
         boolean captureLayoutUpdated = false;
 
-
         if (mFocusAreaSupported) {
             mParameters.setFocusAreas(mFocusManager.getFocusAreas());
         }
 
-     // Image Capture Pixel Format
-
-           // mParameters.set(CameraSettings.KEY_PICTURE_FORMAT, ImageFormat.NV21);
-
-            Log.e(TAG,"Picture format set " + ImageFormat.NV21);
-
-            mParameters.setPictureFormat(ImageFormat.NV21);
-        // Layouts
         String previewLayout = null;
         if (is2DMode()) {
             previewLayout = "none";
         } else {
             previewLayout = mPreferences.getString(
-                    CameraSettings.KEY_PREVIEW_LAYOUT,
+                    CPCameraSettings.KEY_PREVIEW_LAYOUT,
                     getString(R.string.pref_camera_preview_layout_default));
         }
         if (previewLayout!=null && !previewLayout.equals(mPreviewLayout)) {
             if (!mIsPreviewLayoutInit) {
-                mInitialParams.set(CameraSettings.KEY_S3D_PRV_FRAME_LAYOUT, previewLayout);
-                CameraSettings settings = new CameraSettings(this, mInitialParams,
+                mInitialParams.set(CPCameraSettings.KEY_S3D_PRV_FRAME_LAYOUT, previewLayout);
+                CPCameraSettings settings = new CPCameraSettings(this, mInitialParams,
                         mCameraId, CameraHolder.instance().getCameraInfo());
                 mPreferenceGroup = settings.getPreferenceGroup(R.xml.camera_preferences);
                 mIsPreviewLayoutInit = true;
             }
-            mParameters.set(CameraSettings.KEY_S3D_PRV_FRAME_LAYOUT, previewLayout);
+            mParameters.set(CPCameraSettings.KEY_S3D_PRV_FRAME_LAYOUT, previewLayout);
             mPreviewLayout = previewLayout;
             previewLayoutUpdated = true;
             restartNeeded  = true;
@@ -2264,7 +2262,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
 
         if (!is2DMode()) {
             String s3dViewEnabled = mPreferences.getString(
-                    CameraSettings.KEY_S3D_MENU,
+                    CPCameraSettings.KEY_S3D_MENU,
                     getString(R.string.pref_camera_s3d_default));
             mS3dViewEnabled = s3dViewEnabled.equals("on");
         } else {
@@ -2276,24 +2274,24 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
             captureLayout = "none";
         } else {
             captureLayout = mPreferences.getString(
-                CameraSettings.KEY_CAPTURE_LAYOUT,
+                CPCameraSettings.KEY_CAPTURE_LAYOUT,
                 getString(R.string.pref_camera_capture_layout_default));
         }
         if (captureLayout != null && !mCaptureLayout.equals(captureLayout)) {
             if (!mIsCaptureLayoutInit) {
-                mInitialParams.set(CameraSettings.KEY_S3D_CAP_FRAME_LAYOUT, captureLayout);
-                CameraSettings settings = new CameraSettings(this, mInitialParams,
+                mInitialParams.set(CPCameraSettings.KEY_S3D_CAP_FRAME_LAYOUT, captureLayout);
+                CPCameraSettings settings = new CPCameraSettings(this, mInitialParams,
                         mCameraId, CameraHolder.instance().getCameraInfo());
                 mPreferenceGroup = settings.getPreferenceGroup(R.xml.camera_preferences);
                 mIsCaptureLayoutInit = true;
             }
-            mParameters.set(CameraSettings.KEY_S3D_CAP_FRAME_LAYOUT, captureLayout);
+            mParameters.set(CPCameraSettings.KEY_S3D_CAP_FRAME_LAYOUT, captureLayout);
             mCaptureLayout = captureLayout;
             captureLayoutUpdated = true;
         }
 
         if ((previewLayoutUpdated || captureLayoutUpdated) && mPreferenceGroup !=null) {
-            CameraSettings settings = new CameraSettings(this, mInitialParams,
+            CPCameraSettings settings = new CPCameraSettings(this, mInitialParams,
                     mCameraId, CameraHolder.instance().getCameraInfo());
              mPreferenceGroup = settings.getPreferenceGroup(R.xml.camera_preferences);
 
@@ -2301,16 +2299,16 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
              if (previewLayoutUpdated) {
                  ListPreference tbMenuSizes = null;
                  ListPreference ssMenuSizes = null;
-                 ListPreference menu2dSizes = getSupportedListPreference(CameraSettings.KEY_SUPPORTED_PREVIEW_SUBSAMPLED_SIZES,
-                         CameraSettings.KEY_PREVIEW_SIZE_2D);
+                 ListPreference menu2dSizes = getSupportedListPreference(CPCameraSettings.KEY_SUPPORTED_PREVIEW_SUBSAMPLED_SIZES,
+                         CPCameraSettings.KEY_PREVIEW_SIZE_2D);
                  if (!is2DMode()) {
-                     tbMenuSizes =  getSupportedListPreference(CameraSettings.KEY_SUPPORTED_PREVIEW_TOPBOTTOM_SIZES,CameraSettings.KEY_PREVIEW_SIZES_TB);
-                     ssMenuSizes =  getSupportedListPreference(CameraSettings.KEY_SUPPORTED_PREVIEW_SIDEBYSIDE_SIZES,CameraSettings.KEY_PREVIEW_SIZES_SS);
+                     tbMenuSizes =  getSupportedListPreference(CPCameraSettings.KEY_SUPPORTED_PREVIEW_TOPBOTTOM_SIZES,CPCameraSettings.KEY_PREVIEW_SIZES_TB);
+                     ssMenuSizes =  getSupportedListPreference(CPCameraSettings.KEY_SUPPORTED_PREVIEW_SIDEBYSIDE_SIZES,CPCameraSettings.KEY_PREVIEW_SIZES_SS);
                  }
                  ListPreference newPreviewSizes = null;
-                 if (mPreviewLayout.equals(CameraSettings.SS_FULL_S3D_LAYOUT)) {
+                 if (mPreviewLayout.equals(CPCameraSettings.SS_FULL_S3D_LAYOUT)) {
                      newPreviewSizes = ssMenuSizes;
-                 } else if (mPreviewLayout.equals(CameraSettings.TB_FULL_S3D_LAYOUT)) {
+                 } else if (mPreviewLayout.equals(CPCameraSettings.TB_FULL_S3D_LAYOUT)) {
                      newPreviewSizes = tbMenuSizes;
                  } else {
                      newPreviewSizes = menu2dSizes;
@@ -2331,24 +2329,24 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
                  }
 
                  if (mIndicatorControlContainer != null ) {
-                     mIndicatorControlContainer.replace(CameraSettings.KEY_PREVIEW_SIZE, newPreviewSizes, allEntries, allEntryValues);
+                     mIndicatorControlContainer.replace(CPCameraSettings.KEY_PREVIEW_SIZE, newPreviewSizes, allEntries, allEntryValues);
                  }
              }
 
             // Update picture size UI with the new sizes
              if (captureLayoutUpdated) {
-                 ListPreference menu2dSizes = getSupportedListPreference(CameraSettings.KEY_SUPPORTED_PICTURE_SUBSAMPLED_SIZES,
-                         CameraSettings.KEY_PICTURE_SIZE_2D);
+                 ListPreference menu2dSizes = getSupportedListPreference(CPCameraSettings.KEY_SUPPORTED_PICTURE_SUBSAMPLED_SIZES,
+                         CPCameraSettings.KEY_PICTURE_SIZE_2D);
                  ListPreference tbMenuSizes = null;
                  ListPreference ssMenuSizes = null;
                  if (!is2DMode()) {
-                     tbMenuSizes =  getSupportedListPreference(CameraSettings.KEY_SUPPORTED_PICTURE_TOPBOTTOM_SIZES,CameraSettings.KEY_PICTURE_SIZES_TB);
-                     ssMenuSizes =  getSupportedListPreference(CameraSettings.KEY_SUPPORTED_PICTURE_SIDEBYSIDE_SIZES,CameraSettings.KEY_PICTURE_SIZES_SS);
+                     tbMenuSizes =  getSupportedListPreference(CPCameraSettings.KEY_SUPPORTED_PICTURE_TOPBOTTOM_SIZES,CPCameraSettings.KEY_PICTURE_SIZES_TB);
+                     ssMenuSizes =  getSupportedListPreference(CPCameraSettings.KEY_SUPPORTED_PICTURE_SIDEBYSIDE_SIZES,CPCameraSettings.KEY_PICTURE_SIZES_SS);
                  }
                  ListPreference newPictureSizes = null;
-                 if (mCaptureLayout.equals(CameraSettings.SS_FULL_S3D_LAYOUT)) {
+                 if (mCaptureLayout.equals(CPCameraSettings.SS_FULL_S3D_LAYOUT)) {
                      newPictureSizes = ssMenuSizes;
-                 } else if (mCaptureLayout.equals(CameraSettings.TB_FULL_S3D_LAYOUT)) {
+                 } else if (mCaptureLayout.equals(CPCameraSettings.TB_FULL_S3D_LAYOUT)) {
                      newPictureSizes = tbMenuSizes;
                  } else {
                      newPictureSizes = menu2dSizes;
@@ -2371,7 +2369,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
                  }
 
                  if (mIndicatorControlContainer != null ) {
-                     mIndicatorControlContainer.replace(CameraSettings.KEY_PICTURE_SIZE, newPictureSizes, allEntries, allEntryValues);
+                     mIndicatorControlContainer.replace(CPCameraSettings.KEY_PICTURE_SIZE, newPictureSizes, allEntries, allEntryValues);
                  }
              }
         }
@@ -2383,49 +2381,51 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
 
         //CPCAM Manual Exposure and Gain
         String manualExpGainOnOff = mPreferences.getString(
-                CameraSettings.KEY_SHOTPARAMS_MANUAL_EXPOSURE_GAIN_POPUP_SLIDERS, getString(R.string.pref_camera_manual_exp_gain_default));
+                CPCameraSettings.KEY_SHOTPARAMS_MANUAL_EXPOSURE_GAIN_POPUP_SLIDERS, getString(R.string.pref_camera_manual_exp_gain_default));
         if ( (manualExpGainOnOff.equals("on")) ) {
             popupExposureGainSliders();
             Editor editor = mPreferences.edit();
-            editor.putString(CameraSettings.KEY_SHOTPARAMS_MANUAL_EXPOSURE_GAIN_POPUP_SLIDERS, "off");
+            editor.putString(CPCameraSettings.KEY_SHOTPARAMS_MANUAL_EXPOSURE_GAIN_POPUP_SLIDERS, "off");
             editor.commit();
         }
 
         // Set picture size.
         String pictureSize = mPreferences.getString(
-                CameraSettings.KEY_PICTURE_SIZE, null);
+                CPCameraSettings.KEY_PICTURE_SIZE, null);
         if (pictureSize == null) {
-            CameraSettings.initialCameraPictureSize(this, mParameters);
+            CPCameraSettings.initialCameraPictureSize(this, mParameters);
         } else {
             List<String> supported = new ArrayList<String>();
             String supp = null;
-            if (mCaptureLayout.equals(CameraSettings.TB_FULL_S3D_LAYOUT)) {
-                supp = mParameters.get(CameraSettings.KEY_SUPPORTED_PICTURE_TOPBOTTOM_SIZES);
+            if (mCaptureLayout.equals(CPCameraSettings.TB_FULL_S3D_LAYOUT)) {
+                supp = mParameters.get(CPCameraSettings.KEY_SUPPORTED_PICTURE_TOPBOTTOM_SIZES);
                 if(supp !=null && !supp.equals("")){
                     for(String item : supp.split(",")){
                         supported.add(item);
                     }
                 }
-            } else if (mCaptureLayout.equals(CameraSettings.SS_FULL_S3D_LAYOUT)) {
-                supp = mParameters.get(CameraSettings.KEY_SUPPORTED_PICTURE_SIDEBYSIDE_SIZES);
+            } else if (mCaptureLayout.equals(CPCameraSettings.SS_FULL_S3D_LAYOUT)) {
+                supp = mParameters.get(CPCameraSettings.KEY_SUPPORTED_PICTURE_SIDEBYSIDE_SIZES);
                 if (supp !=null && !supp.equals("")) {
                     for (String item : supp.split(",")) {
                         supported.add(item);
                     }
                 }
-            }else if (mCaptureLayout.equals(CameraSettings.SS_SUB_S3D_LAYOUT) ||
-                    mCaptureLayout.equals(CameraSettings.TB_SUB_S3D_LAYOUT)) {
-                supp = mParameters.get(CameraSettings.KEY_SUPPORTED_PICTURE_SUBSAMPLED_SIZES);
+            }else if (mCaptureLayout.equals(CPCameraSettings.SS_SUB_S3D_LAYOUT) ||
+                    mCaptureLayout.equals(CPCameraSettings.TB_SUB_S3D_LAYOUT)) {
+                supp = mParameters.get(CPCameraSettings.KEY_SUPPORTED_PICTURE_SUBSAMPLED_SIZES);
                 if (supp !=null && !supp.equals("")) {
                     for (String item : supp.split(",")) {
                         supported.add(item);
                     }
                 }
             } else {
-                supported = CameraSettings.sizeListToStringList(mParameters.getSupportedPictureSizes());
+                supported = CPCameraSettings.sizeListToStringList(mParameters.getSupportedPictureSizes());
             }
-             CameraSettings.setCameraPictureSize(
+             CPCameraSettings.setCameraPictureSize(
                      pictureSize, supported, mParameters);
+             mFrameWidth = CPCameraSettings.getCameraPictureSizeWidth(pictureSize);
+             mFrameHeight = CPCameraSettings.getCameraPictureSizeHeight(pictureSize);
         }
 
         mPreviewPanel = findViewById(R.id.frame_layout);
@@ -2433,10 +2433,10 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
 
         String[] previewDefaults = getResources().getStringArray(R.array.pref_camera_previewsize_default_array);
         String defaultPreviewSize = "";
-        if (mPreviewLayout.equals(CameraSettings.TB_FULL_S3D_LAYOUT)) {
+        if (mPreviewLayout.equals(CPCameraSettings.TB_FULL_S3D_LAYOUT)) {
             String[] tbPreviewSizes = getResources().getStringArray(R.array.pref_camera_tb_previewsize_entryvalues);
             defaultPreviewSize = elementExists(previewDefaults, tbPreviewSizes);
-        } else if (mPreviewLayout.equals(CameraSettings.SS_FULL_S3D_LAYOUT)) {
+        } else if (mPreviewLayout.equals(CPCameraSettings.SS_FULL_S3D_LAYOUT)) {
             String[] ssPreviewSizes = getResources().getStringArray(R.array.pref_camera_ss_previewsize_entryvalues);
             defaultPreviewSize = elementExists(previewDefaults, ssPreviewSizes);
         } else {
@@ -2444,49 +2444,50 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
             defaultPreviewSize = elementExists(previewDefaults, previewSizes2D);
         }
 
-        String previewSize = mPreferences.getString(CameraSettings.KEY_PREVIEW_SIZE, defaultPreviewSize);
+        String previewSize = mPreferences.getString(CPCameraSettings.KEY_PREVIEW_SIZE, defaultPreviewSize);
         if (previewSize !=null && (!previewSize.equals(mPreviewSize) || previewLayoutUpdated )) {
             List<String> supported = new ArrayList<String>();
             String supp = null;
-            if (mPreviewLayout.equals(CameraSettings.TB_FULL_S3D_LAYOUT)) {
-                supp = mParameters.get(CameraSettings.KEY_SUPPORTED_PREVIEW_TOPBOTTOM_SIZES);
+            if (mPreviewLayout.equals(CPCameraSettings.TB_FULL_S3D_LAYOUT)) {
+                supp = mParameters.get(CPCameraSettings.KEY_SUPPORTED_PREVIEW_TOPBOTTOM_SIZES);
                 if (supp !=null && !supp.equals("")) {
                     for (String item : supp.split(",")) {
                         supported.add(item);
                     }
                 }
-            } else if (mPreviewLayout.equals(CameraSettings.SS_FULL_S3D_LAYOUT)) {
-                supp = mParameters.get(CameraSettings.KEY_SUPPORTED_PREVIEW_SIDEBYSIDE_SIZES);
+            } else if (mPreviewLayout.equals(CPCameraSettings.SS_FULL_S3D_LAYOUT)) {
+                supp = mParameters.get(CPCameraSettings.KEY_SUPPORTED_PREVIEW_SIDEBYSIDE_SIZES);
                 if (supp !=null && !supp.equals("")) {
                     for (String item : supp.split(",")) {
                         supported.add(item);
                     }
                 }
-            } else if (mPreviewLayout.equals(CameraSettings.SS_SUB_S3D_LAYOUT) ||
-                    mPreviewLayout.equals(CameraSettings.TB_SUB_S3D_LAYOUT)) {
-                supp = mParameters.get(CameraSettings.KEY_SUPPORTED_PREVIEW_SUBSAMPLED_SIZES);
+            } else if (mPreviewLayout.equals(CPCameraSettings.SS_SUB_S3D_LAYOUT) ||
+                    mPreviewLayout.equals(CPCameraSettings.TB_SUB_S3D_LAYOUT)) {
+                supp = mParameters.get(CPCameraSettings.KEY_SUPPORTED_PREVIEW_SUBSAMPLED_SIZES);
                 if (supp !=null && !supp.equals("")) {
                     for (String item : supp.split(",")) {
                         supported.add(item);
                     }
                 }
             } else {
-                supported = CameraSettings.sizeListToStringList(mParameters.getSupportedPreviewSizes());
+                supported = CPCameraSettings.sizeListToStringList(mParameters.getSupportedPreviewSizes());
             }
-            CameraSettings.setCameraPreviewSize(previewSize, supported, mParameters);
+            CPCameraSettings.setCameraPreviewSize(previewSize, supported, mParameters);
             mPreviewSize = previewSize;
             enableCameraControls(true);
             restartNeeded = true;
         }
         Size size = mParameters.getPreviewSize();
         if (mS3dViewEnabled) {
-            if (mPreviewLayout.equals(CameraSettings.TB_FULL_S3D_LAYOUT)) {
+            if (mPreviewLayout.equals(CPCameraSettings.TB_FULL_S3D_LAYOUT)) {
                 size.height /= 2;
-            } else if (mPreviewLayout.equals(CameraSettings.SS_FULL_S3D_LAYOUT)) {
+            } else if (mPreviewLayout.equals(CPCameraSettings.SS_FULL_S3D_LAYOUT)) {
                 size.width /= 2;
             }
         }
         mPreviewFrameLayout.setAspectRatio((double) size.width / size.height);
+        mParameters.set(CameraSettings.KEY_MODE, mCaptureMode);
 
 
         if (!restartNeeded) {
@@ -2501,7 +2502,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
         //Hack: Don't apply any new parameters during
         //      temporal bracketing.
         if ( null != mFocusManager ) {
-            if ( mFocusManager.getTempBracketingState() == FocusManager.TempBracketingStates.RUNNING ) {
+            if ( mFocusManager.getTempBracketingState() == CPCamFocusManager.TempBracketingStates.RUNNING ) {
                 ret = false;
             }
         }
@@ -2518,7 +2519,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
             return;
         }
 
-        mParameters = mCameraDevice.getParameters();
+        mParameters = mCPCamDevice.getParameters();
 
         if ((updateSet & UPDATE_PARAM_INITIALIZE) != 0) {
             updateCameraParametersInitialize();
@@ -2534,20 +2535,19 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
 
         if ((updateSet & UPDATE_PARAM_MODE ) != 0 ) {
             updateCameraParametersPreference();
-            Log.v(TAG,"Capture mode set: " + mParameters.get(CameraSettings.KEY_MODE));
+            Log.v(TAG,"Capture mode set: " + mParameters.get(CPCameraSettings.KEY_MODE));
 
         }
         if ((updateSet & UPDATE_PARAM_SHOT_PARAMS ) != 0 ) {
-            mShotParams = mCameraDevice.getParameters();
-            Log.e(TAG,"Updating SHOT parameters: " + mParameters.get(CameraSettings.KEY_MODE));
-            mShotParams.set(CameraSettings.KEY_SHOTPARAMS_EXP_GAIN_PAIRS,
+            mShotParams = mCPCamDevice.getParameters();
+            mShotParams.set(CPCameraSettings.KEY_SHOTPARAMS_EXP_GAIN_PAIRS,
                     "(" + mShotParamsExposure + "," + mShotParamsGain + ")");
-               mShotParams.set(CameraSettings.KEY_SHOTPARAMS_BURST, 1);
-            mCameraDevice.setParameters(mShotParams);
+               mShotParams.set(CPCameraSettings.KEY_SHOTPARAMS_BURST, 1);
+            mCPCamDevice.setParameters(mShotParams);
         }
 
 
-        mCameraDevice.setParameters(mParameters);
+        mCPCamDevice.setParameters(mParameters);
 
         if ( ( restartPreview ) && ( mCameraState != PREVIEW_STOPPED ) ) {
             // This will only restart the preview
@@ -2564,7 +2564,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
     // accumulate them in mUpdateSet and update later.
     private void setCameraParametersWhenIdle(int additionalUpdateSet) {
         mUpdateSet |= additionalUpdateSet;
-        if (mCameraDevice == null) {
+        if (mCPCamDevice == null) {
             // We will update all the parameters when we open the device, so
             // we don't need to do anything now.
             mUpdateSet = 0;
@@ -2671,7 +2671,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
             menu.add(R.string.switch_camera_id)
                     .setOnMenuItemClickListener(new OnMenuItemClickListener() {
                 public boolean onMenuItemClick(MenuItem item) {
-                    CameraSettings.writePreferredCameraId(mPreferences,
+                    CPCameraSettings.writePreferredCameraId(mPreferences,
                             (((mCameraId + 1) < mNumberOfCameras)
                             ? (mCameraId + 1) : 0));
                     onSharedPreferenceChanged();
@@ -2753,7 +2753,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
         if (mIndicatorControlContainer != null) {
             mIndicatorControlContainer.dismissSettingPopup();
 
-            CameraSettings.restorePreferences(CPCam.this, mPreferences,
+            CPCameraSettings.restorePreferences(CPCam.this, mPreferences,
                     mParameters);
             mIndicatorControlContainer.reloadPreferences();
             onSharedPreferenceChanged();
@@ -2781,7 +2781,7 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
     }
 
     @Override
-    public void onFaceDetection(Face[] faces, android.hardware.Camera camera) {
+    public void onFaceDetection(Face[] faces, com.ti.omap.android.cpcam.CPCam camera) {
         mFaceView.setFaces(faces);
     }
 
@@ -2789,25 +2789,37 @@ public class CPCam extends ActivityBase implements FocusManager.Listener,
         new RotateTextToast(this, R.string.tap_to_focus, mOrientation).show();
         // Clear the preference.
         Editor editor = mPreferences.edit();
-        editor.putBoolean(CameraSettings.KEY_CAMERA_FIRST_USE_HINT_SHOWN, false);
+        editor.putBoolean(CPCameraSettings.KEY_CAMERA_FIRST_USE_HINT_SHOWN, false);
         editor.apply();
     }
 
     private void initializeCapabilities() {
-        mInitialParams = mCameraDevice.getParameters();
+        mInitialParams = mCPCamDevice.getParameters();
         mFocusManager.initializeParameters(mInitialParams);
         mFocusAreaSupported = (mInitialParams.getMaxNumFocusAreas() > 0
                 && isSupported(Parameters.FOCUS_MODE_AUTO,
                         mInitialParams.getSupportedFocusModes()));
     }
     //CPCAM related methods
-    public native void processPicture(SurfaceTexture surface, ByteBuffer outBuffer);
     public void onFrameAvailable(final SurfaceTexture st) {
         // Invoked every time there's a new frame available in SurfaceTexture
         new Thread(new Runnable() {
             public void run() {
-                Log.e(TAG, "onFrameAvailable: SurfaceTexture got updated");
-                st.updateTexImage();
+                try {
+                    try {
+                        mParameters.setPictureFormat(ImageFormat.JPEG);
+                        mParameters.setPictureSize(mFrameWidth, mFrameHeight);
+                        mCPCamDevice.setParameters(mParameters);
+                        mTapOut.setDefaultBufferSize(mFrameWidth, mFrameHeight);
+                        mCPCamDevice.setBufferSource(mTapOut,null);
+                    } catch (IOException ioe) {
+                        Log.e(TAG, "Error trying to setBufferSource!");
+                    }
+                        Log.e(TAG, "onFrameAvailable: SurfaceTexture got updated, Tid: " + Process.myTid());
+                        mCPCamDevice.reprocess(mShotParams);
+                } catch (IOException ioe) {
+                    Log.e(TAG, "Unknown error in processing thread" + "Tid: " +  + Process.myTid());
+                }
             }
         }).start();
     }

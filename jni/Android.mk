@@ -2,16 +2,16 @@ LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_C_INCLUDES := \
+COMMON_C_INCLUDES := \
         $(LOCAL_PATH)/feature_stab/db_vlvm \
         $(LOCAL_PATH)/feature_stab/src \
         $(LOCAL_PATH)/feature_stab/src/dbreg \
         $(LOCAL_PATH)/feature_mos/src \
         $(LOCAL_PATH)/feature_mos/src/mosaic
 
-LOCAL_CFLAGS := -O3 -DNDEBUG
+COMMON_CFLAGS := -O3 -DNDEBUG
 
-LOCAL_SRC_FILES := \
+COMMON_SRC_FILES := \
         feature_mos_jni.cpp \
         mosaic_renderer_jni.cpp \
         feature_mos/src/mosaic/trsMatrix.cpp \
@@ -38,12 +38,34 @@ LOCAL_SRC_FILES := \
         feature_stab/db_vlvm/db_utilities_poly.cpp \
         feature_stab/src/dbreg/dbreg.cpp \
         feature_stab/src/dbreg/dbstabsmooth.cpp \
-        feature_stab/src/dbreg/vp_motionmodel.c
+        feature_stab/src/dbreg/vp_motionmodel.c \
 
-LOCAL_SHARED_LIBRARIES := liblog libnativehelper libGLESv2
+COMMON_SHARED_LIBRARIES := liblog libnativehelper libGLESv2
 #LOCAL_LDLIBS := -L$(SYSROOT)/usr/lib -ldl -llog -lGLESv2 -L$(TARGET_OUT)
 
+# ORIGINAL
+LOCAL_C_INCLUDES := $(COMMON_C_INCLUDES)
+LOCAL_CFLAGS := $(COMMON_CFLAGS)
+LOCAL_SRC_FILES := $(COMMON_SRC_FILES)
+LOCAL_SHARED_LIBRARIES := $(COMMON_SHARED_LIBRARIES)
+LOCAL_MODULE_TAGS := optional
+LOCAL_MODULE    := libjni_msc
+
+include $(BUILD_SHARED_LIBRARY)
+
+# CPCAM
+include $(CLEAR_VARS)
+LOCAL_C_INCLUDES := $(COMMON_C_INCLUDES)
+LOCAL_CFLAGS := $(COMMON_CFLAGS)
+LOCAL_SRC_FILES := $(COMMON_SRC_FILES)
+LOCAL_SHARED_LIBRARIES := $(COMMON_SHARED_LIBRARIES) libandroid liblog libbinder libutils libgui libui
+LOCAL_LDFLAGS += -ljnigraphics
+LOCAL_LDLIBS := -llog -landroid -ljnigraphics
 LOCAL_MODULE_TAGS := optional
 
-LOCAL_MODULE    := libjni_msc
+LOCAL_SRC_FILES += \
+        process_jni.cpp \
+
+LOCAL_MODULE    := libjni_process
+
 include $(BUILD_SHARED_LIBRARY)

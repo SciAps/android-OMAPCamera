@@ -22,6 +22,7 @@
             android:hardwareAccelerated="true" android:largeHeap="true">
         <uses-library android:name="com.google.android.media.effects" android:required="false" />
         <uses-library android:name="com.ti.s3d" android:required="false" />
+        <uses-library android:name="com.ti.omap.android.cpcam" android:required="false" />
         <receiver android:name="com.ti.omap4.android.camera.CameraButtonIntentReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.CAMERA_BUTTON"/>

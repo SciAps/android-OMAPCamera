@@ -45,6 +45,7 @@ import java.io.IOException;
 public class CameraHolder {
     private static final String TAG = "CameraHolder";
     private android.hardware.Camera mCameraDevice;
+    private com.ti.omap.android.cpcam.CPCam mCPcamDevice;
     private long mKeepBeforeTime = 0;  // Keep the Camera before this time.
     private final Handler mHandler;
     private int mUsers = 0;  // number of open() - number of release()
@@ -58,6 +59,7 @@ public class CameraHolder {
     // This prevents the parameters set by the Camera activity used by
     // the VideoCamera activity inadvertently.
     private Parameters mParameters;
+    private com.ti.omap.android.cpcam.CPCam.Parameters mParametersCPCam;
 
     // Use a singleton.
     private static CameraHolder sHolder;
@@ -177,12 +179,18 @@ public class CameraHolder {
     private synchronized void releaseCamera() {
         Assert(mUsers == 0);
         Assert(mCameraDevice != null);
-        long now = System.currentTimeMillis();
+        //long now = System.currentTimeMillis();
+
+        /* This delay is removed, due to holding the instance too much.It's critical
+       for management CPCam and Camera instances
+
         if (now < mKeepBeforeTime) {
             mHandler.sendEmptyMessageDelayed(RELEASE_CAMERA,
                     mKeepBeforeTime - now);
             return;
         }
+ *
+ */
         mCameraDevice.release();
         mCameraDevice = null;
         // We must set this to null because it has a reference to Camera.
@@ -206,5 +214,69 @@ public class CameraHolder {
 
     public int getFrontCameraId() {
         return mFrontCameraId;
+    }
+
+    //CPCam related methods
+    public synchronized com.ti.omap.android.cpcam.CPCam openCPCamera(int cameraId)
+            throws CameraHardwareException {
+        Assert(mUsers == 0);
+        if (mCPcamDevice != null && mCameraId != cameraId) {
+            mCPcamDevice.release();
+            mCPcamDevice = null;
+            mCameraId = -1;
+        }
+        if (mCPcamDevice == null) {
+            try {
+                Log.v(TAG, "open CPCamera " + cameraId);
+                mCPcamDevice = com.ti.omap.android.cpcam.CPCam.open(cameraId);
+                mCameraId = cameraId;
+            } catch (RuntimeException e) {
+                Log.e(TAG, "fail to connect CPCamera", e);
+                throw new CameraHardwareException(e);
+            }
+            mParametersCPCam = mCPcamDevice.getParameters();
+        } else {
+            try {
+                mCPcamDevice.reconnect();
+            } catch (IOException e) {
+                Log.e(TAG, "reconnect to CPCamera failed.");
+                throw new CameraHardwareException(e);
+            }
+            mCPcamDevice.setParameters(mParametersCPCam);
+        }
+        ++mUsers;
+        mHandler.removeMessages(RELEASE_CAMERA);
+        mKeepBeforeTime = 0;
+        return mCPcamDevice;
+    }
+
+    public synchronized com.ti.omap.android.cpcam.CPCam tryOpenCPCamera(int cameraId) {
+        try {
+            return mUsers == 0 ? openCPCamera(cameraId) : null;
+        } catch (CameraHardwareException e) {
+            // In eng build, we throw the exception so that test tool
+            // can detect it and report it
+            if ("eng".equals(Build.TYPE)) {
+                throw new RuntimeException(e);
+            }
+            return null;
+        }
+    }
+    public synchronized void CPCamInstanceRelease() {
+        Assert(mUsers == 1);
+        --mUsers;
+        mCPcamDevice.stopPreview();
+        releaseCPCamera();
+    }
+
+    private synchronized void releaseCPCamera() {
+        Assert(mUsers == 0);
+        Assert(mCPcamDevice != null);
+        mCPcamDevice.release();
+        mCPcamDevice = null;
+        // We must set this to null because it has a reference to Camera.
+        // Camera has references to the listeners.
+        mParametersCPCam = null;
+        mCameraId = -1;
     }
 }
