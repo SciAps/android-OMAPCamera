@@ -1098,37 +1098,23 @@ public class CameraSettings {
     }
 
     private static List<Integer> getSupportedFramerates(Parameters params) {
-        List<Integer> fpsList = params.getSupportedPreviewFrameRates();
-        String extendedFramerates = params.get(KEY_SUPPORTED_PREVIEW_FRAMERATES_EXT);
-        if ( null != extendedFramerates ) {
-            List<Integer> extFPSList = parseToIntList(extendedFramerates);
-            if ( null != extFPSList ) {
-                fpsList.addAll(extFPSList);
-            }
-        }
-
-        return fpsList;
+        final List<Integer> extendedFrameRates = parseToIntList(
+                params.get(KEY_SUPPORTED_PREVIEW_FRAMERATES_EXT));
+        return extendedFrameRates == null || extendedFrameRates.isEmpty() ?
+                params.getSupportedPreviewFrameRates() : // fallback to regular frame rates
+                extendedFrameRates;
     }
 
     private static List<Integer> parseToIntList(String str) {
-        if ( null == str ) {
-            throw new RuntimeException("Invalid argument");
+        if ( str == null ) {
+            return null;
         }
 
         StringTokenizer tokenizer = new StringTokenizer(str, ",");
         ArrayList<Integer> intList = new ArrayList<Integer>();
 
         while (tokenizer.hasMoreElements()) {
-            String token = tokenizer.nextToken();
-            try {
-                intList.add(Integer.parseInt(token));
-            } catch(NumberFormatException e) {
-                e.printStackTrace();
-            }
-        }
-
-        if ( intList.isEmpty() ) {
-            return null;
+            intList.add(Integer.parseInt(tokenizer.nextToken()));
         }
 
         return intList;
