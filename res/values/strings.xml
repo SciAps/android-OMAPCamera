@@ -533,7 +533,7 @@
     <!-- Scene mode optimized for taking images with the old film effects. -->
     <string name="pref_camera_scenemode_entry_oldfilm">Old film</string>
     <!-- Scene mode optimized for taking images of a sport actions. -->
-    <string name="pref_camera_scenemode_entry_sport">Sport</string>
+    <string name="pref_camera_scenemode_entry_sports">Sports</string>
     <!-- Scene mode optimized for taking indoor low-lights pictures. [CHAR LIMIT=16] -->
     <string name="pref_camera_scenemode_entry_party">Party</string>
     <!-- Scene mode optimized for capturing the naturally warm color of scenes lit by candles. [CHAR LIMIT=16] -->
