@@ -2818,8 +2818,12 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                  }
                  ArrayList<CharSequence[]> allEntries = new ArrayList<CharSequence[]>();
                  ArrayList<CharSequence[]> allEntryValues = new ArrayList<CharSequence[]>();
-                 allEntries.add(menu2dSizes.getEntries());
-                 allEntryValues.add(menu2dSizes.getEntryValues());
+                 if(menu2dSizes != null) {
+                     allEntries.add(menu2dSizes.getEntries());
+                     allEntryValues.add(menu2dSizes.getEntryValues());
+                 } else {
+                     Log.v(TAG, "menu2dSizes is null");
+                 }
                  if (!is2DMode()) {
                      if (tbMenuSizes != null) {
                          allEntries.add(tbMenuSizes.getEntries());
@@ -2859,6 +2863,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                  if (menu2dSizes != null) {
                      allEntries.add(menu2dSizes.getEntries());
                      allEntryValues.add(menu2dSizes.getEntryValues());
+                 } else {
+                     Log.v(TAG, "menu2dSizes is null");
                  }
                  if (!is2DMode()) {
                      if (tbMenuSizes != null) {
