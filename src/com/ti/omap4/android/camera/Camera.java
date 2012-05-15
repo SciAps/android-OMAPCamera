@@ -374,6 +374,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private IntentFilter mTestIntent = null;
     private final BroadcastReceiver mTestReceiver = new CameraBroadcastReceiverTest();
 
+    private boolean mNeedToRecreateSurfaceView = false;
+
     /**
      * This Handler is used to post message back onto the main thread of the
      * application
@@ -1873,6 +1875,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mMediaProviderClient.release();
             mMediaProviderClient = null;
         }
+        if (mPreviewFrame != null) {
+            mPreviewFrame.setVisibility(View.INVISIBLE);
+        }
     }
 
     private void checkStorage() {
@@ -2151,7 +2156,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mJpegPictureCallbackTime = 0;
         mZoomValue = 0;
 
-        if (mPreviewFrame != null && mPreviewFrame.getVisibility() == View.INVISIBLE) {
+        if (mPreviewFrame != null && mNeedToRecreateSurfaceView) {
             int childId = mPreviewFrameLayout.indexOfChild(mPreviewFrame);
             mPreviewFrameLayout.removeView(mPreviewFrame);
             SurfaceView preview = new SurfaceView(this);
@@ -2165,6 +2170,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             boolean mirror = (info.facing == CameraInfo.CAMERA_FACING_FRONT);
             mFocusManager.initialize(mFocusAreaIndicator, mPreviewFrame, mFaceView, this,
                     mirror, mDisplayOrientation);
+            mNeedToRecreateSurfaceView = false;
         }
 
         // Start the preview if it is not started.
@@ -2272,9 +2278,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mThumbnail = null;
         if (mSurfaceHolder != null) {
             mSurfaceHolder.getSurface().release();
-            if (mPreviewFrame != null) {
-                mPreviewFrame.setVisibility(View.INVISIBLE);
-            }
+            mNeedToRecreateSurfaceView = true;
         }
         super.onPause();
     }

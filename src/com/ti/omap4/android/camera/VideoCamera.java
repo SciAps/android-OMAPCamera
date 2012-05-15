@@ -291,6 +291,7 @@ public class VideoCamera extends ActivityBase
 
     private S3DViewWrapper s3dView;
     private boolean mS3dViewEnabled = false;
+    private boolean mNeedToRecreateSurfaceView = false;
 
     // This Handler is used to post message back onto the main thread of the
     // application
@@ -940,7 +941,7 @@ public class VideoCamera extends ActivityBase
         if (mOpenCameraFail || mCameraDisabled) return;
 
         SurfaceView currentPreview = (SurfaceView)findViewById(R.id.camera_preview);
-        if (currentPreview.getVisibility() == View.INVISIBLE) {
+        if (mNeedToRecreateSurfaceView) {
             int childId = mPreviewFrameLayout.indexOfChild(currentPreview);
             mPreviewFrameLayout.removeView(currentPreview);
             SurfaceView preview = new SurfaceView(this);
@@ -949,6 +950,7 @@ public class VideoCamera extends ActivityBase
             preview.getHolder().addCallback(this);
             preview.setOnTouchListener(this);
             s3dView = new S3DViewWrapper(preview.getHolder());
+            mNeedToRecreateSurfaceView = false;
         }
 
         if ( null == mAutoConvergence || mPausing ) {
@@ -1182,10 +1184,16 @@ public class VideoCamera extends ActivityBase
         mThumbnail = null;
         if (mSurfaceHolder != null) {
             mSurfaceHolder.getSurface().release();
-            SurfaceView preview = (SurfaceView)findViewById(R.id.camera_preview);
-            if (preview != null) {
-                preview.setVisibility(View.INVISIBLE);
-            }
+            mNeedToRecreateSurfaceView = true;
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        SurfaceView preview = (SurfaceView)findViewById(R.id.camera_preview);
+        if (preview != null) {
+            preview.setVisibility(View.INVISIBLE);
         }
     }
 
