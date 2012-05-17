@@ -60,7 +60,7 @@ public class IndicatorControlWheelContainer extends IndicatorControlContainer {
     }
 
     public void initialize(Context context, PreferenceGroup group,
-            boolean isZoomSupported, String[] keys, String[] otherSettingKeys) {
+            boolean isZoomSupported, boolean isCPcamSlidersSupported, String[] keys, String[] otherSettingKeys) {
         mIndicatorControlWheel.initialize(context, group, isZoomSupported,
                 keys, otherSettingKeys);
     }

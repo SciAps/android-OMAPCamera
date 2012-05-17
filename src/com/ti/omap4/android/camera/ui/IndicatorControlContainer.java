@@ -27,7 +27,7 @@ import android.util.AttributeSet;
 public abstract class IndicatorControlContainer extends IndicatorControl
         implements OnIndicatorEventListener {
     public abstract void initialize(Context context, PreferenceGroup group,
-            boolean isZoomSupported, String[] keys, String[] otherSettingKeys);
+            boolean isZoomSupported, boolean isCPcamSlidersSupported, String[] keys, String[] otherSettingKeys);
 
     public IndicatorControlContainer(Context context, AttributeSet attrs) {
         super(context, attrs);

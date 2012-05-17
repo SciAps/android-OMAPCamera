@@ -590,7 +590,7 @@ public class VideoCamera extends ActivityBase
 
         CameraPicker.setImageResourceId(R.drawable.ic_switch_video_facing_holo_light);
         mIndicatorControlContainer.initialize(this, mPreferenceGroup,
-                mParameters.isZoomSupported(), SETTING_KEYS, OTHER_SETTING_KEYS);
+                mParameters.isZoomSupported(), false, SETTING_KEYS, OTHER_SETTING_KEYS);
         mIndicatorControlContainer.setListener(this);
         mPopupGestureDetector = new GestureDetector(this,
                 new PopupGestureListener());
