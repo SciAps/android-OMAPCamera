@@ -28,6 +28,7 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.lang.RuntimeException;
 
 public class Storage {
     private static final String TAG = "CameraStorage";
@@ -41,6 +42,9 @@ public class Storage {
     public static final String BUCKET_ID =
             String.valueOf(DIRECTORY.toLowerCase().hashCode());
 
+    public static final String MIME_TYPE_JPEG = "image/jpeg";
+    public static final String MIME_TYPE_MPO = "image/mpo";
+
     public static final long UNAVAILABLE = -1L;
     public static final long PREPARING = -2L;
     public static final long UNKNOWN_SIZE = -3L;
@@ -48,6 +52,17 @@ public class Storage {
     public static final long PICTURE_SIZE = 1500000;
 
     private static final int BUFSIZE = 4096;
+
+    private static String extension2Mime(String extension) {
+        if (extension.equals("jpeg") || extension.equals ("jpg")
+                || extension.equals("jps") ) {
+            return MIME_TYPE_JPEG;
+        }
+        else if (extension.equals("mpo")) {
+            return MIME_TYPE_MPO;
+        }
+        throw new RuntimeException("Unsupported image extension type: " + extension);
+    }
 
     public static Uri addImage(ContentResolver resolver, String title, String extension, long date,
                 Location location, int orientation, byte[] jpeg, int width, int height) {
@@ -74,7 +89,7 @@ public class Storage {
         values.put(ImageColumns.TITLE, title);
         values.put(ImageColumns.DISPLAY_NAME, title + "." + extension);
         values.put(ImageColumns.DATE_TAKEN, date);
-        values.put(ImageColumns.MIME_TYPE, "image/" + extension);
+        values.put(ImageColumns.MIME_TYPE, extension2Mime(extension));
         values.put(ImageColumns.ORIENTATION, orientation);
         values.put(ImageColumns.DATA, path);
         values.put(ImageColumns.SIZE, jpeg.length);
