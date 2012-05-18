@@ -42,7 +42,7 @@ import java.util.List;
 public class CPCamFocusManager {
     private static final String TAG = "CPCamFocusManager";
 
-    public enum TempBracketingStates { OFF, ACTIVE, RUNNING}
+    public enum QueuedShotStates { OFF, ACTIVE }
     private static final int RESET_TOUCH_FOCUS = 0;
     private static final int FOCUS_BEEP_VOLUME = 100;
     private static final int RESET_TOUCH_FOCUS_DELAY = 3000;
@@ -60,7 +60,7 @@ public class CPCamFocusManager {
     private boolean mInLongPress;
     private boolean mLockAeAwbNeeded;
     private boolean mAeAwbLock;
-    private TempBracketingStates mTempBracketingState = TempBracketingStates.OFF;
+    private QueuedShotStates mQueuedShotState = QueuedShotStates.OFF;
     private Matrix mMatrix;
     private View mFocusIndicatorRotateLayout;
     private FocusIndicatorView mFocusIndicator;
@@ -92,7 +92,7 @@ public class CPCamFocusManager {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case RESET_TOUCH_FOCUS: {
-                    if ( getTempBracketingState() != TempBracketingStates.RUNNING ) {
+                    if ( getQueuedShotState() != QueuedShotStates.ACTIVE ) {
                         cancelAutoFocus();
                         mListener.startFaceDetection();
                     }
@@ -224,7 +224,7 @@ public class CPCamFocusManager {
 
     public void onAutoFocus(boolean focused) {
 
-        setTempBracketingState(TempBracketingStates.RUNNING);
+        setQueuedShotState(QueuedShotStates.ACTIVE);
 
         if (mState == STATE_FOCUSING_SNAP_ON_FINISH) {
             // Take the picture no matter focus succeeds or fails. No need
@@ -269,7 +269,7 @@ public class CPCamFocusManager {
     public boolean onTouch(MotionEvent e) {
         if (( !mInitialized ) ||
             ( mState == STATE_FOCUSING_SNAP_ON_FINISH ) ||
-            ( TempBracketingStates.RUNNING == getTempBracketingState() ) ) {
+            ( QueuedShotStates.ACTIVE == getQueuedShotState() ) ) {
             return false;
         }
 
@@ -449,7 +449,7 @@ public class CPCamFocusManager {
             // Always use autofocus in tap-to-focus.
             mFocusMode = Parameters.FOCUS_MODE_AUTO;
         } else {
-            if ( getTempBracketingState() != TempBracketingStates.RUNNING ) {
+            if ( getQueuedShotState() != QueuedShotStates.ACTIVE ) {
                 if ( null != mDefaultFocusModes ) {
                     mFocusMode = mPreferences.getString(
                             CameraSettings.KEY_FOCUS_MODE, mDefaultFocusModes[0]);
@@ -574,52 +574,29 @@ public class CPCamFocusManager {
         return supported == null ? false : supported.indexOf(value) >= 0;
     }
 
-    public void setTempBracketingState(TempBracketingStates state) {
+    public void setQueuedShotState(QueuedShotStates state) {
 
-        synchronized (mTempBracketingState) {
-            switch ( mTempBracketingState ) {
-                case OFF:
-
-                    if ( state ==  TempBracketingStates.ACTIVE ) {
-                        mTempBracketingState = state;
-                    }
-
-                    break;
-                case ACTIVE:
-
-                    if ( ( state == TempBracketingStates.OFF ) ||
-                         ( state == TempBracketingStates.RUNNING ) ) {
-                        mTempBracketingState = state;
-                    }
-
-                    break;
-                case RUNNING:
-
-                    if ( state == TempBracketingStates.OFF ) {
-                       mTempBracketingState = state;
-                    }
-
-                    break;
-            }
+        synchronized (mQueuedShotState) {
+            mQueuedShotState = state;
         }
     }
 
-    public TempBracketingStates getTempBracketingState() {
-        synchronized (mTempBracketingState) {
-            return this.mTempBracketingState;
+    public QueuedShotStates getQueuedShotState() {
+        synchronized (mQueuedShotState) {
+            return this.mQueuedShotState;
         }
     }
 
     private boolean needAutoFocusCall() {
         String focusMode = getFocusMode();
-        TempBracketingStates state = getTempBracketingState();
+        QueuedShotStates state = getQueuedShotState();
 
-        if ( state == TempBracketingStates.RUNNING ) {
+        if ( state == QueuedShotStates.ACTIVE ) {
             return false;
         }
 
         return !( ( focusMode.equals(Parameters.FOCUS_MODE_INFINITY)
-                    && ( state != TempBracketingStates.ACTIVE ) )
+                    && ( state != QueuedShotStates.ACTIVE ) )
                 || focusMode.equals(Parameters.FOCUS_MODE_FIXED)
                 || focusMode.equals(Parameters.FOCUS_MODE_EDOF));
     }

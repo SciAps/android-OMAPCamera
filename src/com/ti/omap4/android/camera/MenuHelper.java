@@ -46,7 +46,7 @@ public class MenuHelper {
     private static final String CAMERA_CLASS = "com.ti.omap4.android.camera.Camera";
     private static final String PANORAMA_CLASS = "com.ti.omap4.android.camera.panorama.PanoramaActivity";
     private static final String VIDEO_CAMERA_CLASS = "com.ti.omap4.android.camera.VideoCamera";
-    private static final String CPCAM_CLASS = "com.ti.omap4.android.camera.CPcam";
+    private static final String CPCAM_CLASS = "com.ti.omap4.android.camera.CPCam";
 
     public static void addSwitchModeMenuItem(Menu menu, int mode,
             final Runnable r) {

@@ -70,7 +70,7 @@
                 android:clearTaskOnLaunch="true"
                 android:windowSoftInputMode="stateAlwaysHidden|adjustPan">
         </activity>
-                <activity android:name="com.ti.omap4.android.camera.CPcam"
+                <activity android:name="com.ti.omap4.android.camera.CPCam"
                 android:label="@string/cpcam_camera_label"
                 android:configChanges="orientation|screenSize|keyboardHidden"
                 android:screenOrientation="landscape"

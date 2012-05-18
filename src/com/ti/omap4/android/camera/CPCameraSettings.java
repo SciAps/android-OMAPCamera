@@ -146,7 +146,6 @@ public class CPCameraSettings {
     public static final String EXPOSURE_DEFAULT_VALUE = "0";
 
     //CPCAM shot parameres
-    public static final String KEY_SHOTPARAMS_MANUAL_EXPOSURE_GAIN_POPUP_SLIDERS = "pref_camera_manual_exp_gain_key";
     public static final String KEY_SHOTPARAMS_BURST = "burst-capture";
     public static final String KEY_SHOTPARAMS_EXP_GAIN_PAIRS = "exp-gain-pairs";
     
@@ -370,7 +369,6 @@ public class CPCameraSettings {
         ListPreference flashMode = group.findPreference(KEY_FLASH_MODE);
         ListPreference focusMode = group.findPreference(KEY_FOCUS_MODE);
         ListPreference exposure = group.findPreference(KEY_EXPOSURE_COMPENSATION_MENU);
-        ListPreference cpcam_manual_exp_gain = group.findPreference(KEY_SHOTPARAMS_MANUAL_EXPOSURE_GAIN_POPUP_SLIDERS);
         ListPreference colorEffect = group.findPreference(KEY_COLOR_EFFECT);
         ListPreference autoConvergence = group.findPreference(KEY_AUTO_CONVERGENCE);
         ListPreference iso = group.findPreference(KEY_ISO);
@@ -420,13 +418,6 @@ public class CPCameraSettings {
                 supp.add("none");
             }
             filterUnsupportedOptions(group, s3d, supp);
-        }
-
-        if (cpcam_manual_exp_gain != null) {
-            List<String> supp = new ArrayList<String>();
-            supp.add("on");
-            supp.add("off");
-            filterUnsupportedOptions(group, cpcam_manual_exp_gain, supp);
         }
 
         if (previewSize2d != null) {
