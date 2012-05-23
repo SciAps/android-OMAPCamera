@@ -2258,22 +2258,6 @@ public class VideoCamera extends ActivityBase
 
         mParameters.setRecordingHint(true);
 
-        // Set picture size.
-        // The logic here is different from the logic in still-mode camera.
-        // There we determine the preview size based on the picture size, but
-        // here we determine the picture size based on the preview size.
-        if (mParameters.isVideoSnapshotSupported()) {
-            List<Size> supported = mParameters.getSupportedPictureSizes();
-            Size optimalSize = Util.getOptimalVideoSnapshotPictureSize(supported,
-                    (double) mDesiredPreviewWidth / mDesiredPreviewHeight);
-            Size original = mParameters.getPictureSize();
-            if (!original.equals(optimalSize)) {
-                mParameters.setPictureSize(optimalSize.width, optimalSize.height);
-                Log.v(TAG, "Video snapshot size is " + optimalSize.width + "x" +
-                        optimalSize.height);
-            }
-        }
-
         // Set JPEG quality.
         int jpegQuality = CameraProfile.getJpegEncodingQualityParameter(mCameraId,
                 CameraProfile.QUALITY_HIGH);
