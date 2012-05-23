@@ -777,6 +777,6 @@
 
     <string name="settings_manual_gain_exposure_button_ok">Ok</string>
     <string name="settings_manual_exposure_title_popup">Manual Exposure Settings</string>
-    <string name="manual_gain_button">Exposure/Gain</string>
+    <string name="manual_gain_button">Absolute</string>
     <string name="reprocess_button">Reprocess</string>
 </resources>

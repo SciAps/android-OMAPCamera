@@ -208,6 +208,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     private Rotatable mReviewCancelButton;
     private Rotatable mReviewDoneButton;
     private Button mReprocessButton;
+    private Button mExpGainButton;
 
     // mCropValue and mSaveUri are used only if isImageCaptureIntent() is true.
     private String mCropValue;
@@ -277,6 +278,9 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     private String mCPCamMode;
     private boolean mReprocessNextFrame = false;
     private boolean mRestartQueueShot = false;
+
+    private boolean mIsRelativeExposureGainPair = false;
+
     private String mManualExposure;
 
     private String mCaptureMode = "cp-cam";
@@ -298,7 +302,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     private byte[] mJpegImageData;
     private int mManualExposureControl;
     private int mManualGainISO;
-    private int mManualExposureControlValue = 62; //Default values
+    private int mManualExposureControlValue = 1; //Default values
     private int mManualGainControlValue = 400;
 
     // These latency time are for the CameraLatency test.
@@ -397,19 +401,44 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
                     data = msg.getData();
                     mManualExposureControl = data.getInt("EXPOSURE");
                     mManualGainISO = data.getInt("ISO");
-                    Log.e(TAG, "mManualExposureControl " + mManualExposureControl + " mManualGainISO " + mManualGainISO);
 
-                    if (mManualExposureControl <= 0) {
-                        mManualExposureControl = 1;
+                    if(mIsRelativeExposureGainPair) {
+                        //set Relative exposure and gain values
+                        mManualExposureControl = mManualExposureControl -300;
+                        mManualGainISO = mManualGainISO - 300;
+                        // decrement with 300 to get the range (-300;+300 )
+                        if (mManualExposureControl < -300)
+                            mManualExposureControl = -300;
+
+                        if(mManualExposureControl > 0) {
+                            mShotParamsExposure = "+" + Integer.toString(mManualExposureControl);
+                        } else {
+                            mShotParamsExposure = Integer.toString(mManualExposureControl);
+                        }
+
+                        if ( mManualGainISO <= -300)
+                            mManualGainISO = -300;
+
+                        if(mManualGainISO > 0) {
+                            mShotParamsGain = "+" + Integer.toString(mManualGainISO);
+                        } else {
+                            mShotParamsGain = Integer.toString(mManualGainISO);
+                        }
+
+                    } else {
+                        //Set Absolute exposure and gain values
+                        if (mManualExposureControl <= 0) {
+                            mManualExposureControl = 1;
+                        }
+                        mShotParamsExposure = Integer.toString(1000*mManualExposureControl);
+
+                        if ( mManualGainISO <= 0) {
+                            mManualGainISO = 0;
+                        }
+                        mShotParamsGain = Integer.toString(mManualGainISO);
                     }
-                    mShotParamsExposure = Integer.toString(1000*mManualExposureControl);
-
-                    if ( mManualGainISO <= 0) {
-                        mManualGainISO = 0;
-                    }
-                    mShotParamsGain = Integer.toString(mManualGainISO);
-                    Log.e(TAG, mShotParamsExposure + " , " + mShotParamsGain);
-
+                    Log.e(TAG,mIsRelativeExposureGainPair
+                    + mShotParamsExposure + " , " + mShotParamsGain);
                     String expGainPair = new String( "(" + mShotParamsExposure + "," + mShotParamsGain + ")" );
 
                     if ( null == mShotParams && null != mCPCamDevice ) {
@@ -492,7 +521,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         Util.initializeScreenBrightness(getWindow(), getContentResolver());
         installIntentFilter();
         //initializeZoom();
-        initialiseCPcamSliders();
+        initializeCPcamSliders(mIsRelativeExposureGainPair);
         updateOnScreenIndicators();
         startFaceDetection();
         // Show the tap to focus toast if this is the first start.
@@ -557,8 +586,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
 
         installIntentFilter();
         mImageSaver = new ImageSaver();
-        //initializeZoom();
-        initialiseCPcamSliders();
+        initializeCPcamSliders(mIsRelativeExposureGainPair);
         keepMediaProviderInstance();
         checkStorage();
         hidePostCaptureAlert();
@@ -608,24 +636,30 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         }
     }
 
-    private void initialiseCPcamSliders() {
+    private void initializeCPcamSliders(boolean mIsRelativeExposureGainPair) {
+        int expMin,expMax,expStep,isoMax,isoStep,isoMin;
+        if(mIsRelativeExposureGainPair){
+            //Relative exposure and gain values
+            expMin = 0;
+            expMax = 600;
+            expStep = 1;
+            isoMin = 0;
+            isoMax = 600;
+            isoStep = 100;
 
-        int expMin = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_MIN));
-        int expMax = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_MAX));
-        int expStep = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_STEP));
-        int isoMin = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_MIN));
-        int isoMax = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_MAX));
-        int isoStep = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_STEP));
-        int expValue = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_MANUAL_EXPOSURE));
-        int isoValue = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_MANUAL_GAIN_ISO));
-;
-        mCpcamGainControl.setGainMax(isoMax);
-        mCpcamGainControl.setGainIndex(mManualGainControlValue);
-        mCpcamGainControl.setGainStep(isoStep);
+        } else {
+            //Absolute exposure and gain values
+            expMin = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_MIN));
+            expMax = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_MAX));
+            expStep = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_STEP));
+            isoMin = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_MIN));
+            isoMax = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_MAX));
+            isoStep = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_STEP));
 
-        mCpcamExposureControl.setExposureMax(expMax);
-        mCpcamExposureControl.setExposureIndex(mManualExposureControlValue);
-        mCpcamExposureControl.setExposureStep(expStep);
+        }
+
+        mCpcamGainControl.setGainMinMax(isoMin,isoMax);
+        mCpcamExposureControl.setExposureMinMax(expMin,expMax);
 
         mCpcamGainControl.setOnGainChangeListener(new CpcamGainChangeListener());
         mCpcamExposureControl.setOnExposureChangeListener(new CpcamExposureChangeListener());
@@ -1329,7 +1363,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
                 mFocusManager.setQueuedShotState(QueuedShotStates.OFF);
                 mReprocessButton.setVisibility(View.INVISIBLE);
                 mMetaDataIndicator.setVisibility(View.INVISIBLE);
-
+                mExpGainButton.setVisibility(View.INVISIBLE);
                 Message msg = new Message();
                 msg.what = RESTART_PREVIEW;
                 msg.arg1 = MODE_RESTART;
@@ -1367,6 +1401,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
             mFaceDetectionStarted = false;
             setCameraState(QUEUED_SHOT_IN_PROGRESS);
             mReprocessButton.setVisibility(View.VISIBLE);
+            mExpGainButton.setVisibility(View.VISIBLE);
             return true;
         }
     }
@@ -1528,6 +1563,20 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         mCpcamExposureControl = (CPcamExposureControl) findViewById(R.id.exposure_control);
         mOnScreenIndicators = (Rotatable) findViewById(R.id.on_screen_indicators);
         mLocationManager = new LocationManager(this, this);
+
+        mExpGainButton = (Button) findViewById(R.id.manual_gain_exposure_button);
+        mExpGainButton.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    if(mIsRelativeExposureGainPair ){
+                        mExpGainButton.setText("Absolute");
+                        mIsRelativeExposureGainPair = false;
+                    } else {
+                        mExpGainButton.setText("Relative");
+                        mIsRelativeExposureGainPair = true;
+                    }
+                    initializeCPcamSliders(mIsRelativeExposureGainPair);
+                }
+        });
 
         mReprocessButton = (Button) findViewById(R.id.reprocess_button);
         mReprocessButton.setOnClickListener(new View.OnClickListener() {
@@ -1869,7 +1918,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     }
 
     private void initDefaults() {
-    	initialiseCPcamSliders();
+        initializeCPcamSliders(mIsRelativeExposureGainPair);
 
         // Preview layout and size
         if (mPausing) {
@@ -2879,8 +2928,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     }
 
     private void restorePreferences() {
-        // Reset the zoom. Zoom value is not stored in preference.
-    	initialiseCPcamSliders();
+        initializeCPcamSliders(mIsRelativeExposureGainPair);
 
         if (mIndicatorControlContainer != null) {
             mIndicatorControlContainer.dismissSettingPopup();

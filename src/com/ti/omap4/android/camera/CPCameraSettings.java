@@ -148,7 +148,9 @@ public class CPCameraSettings {
     //CPCAM shot parameres
     public static final String KEY_SHOTPARAMS_BURST = "burst-capture";
     public static final String KEY_SHOTPARAMS_EXP_GAIN_PAIRS = "exp-gain-pairs";
-    
+    public static final String KEY_EXP_COMPENSATION = "exp-compensation";
+    public static final String KEY_FLUSH_CONFIG = "flush";
+
     public static final int CURRENT_VERSION = 5;
     public static final int CURRENT_LOCAL_VERSION = 2;
 

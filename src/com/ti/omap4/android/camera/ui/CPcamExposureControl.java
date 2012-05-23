@@ -21,6 +21,7 @@ import com.ti.omap4.android.camera.R;
 import android.content.Context;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -36,7 +37,7 @@ public abstract class CPcamExposureControl extends RelativeLayout implements Rot
     public static final int EXPOSURE_STOP = 2;
 
     private static final String TAG = "CPcamExposureControl";
-    private static final int EXPOSUREING_INTERVAL = 1000; // milliseconds
+    private static final int SCALING_INTERVAL = 1000; // milliseconds
 
     protected ImageView mExposureIn;
     protected ImageView mExposureOut;
@@ -55,7 +56,7 @@ public abstract class CPcamExposureControl extends RelativeLayout implements Rot
         void onExposureIndexChanged(double indexPosition);
     }
 
-    protected int mExposureMax, mExposureIndex;
+    protected int mExposureMax,mExposureMin, mExposureIndex;
     private OnExposureChangedListener mListener;
     private OnExposureIndexChangedListener mIndexListener;
 
@@ -104,8 +105,9 @@ public abstract class CPcamExposureControl extends RelativeLayout implements Rot
         }
     }
 
-    public void setExposureMax(int exposureMax) {
+    public void setExposureMinMax(int exposureMin,int exposureMax) {
         mExposureMax = exposureMax;
+        mExposureMin = exposureMin;
 
         // Layout should be requested as the maximum exposure level is the key to
         // show the correct exposure slider position.
@@ -133,7 +135,7 @@ public abstract class CPcamExposureControl extends RelativeLayout implements Rot
     }
 
     private boolean exposureOut() {
-        return (mExposureIndex == 0) ? false : changeExposureIndex(mExposureIndex - mStep);
+        return (mExposureIndex == mExposureMin) ? false : changeExposureIndex(mExposureIndex - mStep);
     }
 
     public void setExposureStep(int step) {
