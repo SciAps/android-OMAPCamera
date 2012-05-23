@@ -2279,46 +2279,25 @@ public class VideoCamera extends ActivityBase
                 CameraProfile.QUALITY_HIGH);
         mParameters.setJpegQuality(jpegQuality);
 
+        int[] frameRange = new int[2];
         // Set FrameRate
         String framerate = mPreferences.getString(CameraSettings.KEY_VIDEO_FRAMERATE, getString(R.string.pref_camera_videoframerate_default));
-        int maxFrameRate = Integer.parseInt(framerate);
+        frameRange[Parameters.PREVIEW_FPS_MAX_INDEX] = Integer.parseInt(framerate) * 1000;
 
         // Set MIN FrameRate
         String minframerate = mPreferences.getString(CameraSettings.KEY_VIDEO_MINFRAMERATE, getString(R.string.pref_camera_videominframerate_default));
-        int minFrameRate = Integer.parseInt(minframerate);
+        frameRange[Parameters.PREVIEW_FPS_MIN_INDEX] = Integer.parseInt(minframerate) * 1000;
 
-        if (minFrameRate > maxFrameRate) {
-            int[] currentFps;
-            currentFps = new int[2];
-            mParameters.getPreviewFpsRange(currentFps);
-            Editor editor = mPreferences.edit();
+        final List<int[]> supportedFpsRanges = mParameters.getSupportedPreviewFpsRange();
 
-            if (maxFrameRate != (currentFps[Parameters.PREVIEW_FPS_MAX_INDEX] / 1000)) {
-                // Upper VFR bound changed from the menu (max FPS) -
-                // User decreases max FPS and as a result min becomes > max
-                // so we make min = max here. The user selected menu value is
-                // displayed in the menu (framerate) but the actual setting is
-                // the modified one (maxFrameRate) as those may differ if menu
-                // value is not supported
-                minFrameRate = maxFrameRate;
-                editor.putString(CameraSettings.KEY_VIDEO_MINFRAMERATE, framerate);
-            } else {
-                // Lower VFR bound changed from the menu (min FPS) -
-                // User increases min FPS and as a result min becomes > max
-                // so we make max = min here. The user selected menu value is
-                // displayed in the menu (minframerate) but the actual setting
-                // is the modified one (minFrameRate) as those may differ if
-                // menu value is not supported
-                maxFrameRate = minFrameRate;
-                editor.putString(CameraSettings.KEY_VIDEO_FRAMERATE, minframerate);
-            }
-            editor.apply();
-            mIndicatorControlContainer.reloadPreferences();
+        if ((supportedFpsRanges != null) && (!supportedFpsRanges.contains(frameRange)) &&
+                CameraSettings.getSupportedFramerateRange(frameRange, supportedFpsRanges)) {
+            upadateIndicatorFpsRange(frameRange[Parameters.PREVIEW_FPS_MIN_INDEX]/1000, frameRange[Parameters.PREVIEW_FPS_MAX_INDEX]/1000);
         }
 
-        mProfile.videoFrameRate = maxFrameRate;
-        mParameters.setPreviewFpsRange(minFrameRate * 1000, maxFrameRate * 1000);
-        Log.v(TAG,"Framerate is set to [" + maxFrameRate + ", " + minFrameRate + "]");
+        mProfile.videoFrameRate = frameRange[Parameters.PREVIEW_FPS_MAX_INDEX]/1000;
+        mParameters.setPreviewFpsRange(frameRange[Parameters.PREVIEW_FPS_MIN_INDEX], frameRange[Parameters.PREVIEW_FPS_MAX_INDEX]);
+        Log.v(TAG,"Framerate is set to [" + frameRange[Parameters.PREVIEW_FPS_MAX_INDEX]/1000 + ", " + frameRange[Parameters.PREVIEW_FPS_MIN_INDEX]/1000 + "]");
 
         // Set Bitrate
         String bitrate = mPreferences.getString(CameraSettings.KEY_VIDEO_BITRATE, (getString(R.string.pref_camera_videobitrate_default)));
@@ -2363,6 +2342,16 @@ public class VideoCamera extends ActivityBase
         mCameraDevice.setParameters(mParameters);
         // Keep preview size up to date.
         mParameters = mCameraDevice.getParameters();
+    }
+
+    private void upadateIndicatorFpsRange(int minFps, int maxFps) {
+        Editor editor = mPreferences.edit();
+        editor.putString(CameraSettings.KEY_VIDEO_MINFRAMERATE, String.valueOf(minFps));
+        editor.putString(CameraSettings.KEY_VIDEO_FRAMERATE, String.valueOf(maxFps));
+        editor.apply();
+        if (mIndicatorControlContainer != null) {
+            mIndicatorControlContainer.reloadPreferences();
+        }
     }
 
     private boolean switchToOtherMode(int mode) {

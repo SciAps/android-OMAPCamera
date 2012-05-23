@@ -414,6 +414,7 @@
         <item>@string/pref_camera_videoframerate_entry_4</item>
         <item>@string/pref_camera_videoframerate_entry_5</item>
         <item>@string/pref_camera_videoframerate_entry_6</item>
+        <item>@string/pref_camera_videoframerate_entry_7</item>
     </string-array>
 
     <string-array name="pref_camera_videoframerate_entryvalues">
@@ -421,6 +422,7 @@
         <item>10</item>
         <item>15</item>
         <item>24</item>
+        <item>27</item>
         <item>30</item>
         <item>60</item>
     </string-array>
@@ -434,6 +436,7 @@
         <item>@string/pref_camera_videominframerate_entry_4</item>
         <item>@string/pref_camera_videominframerate_entry_5</item>
         <item>@string/pref_camera_videominframerate_entry_6</item>
+        <item>@string/pref_camera_videominframerate_entry_7</item>
     </string-array>
 
     <string-array name="pref_camera_videominframerate_entryvalues">
@@ -441,6 +444,7 @@
         <item>10</item>
         <item>15</item>
         <item>24</item>
+        <item>27</item>
         <item>30</item>
         <item>60</item>
     </string-array>

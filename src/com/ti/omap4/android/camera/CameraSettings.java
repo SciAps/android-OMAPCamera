@@ -310,6 +310,53 @@ public class CameraSettings {
         return false;
     }
 
+    public static boolean getSupportedFramerateRange(int[] range, final List<int[]> supportedFpsRanges) {
+
+        if (supportedFpsRanges.isEmpty()) {
+            return false;
+        }
+
+        int currentBest = Integer.MAX_VALUE;
+        int bestMatch = range[Parameters.PREVIEW_FPS_MAX_INDEX];
+        List<int[]> matchedResults = new ArrayList<int[]>();
+        matchedResults.add(range);
+
+        //Find fpsRange with minimum difference in maximum fps value
+        for (int[] fpsRange: supportedFpsRanges) {
+            final int diff = Math.abs(fpsRange[Parameters.PREVIEW_FPS_MAX_INDEX] - range[Parameters.PREVIEW_FPS_MAX_INDEX]);
+            if (diff < currentBest) {
+                currentBest = diff;
+                bestMatch = fpsRange[Parameters.PREVIEW_FPS_MAX_INDEX];
+                matchedResults.clear();
+                matchedResults.add(fpsRange);
+            }
+            else if (diff == currentBest) {
+                matchedResults.add(fpsRange);
+            }
+        }
+
+        if (matchedResults.size() == 1) {
+            range[Parameters.PREVIEW_FPS_MIN_INDEX] = matchedResults.get(0)[Parameters.PREVIEW_FPS_MIN_INDEX];
+            range[Parameters.PREVIEW_FPS_MAX_INDEX] = matchedResults.get(0)[Parameters.PREVIEW_FPS_MAX_INDEX];
+            return true;
+        }
+
+        //If we got more than one result - find range with minimum difference in
+        //minimum fps value
+        currentBest = Integer.MAX_VALUE;
+        int[] bestMatchRange = {range[Parameters.PREVIEW_FPS_MIN_INDEX], bestMatch};
+        for (int[] fpsRange: matchedResults) {
+            final int diff = Math.abs(fpsRange[Parameters.PREVIEW_FPS_MIN_INDEX] - range[Parameters.PREVIEW_FPS_MIN_INDEX]);
+            if (diff < currentBest) {
+                currentBest = diff;
+                bestMatchRange[Parameters.PREVIEW_FPS_MIN_INDEX] = fpsRange[Parameters.PREVIEW_FPS_MIN_INDEX];
+            }
+        }
+        range[Parameters.PREVIEW_FPS_MIN_INDEX] = bestMatchRange[Parameters.PREVIEW_FPS_MIN_INDEX];
+        range[Parameters.PREVIEW_FPS_MAX_INDEX] = bestMatchRange[Parameters.PREVIEW_FPS_MAX_INDEX];
+        return true;
+    }
+
     public static boolean setCameraPictureSize(
             String candidate, List<String> supported, Parameters parameters) {
         int index = candidate.indexOf('x');
