@@ -2156,7 +2156,15 @@ public class VideoCamera extends ActivityBase
                     getString(R.string.pref_video_preview_layout_default));
         }
         if (previewLayout != null  && !previewLayout.equals(mPreviewLayout)) {
-            mParameters.set(CameraSettings.KEY_S3D_PRV_FRAME_LAYOUT ,previewLayout);
+            String captureLayout = previewLayout;
+            // We support only full 3D layouts when capturing
+            if (captureLayout.equals(CameraSettings.TB_SUB_S3D_LAYOUT)) {
+                captureLayout = CameraSettings.TB_FULL_S3D_LAYOUT;
+            } else if (captureLayout.equals(CameraSettings.SS_SUB_S3D_LAYOUT)) {
+                captureLayout = CameraSettings.SS_FULL_S3D_LAYOUT;
+            }
+            mParameters.set(CameraSettings.KEY_S3D_PRV_FRAME_LAYOUT, previewLayout);
+            mParameters.set(CameraSettings.KEY_S3D_CAP_FRAME_LAYOUT, captureLayout);
             mPreviewLayout = previewLayout;
         }
 
@@ -2846,8 +2854,18 @@ public class VideoCamera extends ActivityBase
             Location loc = mLocationManager.getCurrentLocation();
             Util.setGpsParameters(mParameters, loc);
 
+            Size previewSize = mParameters.getPreviewSize();
+            // We support only full 3D layouts when capturing - if preview
+            // is sub-sampled then we modify the preview resolution as if it
+            // was full so getOptimalSnapshotSize() can do its job properly
+            if (mPreviewLayout.equals(CameraSettings.TB_SUB_S3D_LAYOUT)) {
+                previewSize.height *= 2;
+            } else if (mPreviewLayout.equals(CameraSettings.SS_SUB_S3D_LAYOUT)) {
+                previewSize.width *= 2;
+            }
+
             Size snapshotSize = Util.getOptimalSnapshotSize(mParameters.getSupportedPictureSizes(),
-                                                            mParameters.getPreviewSize());
+                                                            previewSize);
             if ( null != snapshotSize ) {
                 mParameters.setPictureSize(snapshotSize.width, snapshotSize.height);
             }
