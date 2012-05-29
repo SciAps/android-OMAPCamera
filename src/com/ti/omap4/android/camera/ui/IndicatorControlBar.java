@@ -122,7 +122,7 @@ public class IndicatorControlBar extends IndicatorControl implements
         }
 
         if (mExposureControl != null)  {
-            mExposureControl.layout(padding + size, size / 2, width - padding - size, size);
+            mExposureControl.layout(padding + size, (size / 3)*2, width - padding - size, size);
         }
 
         if (mCameraPicker != null) {
