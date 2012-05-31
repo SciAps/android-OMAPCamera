@@ -18,6 +18,7 @@ package com.ti.omap4.android.camera;
 
 import com.ti.omap4.android.camera.ui.CameraPicker;
 import com.ti.omap4.android.camera.ui.FaceView;
+import com.ti.omap4.android.camera.ui.FaceViewData;
 import com.ti.omap4.android.camera.ui.IndicatorControlContainer;
 import com.ti.omap4.android.camera.ui.PopupManager;
 import com.ti.omap4.android.camera.ui.ManualConvergenceSettings;
@@ -3578,11 +3579,13 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 switchToOtherMode(ModePicker.MODE_PANORAMA);
             }
         });
-        MenuHelper.addSwitchModeMenuItem(menu, ModePicker.MODE_CPCAM, new Runnable() {
-            public void run() {
-                switchToOtherMode(ModePicker.MODE_CPCAM);
-            }
-        });
+        if ( Util.isCPCamLibraryPresent() ) {
+            MenuHelper.addSwitchModeMenuItem(menu, ModePicker.MODE_CPCAM, new Runnable() {
+                public void run() {
+                    switchToOtherMode(ModePicker.MODE_CPCAM);
+                }
+            });
+        }
 
         if (mNumberOfCameras > 1) {
             menu.add(R.string.switch_camera_id)
@@ -3792,7 +3795,26 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
     @Override
     public void onFaceDetection(Face[] faces, android.hardware.Camera camera) {
-        mFaceView.setFaces(faces);
+        FaceViewData faceData[] = new FaceViewData[faces.length];
+
+        int i = 0;
+        for ( Face face : faces ) {
+
+            faceData[i] = new FaceViewData();
+            if ( null == faceData[i] ) {
+                break;
+            }
+
+            faceData[i].id = face.id;
+            faceData[i].leftEye = face.leftEye;
+            faceData[i].mouth = face.mouth;
+            faceData[i].rect = face.rect;
+            faceData[i].rightEye = face.rightEye;
+            faceData[i].score = face.score;
+            i++;
+        }
+
+        mFaceView.setFaces(faceData);
     }
 
     private void showTapToFocusToast() {

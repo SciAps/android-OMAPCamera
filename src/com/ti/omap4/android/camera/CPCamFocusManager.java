@@ -16,7 +16,7 @@
 
 package com.ti.omap4.android.camera;
 
-import com.ti.omap4.android.camera.ui.CPCamFaceView;
+import com.ti.omap4.android.camera.ui.FaceView;
 import com.ti.omap4.android.camera.ui.FocusIndicator;
 import com.ti.omap4.android.camera.ui.FocusIndicatorView;
 
@@ -65,7 +65,7 @@ public class CPCamFocusManager {
     private View mFocusIndicatorRotateLayout;
     private FocusIndicatorView mFocusIndicator;
     private View mPreviewFrame;
-    private CPCamFaceView mFaceView;
+    private FaceView mFaceView;
     private List<Area> mFocusArea; // focus area in driver format
     private List<Area> mMeteringArea; // metering area in driver format
     private String mFocusMode;
@@ -120,7 +120,7 @@ public class CPCamFocusManager {
     }
 
     public void initialize(View focusIndicatorRotate, View previewFrame,
-            CPCamFaceView faceView, Listener listener, boolean mirror, int displayOrientation) {
+            FaceView faceView, Listener listener, boolean mirror, int displayOrientation) {
         mFocusIndicatorRotateLayout = focusIndicatorRotate;
         mFocusIndicator = (FocusIndicatorView) focusIndicatorRotate.findViewById(
                 R.id.focus_indicator);

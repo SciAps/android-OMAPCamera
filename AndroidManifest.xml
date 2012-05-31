@@ -30,7 +30,6 @@
         </receiver>
         <activity android:name="com.ti.omap4.android.camera.Camera"
                 android:configChanges="orientation|screenSize|keyboardHidden"
-                android:screenOrientation="landscape"
                 android:clearTaskOnLaunch="true"
                 android:windowSoftInputMode="stateAlwaysHidden|adjustPan">
             <intent-filter>
@@ -66,14 +65,12 @@
         <activity android:name="com.ti.omap4.android.camera.panorama.PanoramaActivity"
                 android:label="@string/pano_dialog_title"
                 android:configChanges="orientation|screenSize|keyboardHidden"
-                android:screenOrientation="landscape"
                 android:clearTaskOnLaunch="true"
                 android:windowSoftInputMode="stateAlwaysHidden|adjustPan">
         </activity>
                 <activity android:name="com.ti.omap4.android.camera.CPCam"
                 android:label="@string/cpcam_camera_label"
                 android:configChanges="orientation|screenSize|keyboardHidden"
-                android:screenOrientation="landscape"
                 android:clearTaskOnLaunch="true"
                 android:windowSoftInputMode="stateAlwaysHidden|adjustPan">
         </activity>

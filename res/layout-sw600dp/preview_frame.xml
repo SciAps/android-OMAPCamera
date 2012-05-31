@@ -29,10 +29,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:visibility="gone"/>
-        <com.ti.omap4.android.camera.ui.CPCamFaceView android:id="@+id/cpcam_face_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="gone"/>
         <include layout="@layout/focus_indicator"/>
         <include layout="@layout/priority_indicators"/>
     </com.ti.omap4.android.camera.PreviewFrameLayout>
