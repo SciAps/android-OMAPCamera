@@ -37,5 +37,7 @@ public abstract class IndicatorControlContainer extends IndicatorControl
 
     public abstract void dismissSecondLevelIndicator();
 
+    public abstract void showCPCamSliders(boolean enabled);
+
     public void replace(String key, ListPreference pref, ArrayList<CharSequence[]> allEntries, ArrayList<CharSequence[]> allEntryValues){ }
 }

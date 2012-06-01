@@ -190,6 +190,11 @@ public class IndicatorControlBarContainer extends IndicatorControlContainer {
     }
 
     @Override
+    public void showCPCamSliders(boolean enabled) {
+        mIndicatorControlBar.showCPCamSliders(enabled);
+    }
+
+    @Override
     public void replace(String key, ListPreference pref,ArrayList<CharSequence[]> allEntries,
             ArrayList<CharSequence[]> allEntryValues) {
         mSecondLevelIndicatorControlBar.replace(key, pref, allEntries, allEntryValues);

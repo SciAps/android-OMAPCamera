@@ -248,7 +248,6 @@
         <item>@string/pref_camera_mode_entry_hs</item>
         <item>@string/pref_camera_mode_entry_hq</item>
         <item>@string/pref_camera_mode_entry_zsl</item>
-        <item>@string/pref_camera_mode_entry_cpcam</item>
         <item>@string/pref_camera_mode_entry_temporal_bracketing</item>
         <item>@string/pref_camera_mode_entry_exp_bracketing</item>
         <item>@string/pref_camera_mode_entry_zoom_bracketing</item>
@@ -257,7 +256,6 @@
         <item>high-performance</item>
         <item>high-quality</item>
         <item>high-quality-zsl</item>
-        <item>cp-cam</item>
         <item>temporal-bracketing</item>
         <item>exposure-bracketing</item>
         <item>zoom-bracketing</item>

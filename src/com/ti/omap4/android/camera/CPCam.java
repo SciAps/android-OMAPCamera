@@ -1124,6 +1124,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
                 mReprocessButton.setVisibility(View.INVISIBLE);
                 mMetaDataIndicator.setVisibility(View.INVISIBLE);
                 mExpGainButton.setVisibility(View.INVISIBLE);
+                mIndicatorControlContainer.showCPCamSliders(false);
                 Message msg = new Message();
                 msg.what = RESTART_PREVIEW;
                 msg.arg1 = MODE_RESTART;
@@ -1162,6 +1163,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
             setCameraState(QUEUED_SHOT_IN_PROGRESS);
             mReprocessButton.setVisibility(View.VISIBLE);
             mExpGainButton.setVisibility(View.VISIBLE);
+            mIndicatorControlContainer.showCPCamSliders(true);
             return true;
         }
     }
