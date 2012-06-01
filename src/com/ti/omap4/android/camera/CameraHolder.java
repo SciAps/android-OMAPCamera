@@ -179,18 +179,10 @@ public class CameraHolder {
     private synchronized void releaseCamera() {
         Assert(mUsers == 0);
         Assert(mCameraDevice != null);
-        //long now = System.currentTimeMillis();
 
         /* This delay is removed, due to holding the instance too much.It's critical
        for management CPCam and Camera instances
-
-        if (now < mKeepBeforeTime) {
-            mHandler.sendEmptyMessageDelayed(RELEASE_CAMERA,
-                    mKeepBeforeTime - now);
-            return;
-        }
- *
- */
+        */
         mCameraDevice.release();
         mCameraDevice = null;
         // We must set this to null because it has a reference to Camera.
