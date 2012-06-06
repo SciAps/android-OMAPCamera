@@ -236,6 +236,7 @@ public class ModePicker extends RelativeLayout implements View.OnClickListener,
         if (mCurrentModeFrame != null) {
             for (int i = 0; i < MODE_NUM; ++i) {
                 Log.v(TAG,"modee: " + mCurrentMode);
+                if(!Util.isCPCamLibraryPresent() && i==3) continue;
                 highlightView(mModeSelectionIcon[i], (i == mCurrentMode));
             }
         }
@@ -253,6 +254,7 @@ public class ModePicker extends RelativeLayout implements View.OnClickListener,
                     if (j == mCurrentMode) j++;
                     target = j++;
                 }
+                if(!Util.isCPCamLibraryPresent() && i==3) continue;
                 mCurrentModeIcon[i].setImageDrawable(
                         mModeSelectionIcon[target].getDrawable());
             }
