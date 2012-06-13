@@ -652,14 +652,20 @@ public class Util {
         // See android.hardware.Camera.Parameters.setRotation for
         // documentation.
         int rotation = 0;
+        CameraInfo info = CameraHolder.instance().getCameraInfo()[cameraId];
         if (orientation != OrientationEventListener.ORIENTATION_UNKNOWN) {
-            CameraInfo info = CameraHolder.instance().getCameraInfo()[cameraId];
             if (info.facing == CameraInfo.CAMERA_FACING_FRONT) {
                 rotation = (info.orientation - orientation + 360) % 360;
             } else {  // back-facing camera
                 rotation = (info.orientation + orientation) % 360;
             }
+        } else {
+            //If it hits this case, it means the the first orientaion
+            // itself is not aquired yet. So just set the sensor mount
+            // orientation.
+            rotation = info.orientation;
         }
+
         parameters.setRotation(rotation);
     }
 
@@ -776,14 +782,20 @@ public class Util {
         // See android.hardware.Camera.Parameters.setRotation for
         // documentation.
         int rotation = 0;
+        CameraInfo info = CameraHolder.instance().getCameraInfo()[cameraId];
         if (orientation != OrientationEventListener.ORIENTATION_UNKNOWN) {
-            CameraInfo info = CameraHolder.instance().getCameraInfo()[cameraId];
             if (info.facing == CameraInfo.CAMERA_FACING_FRONT) {
                 rotation = (info.orientation - orientation + 360) % 360;
             } else {  // back-facing camera
                 rotation = (info.orientation + orientation) % 360;
             }
+        } else {
+            //If it hits this case, it means the the first orientaion
+            // itself is not aquired yet. So just set the sensor mount
+            // orientation.
+            rotation = info.orientation;
         }
+
         parameters.setRotation(rotation);
     }
 
