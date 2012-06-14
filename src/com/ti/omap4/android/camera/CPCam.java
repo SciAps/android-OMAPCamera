@@ -1638,6 +1638,10 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     private void initDefaults() {
         initializeCPcamSliders(mIsRelativeExposureGainPair);
 
+        if ( null == mPictureFormat ) {
+            mPictureFormat = getString(R.string.pref_camera_picture_format_default);
+        }
+
         // Preview layout and size
         if (mPausing) {
             mPreviewLayout = null;
