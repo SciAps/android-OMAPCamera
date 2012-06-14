@@ -143,6 +143,7 @@ public class CameraSettings {
     public static final String KEY_SUPPORTED_PICTURE_FORMATS = "picture-format-values";
 
     public static final String KEY_SUPPORTED_PREVIEW_FRAMERATES_EXT = "preview-fps-ext-values";
+    public static final String KEY_SUPPORTED_PREVIEW_FRAMERATE_RANGES_EXT = "preview-fps-range-ext-values";
 
     public static final String EXPOSURE_DEFAULT_VALUE = "0";
 
