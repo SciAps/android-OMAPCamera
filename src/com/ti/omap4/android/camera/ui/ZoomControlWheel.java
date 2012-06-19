@@ -48,7 +48,7 @@ public class ZoomControlWheel extends ZoomControl {
     private static final float EDGE_STROKE_WIDTH = 6f;
     private static final double BUFFER_RADIANS = Math.toRadians(HIGHLIGHT_DEGREES / 2);
     private static final double SLIDER_RANGE =
-            Math.toRadians(MAX_SLIDER_ANGLE - MIN_SLIDER_ANGLE);
+        Math.toRadians(MAX_SLIDER_ANGLE) - Math.toRadians(MIN_SLIDER_ANGLE);
     private double mSliderRadians = DEFAULT_SLIDER_POSITION;
 
     private final int HIGHLIGHT_COLOR;
@@ -113,12 +113,6 @@ public class ZoomControlWheel extends ZoomControl {
         return true;
     }
 
-    @Override
-    public void startZoomControl() {
-        super.startZoomControl();
-        mSliderRadians = Math.toRadians(DEFAULT_SLIDER_POSITION);
-    }
-
     private void layoutIcon(View view, double radian) {
         // Rotate the wheel with the angle when the wheel is rotating or
         // the indicator control is in the second-level.
@@ -146,6 +140,14 @@ public class ZoomControlWheel extends ZoomControl {
         mCenterX = right - left - Util.dpToPixel(
                 IndicatorControlWheelContainer.FULL_WHEEL_RADIUS);
         mCenterY = (bottom - top) / 2;
+        // synchronize mZoomIndex and slider position
+        if (mZoomMax <= 0 || mZoomIndex > mZoomMax || mZoomIndex < 0) {
+            mSliderRadians = Math.toRadians(DEFAULT_SLIDER_POSITION);
+        }
+        else {
+            double sliderAngleStep = (double)(MAX_SLIDER_ANGLE - MIN_SLIDER_ANGLE) / mZoomMax;
+            mSliderRadians = Math.toRadians(MAX_SLIDER_ANGLE - (sliderAngleStep * mZoomIndex));
+        }
         layoutIcon(mZoomIn, Math.toRadians(ZOOM_IN_ICON_DEGREES));
         layoutIcon(mZoomOut, Math.toRadians(ZOOM_OUT_ICON_DEGREES));
         layoutIcon(mZoomSlider, getSliderDrawAngle(mSliderRadians));
