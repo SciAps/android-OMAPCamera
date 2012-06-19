@@ -46,8 +46,7 @@ public class CameraSettings {
     public static final String KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL = "pref_video_time_lapse_frame_interval_key";
     public static final String KEY_AUDIO_ENCODER = "pref_camera_audioencoder_key";
     public static final String KEY_VIDEO_ENCODER = "pref_camera_videoencoder_key";
-    public static final String KEY_VIDEO_FRAMERATE = "pref_camera_videoframerate_key";
-    public static final String KEY_VIDEO_MINFRAMERATE = "pref_camera_videominframerate_key";
+    public static final String KEY_VIDEO_FRAMERATE_RANGE = "pref_camera_videoframerate_range_key";
     public static final String KEY_VIDEO_BITRATE = "pref_camera_videobitrate_key";
     public static final String KEY_VIDEO_FORMAT = "pref_camera_video_format_key";
     public static final String KEY_VIDEO_TIMER = "pref_camera_video_timer_key";
@@ -431,8 +430,6 @@ public class CameraSettings {
         ListPreference vnf = group.findPreference(KEY_VNF);
         ListPreference exposureMode = group.findPreference(KEY_EXPOSURE_MODE_MENU);
         ListPreference previewFramerate = group.findPreference(KEY_PREVIEW_FRAMERATE);
-        ListPreference videoFramerate = group.findPreference(KEY_VIDEO_FRAMERATE);
-        ListPreference videoMinFramerate = group.findPreference(KEY_VIDEO_MINFRAMERATE);
         ListPreference mechanicalMisalignmentCorrection = group.findPreference(KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU);
         ListPreference mode = group.findPreference(KEY_MODE_MENU);
         ListPreference pictureFormat = group.findPreference(KEY_PICTURE_FORMAT_MENU);
@@ -697,14 +694,6 @@ public class CameraSettings {
 
         List<Integer> fpsList = getSupportedFramerates(mParameters);
 
-        if (videoFramerate != null) {
-            filterUnsupportedOptionsInt(group,
-                    videoFramerate, fpsList);
-        }
-        if (videoMinFramerate != null) {
-            filterUnsupportedOptionsInt(group,
-                    videoMinFramerate, fpsList);
-        }
         if (sceneMode != null) {
             filterUnsupportedOptions(group,
                     sceneMode, mParameters.getSupportedSceneModes());
