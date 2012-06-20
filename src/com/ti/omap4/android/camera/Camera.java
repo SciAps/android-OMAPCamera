@@ -2585,6 +2585,12 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     }
 
     private void startTemporalBracketing() {
+        //For Temporal bracketing setparameters() will not be called in capture().
+        //set the rotation parameter here itself.
+        //Eventhough mOrientation is not updated by onOrientationChanged() at this moment,
+        //the sensor mount orientation should be considered for capture.
+        Util.setRotationParameter(mParameters, mCameraId, mOrientation);
+
         mParameters.set(CameraSettings.KEY_TEMPORAL_BRACKETING, TRUE);
         mCameraDevice.setParameters(mParameters);
     }
