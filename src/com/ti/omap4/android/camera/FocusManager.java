@@ -482,6 +482,17 @@ public class FocusManager {
         return mMeteringArea;
     }
 
+
+    public void drawFocusRectangle() {
+        // Set the length of focus indicator according to preview frame size.
+        int len = Math.min(mPreviewFrame.getWidth(), mPreviewFrame.getHeight()) / 4;
+        ViewGroup.LayoutParams layout = mFocusIndicator.getLayoutParams();
+        layout.width = len;
+        layout.height = len;
+
+        mFocusIndicator.showSuccess();
+    }
+
     public void updateFocusUI() {
         if (!mInitialized) return;
 

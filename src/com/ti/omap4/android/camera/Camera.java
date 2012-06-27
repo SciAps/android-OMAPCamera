@@ -774,6 +774,13 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             // Do not trigger touch focus if popup window is opened.
             if (mIndicatorControlContainer.getActiveSettingPopup() != null) return;
 
+            if (!isSupported(Parameters.FOCUS_MODE_AUTO,mInitialParams.getSupportedFocusModes()) &&
+                    mCaptureMode.equals(mTemporalBracketing)) {
+                startTemporalBracketing();
+                mFocusManager.setTempBracketingState(FocusManager.TempBracketingStates.RUNNING);
+                mFocusManager.drawFocusRectangle();
+            }
+
             final String focusMode = mFocusManager.getFocusMode();
             boolean cafActive = false;
             if (focusMode.equals(Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) ||
@@ -2022,6 +2029,13 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
         Log.v(TAG, "onShutterButtonLongPressed");
         mFocusManager.shutterLongPressed();
+
+        if (!isSupported(Parameters.FOCUS_MODE_AUTO,mInitialParams.getSupportedFocusModes()) &&
+                mCaptureMode.equals(mTemporalBracketing)) {
+            startTemporalBracketing();
+            mFocusManager.setTempBracketingState(FocusManager.TempBracketingStates.RUNNING);
+            mFocusManager.drawFocusRectangle();
+        }
     }
 
     private OnScreenHint mStorageHint;
@@ -3034,8 +3048,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             // Update framerate UI with the new entries
             ListPreference fpsPreference = getSupportedListPreference(mParameters.getSupportedPreviewFrameRates(),
                                                                       CameraSettings.KEY_PREVIEW_FRAMERATE);
-            updateListPreference(fpsPreference, CameraSettings.KEY_PREVIEW_FRAMERATE);
 
+            updateListPreference(fpsPreference, CameraSettings.KEY_PREVIEW_FRAMERATE);
         }
 
         // Set Preview Framerate
@@ -3555,7 +3569,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 mFocusManager.setTempBracketingState(FocusManager.TempBracketingStates.OFF);
             }
         }
-
     }
 
     private void gotoGallery() {
