@@ -82,6 +82,7 @@ public class CameraSettings {
     public static final String KEY_PREVIEW_FRAMERATE = "pref_camera_previewframerate_key";
     public static final String KEY_SATURATION = "pref_camera_saturation_key";
     public static final String KEY_SHARPNESS = "pref_camera_sharpness_key";
+    public static final String KEY_VIDEO_MODE = "pref_camera_video_mode_key";
 
     public static final String KEY_MECHANICAL_MISALIGNMENT_CORRECTION_SUPPORTED = "mechanical-misalignment-correction-supported";
     public static final String KEY_MECHANICAL_MISALIGNMENT_CORRECTION = "mechanical-misalignment-correction";
@@ -444,6 +445,7 @@ public class CameraSettings {
         ListPreference previewSizeTB = group.findPreference(KEY_PREVIEW_SIZES_TB);
         ListPreference previewSizeSS = group.findPreference(KEY_PREVIEW_SIZES_SS);
         ListPreference s3d = group.findPreference(KEY_S3D_MENU);
+        ListPreference videoMode = group.findPreference(KEY_VIDEO_MODE);
 
         checkPreferenceSizeMatches(previewSize, previewSizeTB);
         checkPreferenceSizeMatches(previewSize, previewSizeSS);
@@ -694,6 +696,17 @@ public class CameraSettings {
         }
 
         List<Integer> fpsList = getSupportedFramerates(mParameters);
+
+        if(videoMode != null){
+            ArrayList<String> suppMode = new ArrayList<String>();
+            String modeValues = mParameters.get(KEY_CAP_MODE_VALUES);
+            if(modeValues != null && !modeValues.equals("")){
+                for(String item : modeValues.split(",")){
+                    suppMode.add(item);
+                }
+            }
+            filterUnsupportedOptions(group, videoMode, suppMode);
+        }
 
         if (sceneMode != null) {
             filterUnsupportedOptions(group,

@@ -193,6 +193,7 @@ public class VideoCamera extends ActivityBase
     private String mVNFEnable = "";
     private String mVNFDisable = "";
 
+    private String mCaptureMode = new String();
     private Integer mManualConvergenceValue = new Integer(0);
     private String mManualConvergence;
     private boolean isManualConvergence = false;
@@ -574,6 +575,7 @@ public class VideoCamera extends ActivityBase
                     CameraSettings.KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL};
                     //CameraSettings.KEY_VIDEO_QUALITY}; //Disabling redundant Video Qualily Menu
         final String[] OTHER_SETTING_KEYS = {
+                    CameraSettings.KEY_VIDEO_MODE,
                     CameraSettings.KEY_VIDEO_PREVIEW_LAYOUT,
                     CameraSettings.KEY_VIDEO_FORMAT,
                     CameraSettings.KEY_S3D_MENU,
@@ -2362,6 +2364,16 @@ public class VideoCamera extends ActivityBase
             Log.w(TAG, "invalid exposure range: " + value);
         }
 
+        if ( mCaptureMode.isEmpty() ) {
+            String mode = mPreferences.getString(CameraSettings.KEY_VIDEO_MODE, null);
+            if ( null != mode ) {
+                mCaptureMode = mode;
+                mParameters.set(CameraSettings.KEY_MODE, mCaptureMode);
+            }
+        } else {
+            mParameters.set(CameraSettings.KEY_MODE, mCaptureMode);
+        }
+
         mCameraDevice.setParameters(mParameters);
         // Keep preview size up to date.
         mParameters = mCameraDevice.getParameters();
@@ -2664,6 +2676,14 @@ public class VideoCamera extends ActivityBase
 
         int[] fpsRange = getFrameRateRange();
         if ((fpsRange[Parameters.PREVIEW_FPS_MIN_INDEX]/1000 != mProfile.videoFrameRate)) {
+            isPreviewRestartRequired = true;
+        }
+
+        // Capture mode
+        String mode = mPreferences.getString(CameraSettings.KEY_VIDEO_MODE,
+                                             getString(R.string.pref_camera_video_mode_default));
+        if ( !mCaptureMode.equals(mode) ) {
+            mCaptureMode = mode;
             isPreviewRestartRequired = true;
         }
 

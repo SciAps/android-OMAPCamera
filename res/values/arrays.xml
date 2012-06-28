@@ -261,6 +261,15 @@
         <item>zoom-bracketing</item>
     </string-array>
 
+    <string-array name="pref_camera_video_mode_entries" translatable="false">
+        <item>@string/pref_camera_video_mode_entry_st</item>
+        <item>@string/pref_camera_video_mode_entry_hq</item>
+    </string-array>
+    <string-array name="pref_camera_video_mode_entryvalues" translatable="false">
+        <item>video-mode</item>
+        <item>video-mode-hq</item>
+    </string-array>
+
     <string-array name="pref_camera_bracketrange_entries" translatable="false">
         <item>@string/pref_camera_bracketrange_entry_one</item>
         <item>@string/pref_camera_bracketrange_entry_two</item>
