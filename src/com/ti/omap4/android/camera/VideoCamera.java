@@ -586,7 +586,8 @@ public class VideoCamera extends ActivityBase
                     CameraSettings.KEY_VSTAB,
                     CameraSettings.KEY_VNF,
                     CameraSettings.KEY_RECORD_LOCATION,
-                    CameraSettings.KEY_VIDEO_FRAMERATE_RANGE};
+                    CameraSettings.KEY_VIDEO_FRAMERATE_RANGE,
+                    CameraSettings.KEY_VIDEO_FILE_CONTAINER};
 
         CameraPicker.setImageResourceId(R.drawable.ic_switch_video_facing_holo_light);
         mIndicatorControlContainer.initialize(this, mPreferenceGroup,
@@ -882,6 +883,7 @@ public class VideoCamera extends ActivityBase
         mProfile.videoBitRate = mVideoBitrate;
         mProfile.videoCodec = mVideoEncoder;
         mProfile.audioCodec = mAudioEncoder;
+        mProfile.fileFormat = getVideoFileContainer();
         updateVideoFormat(mVideoFormat);
         getDesiredPreviewSize();
     }
@@ -1412,7 +1414,7 @@ public class VideoCamera extends ActivityBase
             mMediaRecorder.setCaptureRate((1000 / (double) mTimeBetweenTimeLapseFrameCaptureMs));
         }
 
-	mMediaRecorder.setVideoFrameRate(mProfile.videoFrameRate);
+        mMediaRecorder.setVideoFrameRate(mProfile.videoFrameRate);
         mMediaRecorder.setVideoSize(mProfile.videoFrameWidth, mProfile.videoFrameHeight);
         mMediaRecorder.setVideoEncodingBitRate(mProfile.videoBitRate);
 
@@ -3079,5 +3081,18 @@ public class VideoCamera extends ActivityBase
         Editor editor = mPreferences.edit();
         editor.putBoolean(CameraSettings.KEY_VIDEO_FIRST_USE_HINT_SHOWN, false);
         editor.apply();
+    }
+
+    private int getVideoFileContainer() {
+        String fileFormatString = mPreferences.getString(CameraSettings.KEY_VIDEO_FILE_CONTAINER,
+                getString(R.string.pref_video_record_container_default));
+        if (fileFormatString.equals("mp4")) {
+            return MediaRecorder.OutputFormat.MPEG_4;
+        }
+        if (fileFormatString.equals("3gp")) {
+            return MediaRecorder.OutputFormat.THREE_GPP;
+        }
+        Log.v(TAG, "Unknown file format. Reset file format to mp4");
+        return MediaRecorder.OutputFormat.MPEG_4;
     }
 }

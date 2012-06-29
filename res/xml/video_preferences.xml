@@ -163,4 +163,10 @@
            camera:title="@string/pref_camera_s3d_title"
            camera:entries="@array/pref_camera_s3d_entries"
            camera:entryValues="@array/pref_camera_s3d_entryvalues" />
+    <ListPreference
+           camera:key="pref_camera_video_record_container_key"
+           camera:title="@string/pref_video_record_container_title"
+           camera:defaultValue="@string/pref_video_record_container_default"
+           camera:entries="@array/pref_video_record_container_entries"
+           camera:entryValues="@array/pref_video_record_container_entryvalues"/>
 </PreferenceGroup>

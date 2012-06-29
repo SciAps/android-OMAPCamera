@@ -749,4 +749,10 @@
     <string name="settings_manual_exposure_title_popup">Manual Exposure Settings</string>
     <string name="manual_gain_button">Absolute</string>
     <string name="reprocess_button">Reprocess</string>
+
+    <!-- Video File Container Setting -->
+    <string name="pref_video_record_container_title">Video File Container</string>
+    <string name="pref_video_record_container_default" translatable="false">mp4</string>
+    <string name="pref_video_record_container_mp4">MP4</string>
+    <string name="pref_video_record_container_3gp">3GP</string>
 </resources>
