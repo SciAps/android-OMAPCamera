@@ -115,6 +115,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final int UPDATE_PARAM_ZOOM = 2;
     private static final int UPDATE_PARAM_PREFERENCE = 4;
     private static final int UPDATE_PARAM_MODE = 8;
+    private static final int UPDATE_PARAM_FOCUS = 16;
     private static final int UPDATE_PARAM_ALL = -1;
 
     // When setCameraParametersWhenIdle() is called, we accumulate the subsets
@@ -1440,7 +1441,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
     @Override
     public void setFocusParameters() {
-        setCameraParameters(UPDATE_PARAM_PREFERENCE);
+        setCameraParameters(UPDATE_PARAM_FOCUS);
     }
 
     @Override
@@ -2307,7 +2308,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     public void cancelAutoFocus() {
         mCameraDevice.cancelAutoFocus();
         setCameraState(IDLE);
-        setCameraParameters(UPDATE_PARAM_PREFERENCE);
+        setCameraParameters(UPDATE_PARAM_FOCUS);
     }
 
     // Preview area is touched. Handle touch focus and touch convergence
@@ -2574,6 +2575,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mZoomState = ZOOM_STOPPED;
         setCameraState(IDLE);
         mFocusManager.onPreviewStarted();
+        if ( mTempBracketingEnabled ) {
+            mFocusManager.setTempBracketingState(FocusManager.TempBracketingStates.ACTIVE);
+        }
 
         if (mSnapshotOnIdle) {
             mHandler.post(mDoSnapRunnable);
@@ -3422,7 +3426,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             restartPreview = updateCameraParametersPreference();
         }
 
-        if ((updateSet & UPDATE_PARAM_MODE ) != 0 ) {
+        if ( ( (updateSet & UPDATE_PARAM_MODE  ) != 0 ) ||
+             ( (updateSet & UPDATE_PARAM_FOCUS ) != 0 )  ) {
             updateCameraParametersPreference();
         }
 
@@ -3483,7 +3488,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             params.set(CameraSettings.KEY_TEMPORAL_BRACKETING, FALSE);
             params.remove(PARM_ZOOM_BRACKETING_RANGE);
         } else if ( mode.equals(mTemporalBracketing) ) {
-            params.set(CameraSettings.KEY_MODE, mHighPerformance);
+            params.set(CameraSettings.KEY_MODE, mTemporalBracketing);
             params.set(PARM_IPP, PARM_IPP_NONE);
             params.set(PARM_GBCE, PARM_GBCE_OFF);
             params.remove(PARM_ZOOM_BRACKETING_RANGE);
