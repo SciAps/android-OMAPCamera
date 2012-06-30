@@ -36,7 +36,7 @@ public abstract class CPcamGainControl extends RelativeLayout implements Rotatab
     public static final int GAIN_STOP = 2;
 
     private static final String TAG = "CPcamGainControl";
-    private static final int ZOOMING_INTERVAL = 1000; // milliseconds
+    private static final int SCALING_INTERVAL = 1000; // milliseconds
 
     protected ImageView mGainIn;
     protected ImageView mGainOut;
@@ -55,7 +55,7 @@ public abstract class CPcamGainControl extends RelativeLayout implements Rotatab
         void onGainIndexChanged(double indexPosition);
     }
 
-    protected int mGainMax, mGainIndex;
+    protected int mGainMax, mGainMin,mGainIndex;
     private OnGainChangedListener mListener;
     private OnGainIndexChangedListener mIndexListener;
 
@@ -104,8 +104,9 @@ public abstract class CPcamGainControl extends RelativeLayout implements Rotatab
         }
     }
 
-    public void setGainMax(int gainMax) {
+    public void setGainMinMax(int gainMin, int gainMax) {
         mGainMax = gainMax;
+        mGainMin = gainMin;
         // Layout should be requested as the maximum gain level is the key to
         // show the correct gain slider position.
         requestLayout();
@@ -120,7 +121,7 @@ public abstract class CPcamGainControl extends RelativeLayout implements Rotatab
     }
 
     public void setGainIndex(int index) {
-        if (index < 0 || index > mGainMax) {
+        if (index < mGainMin || index > mGainMax) {
             throw new IllegalArgumentException("Invalid gain value:" + index);
         }
         mGainIndex = index;
@@ -132,7 +133,7 @@ public abstract class CPcamGainControl extends RelativeLayout implements Rotatab
     }
 
     private boolean gainOut() {
-        return (mGainIndex == 0) ? false : changeGainIndex(mGainIndex - mStep);
+        return (mGainIndex == mGainMin) ? false : changeGainIndex(mGainIndex - mStep);
     }
 
     public void setGainStep(int step) {
@@ -171,7 +172,7 @@ public abstract class CPcamGainControl extends RelativeLayout implements Rotatab
     private boolean changeGainIndex(int index) {
         if (mListener != null) {
             if (index > mGainMax) index = mGainMax;
-            if (index < 0) index = 0;
+            if (index < mGainMin) index = mGainMin;
             mListener.onGainValueChanged(index);
             mGainIndex = index;
         }
