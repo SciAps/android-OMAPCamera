@@ -219,8 +219,12 @@ public class IndicatorControlWheel extends IndicatorControl implements
         if (mCurrentLevel == 0) {
             // Skip the first component if it is zoom control, as we will
             // deal with it specifically.
-            if (mZoomControl != null) startIndex++;
             endIndex = mSecondLevelStartIndex - 1;
+            if (mZoomControl != null) {
+                startIndex++;
+            } else {
+                endIndex -= 1;
+            }
         } else {
             endIndex = getChildCount() - 1;
         }
