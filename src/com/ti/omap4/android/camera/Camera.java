@@ -765,7 +765,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mPreviewFrame.getLocationInWindow(previewFrameLocation);
             final android.graphics.Rect previewFrameRect = new android.graphics.Rect(
                     previewFrameLocation[0], previewFrameLocation[1],
-                    mPreviewFrame.getWidth(), mPreviewFrame.getHeight());
+                    mPreviewFrame.getWidth() + previewFrameLocation[0],
+                    mPreviewFrame.getHeight() + previewFrameLocation[1]);
             if (!previewFrameRect.contains((int)e.getX(), (int)e.getY())) {
                 return;
             }
