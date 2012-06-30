@@ -98,6 +98,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Formatter;
 import java.util.List;
+import java.util.StringTokenizer;
 
 /** The Camera activity which can preview and take pictures. */
 public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
@@ -139,6 +140,11 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     // When setCameraParametersWhenIdle() is called, we accumulate the subsets
     // needed to be updated in mUpdateSet.
     private int mUpdateSet;
+
+    private static final String ANALOG_GAIN_METADATA = "analog-gain";
+    private static final String ANALOG_GAIN_REQUESTED_METADATA = "analog-gain-req";
+    private static final String EXPOSURE_TIME_METADATA = "exposure-time";
+    private static final String EXPOSURE_TIME_REQUESTED_METADATA = "exposure-time-req";
 
     private static final int SCREEN_DELAY = 2 * 60 * 1000;
     private static final int CAMERA_RELEASE_DELAY = 1000;
@@ -206,6 +212,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
 
     // Small indicators which show the camera settings in the viewfinder.
     private ImageView mFocusIndicator;
+    private TextView mMetaDataIndicator;
     // A view group that contains all the small indicators.
     private Rotatable mOnScreenIndicators;
 
@@ -213,6 +220,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     // generating thumbnails. This reduces the shot-to-shot time.
     private ImageSaver mImageSaver;
     private CameraSound mCameraSound;
+
     private S3DViewWrapper s3dView;
     private boolean mS3dViewEnabled = false;
 
@@ -784,6 +792,25 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
 
     private void initOnScreenIndicator() {
         mFocusIndicator = (ImageView) findViewById(R.id.onscreen_focus_indicator);
+        mMetaDataIndicator = (TextView) findViewById(R.id.onscreen_metadata_indicator);
+    }
+
+    private void updateMetadataIndicator(String exposure,
+                                         String exposureReq,
+                                         String gain,
+                                         String gainReq) {
+        String metadata = new String();
+        try {
+            int expTime = Integer.parseInt(exposure) / 1000;
+            int expTimeReq = Integer.parseInt(exposureReq) / 1000;
+            metadata =  "Exposure[ms]: " + expTime + "\n" ;
+            metadata += "Exposure Requested[ms]: " + expTimeReq + "\n";
+        } catch ( NumberFormatException e ) { e.printStackTrace(); }
+
+        metadata += "Gain: " + gain + "\n";
+        metadata += "Gain Requested: " + gainReq;
+        mMetaDataIndicator.setText(metadata);
+        mMetaDataIndicator.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -827,12 +854,32 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         }
     }
 
+    private void updateOnScreenMetadataIndicators() {
+        StringTokenizer st = new StringTokenizer(mTapOut.getMetadata(), ";=");
+        String exposure = new String();
+        String exposureRequested = new String();
+        String gain = new String();
+        String gainRequested = new String();
+        while(st.hasMoreTokens()){
+            String str = st.nextToken();
+            if ( str.equals(ANALOG_GAIN_METADATA)) {
+                gain = st.nextToken();
+            } else if (str.equals(EXPOSURE_TIME_METADATA)) {
+                exposure = st.nextToken();
+            } else if (str.equals(ANALOG_GAIN_REQUESTED_METADATA)) {
+                gainRequested = st.nextToken();
+            } else if (str.equals(EXPOSURE_TIME_REQUESTED_METADATA)) {
+                exposureRequested = st.nextToken();
+            }
+        }
+        updateMetadataIndicator(exposure,
+                                exposureRequested,
+                                gain,
+                                gainRequested);
+
+    }
+
     private void updateOnScreenIndicators() {
-        boolean isAutoScene = !(Parameters.SCENE_MODE_AUTO.equals(mParameters.getSceneMode()));
-        updateSceneOnScreenIndicator(isAutoScene);
-        updateExposureOnScreenIndicator(CPCameraSettings.readExposure(mPreferences));
-        updateFlashOnScreenIndicator(mParameters.getFlashMode());
-        updateWhiteBalanceOnScreenIndicator(mParameters.getWhiteBalance());
         updateFocusOnScreenIndicator(mParameters.getFocusMode());
     }
     private final class ShutterCallback
@@ -1214,6 +1261,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
                 mFocusManager.setQueuedShotState(QueuedShotStates.OFF);
                 mExpGainButton.setVisibility(View.INVISIBLE);
                 mReprocessButton.setVisibility(View.INVISIBLE);
+                mMetaDataIndicator.setVisibility(View.INVISIBLE);
 
                 Message msg = new Message();
                 msg.what = RESTART_PREVIEW;
@@ -2835,6 +2883,13 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
                     ( mCameraState == QUEUED_SHOT_IN_PROGRESS ) ) {
                     // Queue next shot
                     st.updateTexImage();
+                    mHandler.post( new Runnable()  {
+                        @Override
+                        public void run() {
+                            updateOnScreenMetadataIndicators();
+                        }
+                    });
+
                     Message msg = new Message();
                     msg.what = QUEUE_NEXT_SHOT;
                     mHandler.sendMessage(msg);

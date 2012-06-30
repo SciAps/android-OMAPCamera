@@ -55,6 +55,12 @@
                     android:gravity="center_vertical"
                     android:textSize="@dimen/onscreen_exposure_indicator_text_size"
                     android:textColor="@android:color/white"/>
+            <TextView android:id="@+id/onscreen_metadata_indicator"
+                    android:gravity="center_vertical"
+                    android:textSize="15dp"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:textColor="@android:color/white"/>
             <ImageView android:id="@+id/onscreen_scene_indicator"
                     style="@style/OnScreenIndicator"
                     android:src="@drawable/ic_indicators_scn"/>
