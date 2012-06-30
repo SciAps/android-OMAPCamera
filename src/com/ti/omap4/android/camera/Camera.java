@@ -1821,7 +1821,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
         CameraPicker.setImageResourceId(R.drawable.ic_switch_photo_facing_holo_light);
         mIndicatorControlContainer.initialize(this, mPreferenceGroup,
-                mParameters.isZoomSupported(),
+                mParameters.isZoomSupported(), false,
                 SETTING_KEYS, OTHER_SETTING_KEYS);
         updateSceneModeUI();
         mIndicatorControlContainer.setListener(this);

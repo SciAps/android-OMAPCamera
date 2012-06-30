@@ -28,6 +28,8 @@ import com.ti.omap4.android.camera.ui.RotateLayout;
 import com.ti.omap4.android.camera.ui.RotateTextToast;
 import com.ti.omap4.android.camera.ui.SharePopup;
 import com.ti.omap4.android.camera.ui.ZoomControl;
+import com.ti.omap4.android.camera.ui.CPcamExposureControl;
+import com.ti.omap4.android.camera.ui.CPcamGainControl;
 import javax.microedition.khronos.egl.EGL10;
 
 import android.app.Activity;
@@ -160,6 +162,8 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     private int mZoomMax;
     private int mTargetZoomValue;
     private ZoomControl mZoomControl;
+    private CPcamGainControl mCpcamGainControl;
+    private CPcamExposureControl mCpcamExposureControl;
 
     private com.ti.omap.android.cpcam.CPCam.Parameters mParameters;
     private com.ti.omap.android.cpcam.CPCam.Parameters mInitialParams;
@@ -203,7 +207,6 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     private RotateLayout mFocusAreaIndicator;
     private Rotatable mReviewCancelButton;
     private Rotatable mReviewDoneButton;
-    private Button mExpGainButton;
     private Button mReprocessButton;
 
     // mCropValue and mSaveUri are used only if isImageCaptureIntent() is true.
@@ -215,7 +218,6 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     private TextView mMetaDataIndicator;
     // A view group that contains all the small indicators.
     private Rotatable mOnScreenIndicators;
-
     // We use a thread in ImageSaver to do the work of saving images and
     // generating thumbnails. This reduces the shot-to-shot time.
     private ImageSaver mImageSaver;
@@ -296,6 +298,8 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     private byte[] mJpegImageData;
     private int mManualExposureControl;
     private int mManualGainISO;
+    private int mManualExposureControlValue = 62; //Default values
+    private int mManualGainControlValue = 400;
 
     // These latency time are for the CameraLatency test.
     public long mAutoFocusTime;
@@ -401,7 +405,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
                     mShotParamsExposure = Integer.toString(1000*mManualExposureControl);
 
                     if ( mManualGainISO <= 0) {
-                        mManualGainISO = 400;
+                        mManualGainISO = 0;
                     }
                     mShotParamsGain = Integer.toString(mManualGainISO);
                     Log.e(TAG, mShotParamsExposure + " , " + mShotParamsGain);
@@ -487,7 +491,8 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         mImageSaver = new ImageSaver();
         Util.initializeScreenBrightness(getWindow(), getContentResolver());
         installIntentFilter();
-        initializeZoom();
+        //initializeZoom();
+        initialiseCPcamSliders();
         updateOnScreenIndicators();
         startFaceDetection();
         // Show the tap to focus toast if this is the first start.
@@ -552,7 +557,8 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
 
         installIntentFilter();
         mImageSaver = new ImageSaver();
-        initializeZoom();
+        //initializeZoom();
+        initialiseCPcamSliders();
         keepMediaProviderInstance();
         checkStorage();
         hidePostCaptureAlert();
@@ -560,6 +566,18 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         if (!mIsImageCaptureIntent) {
             updateThumbnailButton();
             mModePicker.setCurrentMode(ModePicker.MODE_CPCAM);
+        }
+    }
+
+    private class CpcamGainChangeListener implements CPcamGainControl.OnGainChangedListener {
+        public void onGainValueChanged(int index) {
+            CPCam.this.onCpcamGainValueChanged(index);
+        }
+    }
+
+    private class CpcamExposureChangeListener implements CPcamExposureControl.OnExposureChangedListener {
+        public void onExposureValueChanged(int index) {
+            CPCam.this.onCpcamExposureValueChanged(index);
         }
     }
 
@@ -590,6 +608,29 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         }
     }
 
+    private void initialiseCPcamSliders() {
+
+        int expMin = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_MIN));
+        int expMax = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_MAX));
+        int expStep = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_STEP));
+        int isoMin = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_MIN));
+        int isoMax = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_MAX));
+        int isoStep = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_STEP));
+        int expValue = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_MANUAL_EXPOSURE));
+        int isoValue = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_MANUAL_GAIN_ISO));
+;
+        mCpcamGainControl.setGainMax(isoMax);
+        mCpcamGainControl.setGainIndex(mManualGainControlValue);
+        mCpcamGainControl.setGainStep(isoStep);
+
+        mCpcamExposureControl.setExposureMax(expMax);
+        mCpcamExposureControl.setExposureIndex(mManualExposureControlValue);
+        mCpcamExposureControl.setExposureStep(expStep);
+
+        mCpcamGainControl.setOnGainChangeListener(new CpcamGainChangeListener());
+        mCpcamExposureControl.setOnExposureChangeListener(new CpcamExposureChangeListener());
+    }
+
     private void initializeZoom() {
         // Get the parameter to make sure we have the up-to-date zoom value.
         mParameters = mCPCamDevice.getParameters();
@@ -605,6 +646,34 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         mGestureDetector = new GestureDetector(this, new ZoomGestureListener());
         mCPCamDevice.setZoomChangeListener(mZoomListener);
     }
+
+    private void onCpcamGainValueChanged(int index) {
+        // Not useful to change zoom value when the activity is paused.
+        if (mPausing) return;
+        Message msg = new Message();
+        Bundle data;
+        data = new Bundle ();
+        mManualGainControlValue = index;
+        data.putInt("ISO", index);
+        data.putInt("EXPOSURE", mManualExposureControlValue);
+        msg.what = Camera.MANUAL_GAIN_EXPOSURE_CHANGED;
+        msg.setData(data);
+        mHandler.sendMessage(msg);
+    }
+
+    private void onCpcamExposureValueChanged(int index) {
+        // Not useful to change zoom value when the activity is paused.
+        if (mPausing) return;
+        Message msg = new Message();
+        Bundle data;
+        data = new Bundle ();
+        mManualExposureControlValue = index;
+        data.putInt("EXPOSURE", index);
+        data.putInt("ISO", mManualGainControlValue);
+        msg.what = Camera.MANUAL_GAIN_EXPOSURE_CHANGED;
+        msg.setData(data);
+        mHandler.sendMessage(msg);
+     }
 
     private void onZoomValueChanged(int index) {
         // Not useful to change zoom value when the activity is paused.
@@ -1235,7 +1304,6 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     private void setCameraState(int state) {
         mCameraState = state;
         switch (state) {
-            case QUEUED_SHOT_IN_PROGRESS:
             case SNAPSHOT_IN_PROGRESS:
             case FOCUSING:
                 enableCameraControls(false);
@@ -1259,7 +1327,6 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
             if ( mCameraState == QUEUED_SHOT_IN_PROGRESS ) {
                 setCameraState(IDLE);
                 mFocusManager.setQueuedShotState(QueuedShotStates.OFF);
-                mExpGainButton.setVisibility(View.INVISIBLE);
                 mReprocessButton.setVisibility(View.INVISIBLE);
                 mMetaDataIndicator.setVisibility(View.INVISIBLE);
 
@@ -1299,7 +1366,6 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
             }
             mFaceDetectionStarted = false;
             setCameraState(QUEUED_SHOT_IN_PROGRESS);
-            mExpGainButton.setVisibility(View.VISIBLE);
             mReprocessButton.setVisibility(View.VISIBLE);
             return true;
         }
@@ -1399,7 +1465,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         mTouchManager = new TouchManager();
 
         mIsImageCaptureIntent = isImageCaptureIntent();
-        setContentView(R.layout.camera);
+        setContentView(R.layout.cpcamcamera);
         if (mIsImageCaptureIntent) {
             mReviewDoneButton = (Rotatable) findViewById(R.id.btn_done);
             mReviewCancelButton = (Rotatable) findViewById(R.id.btn_cancel);
@@ -1458,15 +1524,11 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         }
 
         mZoomControl = (ZoomControl) findViewById(R.id.zoom_control);
+        mCpcamGainControl = (CPcamGainControl) findViewById(R.id.gain_control);
+        mCpcamExposureControl = (CPcamExposureControl) findViewById(R.id.exposure_control);
         mOnScreenIndicators = (Rotatable) findViewById(R.id.on_screen_indicators);
         mLocationManager = new LocationManager(this, this);
 
-        mExpGainButton = (Button) findViewById(R.id.manual_gain_exposure_button);
-        mExpGainButton.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    popupManualGainSliders();
-                }
-        });
         mReprocessButton = (Button) findViewById(R.id.reprocess_button);
         mReprocessButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
@@ -1523,15 +1585,18 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     private void initializeIndicatorControl() {
         // setting the indicator buttons.
         mIndicatorControlContainer =
-                (IndicatorControlContainer) findViewById(R.id.indicator_control);
+                (IndicatorControlContainer) findViewById(R.id.cpcam_indicator_control);
         if (mIndicatorControlContainer == null) return;
         loadCameraPreferences();
 
+        final String[] SETTING_KEYS = {
+                // TBD
+                // CPCameraSettings.KEY_CPCAM_MODE
+        };
+        final String[] OTHER_SETTING_KEYS = {};
         CameraPicker.setImageResourceId(R.drawable.ic_switch_photo_facing_holo_light);
         mIndicatorControlContainer.initialize(this, mPreferenceGroup,
-                false,
-                null,
-                null);
+                false, true, null, null);
 
         mIndicatorControlContainer.setListener(this);
         mIndicatorControlContainer.dismissSecondLevelIndicator();
@@ -1551,6 +1616,8 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         }
         if (mModePicker != null) mModePicker.setEnabled(enable);
         if (mZoomControl != null) mZoomControl.setEnabled(enable);
+        if (mCpcamGainControl != null) mCpcamGainControl.setEnabled(enable);
+        if (mCpcamExposureControl != null) mCpcamExposureControl.setEnabled(enable);
         if (mThumbnailView != null) mThumbnailView.setEnabled(enable);
     }
 
@@ -1586,8 +1653,9 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
 
     private void setOrientationIndicator(int orientation) {
         Rotatable[] indicators = {mThumbnailView, mModePicker, mSharePopup,
-                mIndicatorControlContainer, mZoomControl, mFocusAreaIndicator, null,
-                mReviewCancelButton, mReviewDoneButton, mRotateDialog, mOnScreenIndicators};
+                mIndicatorControlContainer, mZoomControl, mCpcamGainControl, mCpcamExposureControl,
+                mFocusAreaIndicator, null, mReviewCancelButton, mReviewDoneButton,
+                mRotateDialog, mOnScreenIndicators};
         for (Rotatable indicator : indicators) {
             if (indicator != null) indicator.setOrientation(orientation);
         }
@@ -1801,11 +1869,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     }
 
     private void initDefaults() {
-        if (mParameters.isZoomSupported()) {
-            mZoomValue = 0;
-            mZoomControl.setZoomIndex(mZoomValue);
-            mZoomControl.startZoomControl();
-        }
+    	initialiseCPcamSliders();
 
         // Preview layout and size
         if (mPausing) {
@@ -2816,12 +2880,8 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
 
     private void restorePreferences() {
         // Reset the zoom. Zoom value is not stored in preference.
-        if (mParameters.isZoomSupported()) {
-            mZoomValue = 0;
-            setCameraParametersWhenIdle(UPDATE_PARAM_ZOOM);
-            mZoomControl.setZoomIndex(mZoomValue);
-            mZoomControl.startZoomControl();
-        }
+    	initialiseCPcamSliders();
+
         if (mIndicatorControlContainer != null) {
             mIndicatorControlContainer.dismissSettingPopup();
 

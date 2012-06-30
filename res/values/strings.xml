@@ -686,6 +686,10 @@
     <string name="accessibility_back_to_first_level">Close setting controls</string>
     <!-- The zoom control button. [CHAR LIMIT = NONE] -->
     <string name="accessibility_zoom_control">Zoom control</string>
+    <!-- The zoom control button. [CHAR LIMIT = NONE] -->
+    <string name="accessibility_cpcam_gain_control">Gain control</string>
+    <!-- The zoom control button. [CHAR LIMIT = NONE] -->
+    <string name="accessibility_cpcam_exposure_control">Exposure control</string>
     <!-- The decrement button in camera preference such as exposure, picture size. [CHAR LIMIT = NONE] -->
     <string name="accessibility_decrement">Decrease %1$s</string>
     <!-- The increment button in camera preference such as exposure, picture size. [CHAR LIMIT = NONE] -->
