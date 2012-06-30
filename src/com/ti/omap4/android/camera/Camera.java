@@ -1702,8 +1702,11 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             Editor editor = mPreferences.edit();
             editor.putString(CameraSettings.KEY_BURST, burst);
             editor.apply();
-            mParameters.set(PARM_BURST, burst);
-            mCameraDevice.setParameters(mParameters);
+            if ( !mCaptureMode.equals(mExposureBracketing) &&
+                    !mCaptureMode.equals(mZoomBracketing)) {
+                mParameters.set(PARM_BURST, burst);
+                mCameraDevice.setParameters(mParameters);
+            }
             mBurstRunning = false;
             if (mIndicatorControlContainer != null) {
                 mIndicatorControlContainer.reloadPreferences();
