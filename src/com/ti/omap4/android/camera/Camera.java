@@ -16,7 +16,6 @@
 
 package com.ti.omap4.android.camera;
 
-//import com.ti.omap4.android.camera.CPcam.JpegPictureCallback;
 import com.ti.omap4.android.camera.ui.CameraPicker;
 import com.ti.omap4.android.camera.ui.FaceView;
 import com.ti.omap4.android.camera.ui.IndicatorControlContainer;
@@ -137,7 +136,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private ZoomControl mZoomControl;
 
     private Parameters mParameters;
-    private Parameters mShotParams;
     private Parameters mInitialParams;
     private boolean mFocusAreaSupported;
     private boolean mMeteringAreaSupported;
@@ -191,7 +189,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private ImageView mGpsIndicator;
     private ImageView mFlashIndicator;
     private ImageView mSceneIndicator;
-    private ImageView mManualExpGainIndicator;
     private ImageView mWhiteBalanceIndicator;
     private ImageView mFocusIndicator;
     // A view group that contains all the small indicators.
@@ -294,7 +291,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mZoomBracketing;
     private String mHighPerformance;
     private String mHighQuality;
-    private String mCpCam;
     private String mHighQualityZsl;
     private String mGBCEOff;
     private String mManualExposure;
@@ -890,7 +886,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private void initOnScreenIndicator() {
         mGpsIndicator = (ImageView) findViewById(R.id.onscreen_gps_indicator);
         mExposureIndicator = (TextView) findViewById(R.id.onscreen_exposure_indicator);
-        //mManualExpGainIndicator = (TextView) findViewById(R.id.onscreen);
         mFlashIndicator = (ImageView) findViewById(R.id.onscreen_flash_indicator);
         mSceneIndicator = (ImageView) findViewById(R.id.onscreen_scene_indicator);
         mWhiteBalanceIndicator =
@@ -1434,13 +1429,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             }
 
             try {
-                if(mCaptureMode.equals(mCpCam)) {
-                    mCameraDevice.takePicture(mShutterCallback, mRawPictureCallback,
-                            mPostViewPictureCallback, new JpegPictureCallback(loc));
-                } else {
-                    mCameraDevice.takePicture(mShutterCallback, mRawPictureCallback,
-                            mPostViewPictureCallback, new JpegPictureCallback(loc));
-                }
+                mCameraDevice.takePicture(mShutterCallback, mRawPictureCallback,
+                        mPostViewPictureCallback, new JpegPictureCallback(loc));
             } catch (RuntimeException e ) {
                 e.printStackTrace();
                 return false;
@@ -1588,10 +1578,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mHighQualityZsl = temp.findEntryValueByEntry(getString(R.string.pref_camera_mode_entry_zsl));
             if (mHighQualityZsl == null) {
                 mHighQualityZsl = "";
-            }
-            mCpCam = temp.findEntryValueByEntry(getString(R.string.pref_camera_mode_entry_cpcam));
-            if (mCpCam == null) {
-                mCpCam = "";
             }
         }
 
@@ -1791,8 +1777,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_FLASH_MODE,
                 CameraSettings.KEY_WHITE_BALANCE,
                 CameraSettings.KEY_EXPOSURE_COMPENSATION_MENU,
-                CameraSettings.KEY_SCENE_MODE,
-                CameraSettings.KEY_SHOTPARAMS_MANUAL_EXPOSURE_GAIN_POPUP_SLIDERS};
+                CameraSettings.KEY_SCENE_MODE};
         final String[] OTHER_SETTING_KEYS = {
                 CameraSettings.KEY_CAPTURE_LAYOUT,
                 CameraSettings.KEY_PREVIEW_LAYOUT,
