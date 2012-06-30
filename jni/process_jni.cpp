@@ -40,7 +40,7 @@
 extern "C"
 {
 
-void com_ti_omap4_android_camera_CPcam_processPicture(JNIEnv *env,
+void com_ti_omap4_android_camera_CPCam_processPicture(JNIEnv *env,
 	      jobject thiz, jobject jSurfaceTexture, jobject jbitmap, jint processing)
 {
 	uint8_t *inBuffer = NULL;
@@ -172,7 +172,7 @@ exit:
 	LOGI("processPicture: exiting function");
 	}
 static JNINativeMethod methods[] = {
-{"processPicture", "(Landroid/graphics/SurfaceTexture;Landroid/graphics/Bitmap;I)V", (void*)com_ti_omap4_android_camera_CPcam_processPicture}
+{"processPicture", "(Landroid/graphics/SurfaceTexture;Landroid/graphics/Bitmap;I)V", (void*)com_ti_omap4_android_camera_CPCam_processPicture}
 };
 
 jint JNI_OnLoad(JavaVM* vm, void* reserved)
@@ -185,7 +185,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
         goto bail;
     }
 
-    jniRegisterNativeMethods(env, "com/ti/omap4/android/camera/CPcam",
+    jniRegisterNativeMethods(env, "com/ti/omap4/android/camera/CPCam",
         methods, NELEM(methods));
 
     /* success -- return valid version number */

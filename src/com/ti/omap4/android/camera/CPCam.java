@@ -16,12 +16,12 @@
 
 package com.ti.omap4.android.camera;
 
+import com.ti.omap4.android.camera.CPCamFocusManager.QueuedShotStates;
 import com.ti.omap4.android.camera.ui.CameraPicker;
 import com.ti.omap4.android.camera.ui.CPCamFaceView;
 import com.ti.omap4.android.camera.ui.IndicatorControlContainer;
-import com.ti.omap4.android.camera.ui.PopupManager;
-import com.ti.omap4.android.camera.ui.ManualConvergenceSettings;
 import com.ti.omap4.android.camera.ui.ManualGainExposureSettings;
+import com.ti.omap4.android.camera.ui.PopupManager;
 import com.ti.omap4.android.camera.ui.Rotatable;
 import com.ti.omap4.android.camera.ui.RotateImageView;
 import com.ti.omap4.android.camera.ui.RotateLayout;
@@ -44,15 +44,18 @@ import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.graphics.SurfaceTexture.OnFrameAvailableListener;
 import android.hardware.Camera.CameraInfo;
+
 import com.ti.omap.android.cpcam.CPCam.Face;
 import com.ti.omap.android.cpcam.CPCam.FaceDetectionListener;
 import com.ti.omap.android.cpcam.CPCam.Parameters;
 import com.ti.omap.android.cpcam.CPCam.PictureCallback;
+import com.ti.omap.android.cpcam.CPCam.PreviewCallback;
 import com.ti.omap.android.cpcam.CPCam.Size;
 import android.hardware.CameraSound;
 import android.location.Location;
 import android.media.CameraProfile;
 import android.net.Uri;
+import android.opengl.Visibility;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -78,6 +81,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -117,21 +121,19 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     private static final int RESTART_PREVIEW = 10;
     public static final int MANUAL_GAIN_EXPOSURE_CHANGED = 12;
     public static final int RELEASE_CAMERA = 13;
+    private static final int QUEUE_NEXT_SHOT = 14;
     // The subset of parameters we need to update in setCameraParameters().
     private static final int UPDATE_PARAM_INITIALIZE = 1;
     private static final int UPDATE_PARAM_ZOOM = 2;
     private static final int UPDATE_PARAM_PREFERENCE = 4;
     private static final int UPDATE_PARAM_MODE = 8;
-    private static final int UPDATE_PARAM_SHOT_PARAMS = 16;
-    private static final int UPDATE_PARAM_ALL = -1;
 
     //CPCam
     private com.ti.omap.android.cpcam.CPCam mCPCamDevice;
     private String mShotParamsGain = "400"; //Default values
     private String mShotParamsExposure = "10000";
-    private Bitmap outBitmap;
+    private static final String DEFAULT_EXPOSURE_GAIN = "(40000,400)";
     private SurfaceTexture mTapOut;
-    private SurfaceTexture mTapIn;
     Context mContext;
     private int mFrameWidth,mFrameHeight;
     // When setCameraParametersWhenIdle() is called, we accumulate the subsets
@@ -139,7 +141,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     private int mUpdateSet;
 
     private static final int SCREEN_DELAY = 2 * 60 * 1000;
-    private static final int CAMERA_RELEASE_DELAY = 3000;
+    private static final int CAMERA_RELEASE_DELAY = 1000;
 
     private static final int ZOOM_STOPPED = 0;
     private static final int ZOOM_START = 1;
@@ -195,6 +197,8 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     private RotateLayout mFocusAreaIndicator;
     private Rotatable mReviewCancelButton;
     private Rotatable mReviewDoneButton;
+    private Button mExpGainButton;
+    private Button mReprocessButton;
 
     // mCropValue and mSaveUri are used only if isImageCaptureIntent() is true.
     private String mCropValue;
@@ -211,14 +215,6 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     private CameraSound mCameraSound;
     private S3DViewWrapper s3dView;
     private boolean mS3dViewEnabled = false;
-
-    private Runnable mDoSnapRunnable = new Runnable() {
-        public void run() {
-            onShutterButtonClick();
-        }
-    };
-
-    private final StringBuilder mBuilder = new StringBuilder();
 
     /**
      * An unpublished intent flag requesting to return as soon as capturing
@@ -243,9 +239,9 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     // Focus is in progress. The exact focus state is in Focus.java.
     private static final int FOCUSING = 2;
     private static final int SNAPSHOT_IN_PROGRESS = 3;
+    private static final int QUEUED_SHOT_IN_PROGRESS = 4;
     private int mCameraState = PREVIEW_STOPPED;
     private Object mCameraStateLock = new Object();
-    private boolean mSnapshotOnIdle = false;
 
     private ContentResolver mContentResolver;
     private boolean mDidRegister = false;
@@ -268,6 +264,9 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     public static final String TRUE = "true";
     public static final String FALSE = "false";
 
+    private String mCPCamMode;
+    private boolean mReprocessNextFrame = false;
+    private boolean mRestartQueueShot = false;
     private String mManualExposure;
 
     private String mCaptureMode = "cp-cam";
@@ -287,8 +286,8 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     private long mOnResumeTime;
     private long mPicturesRemaining;
     private byte[] mJpegImageData;
-    private Integer mManualExposureControl = new Integer(0);
-    private Integer mManualGainISO = new Integer(0);
+    private int mManualExposureControl;
+    private int mManualGainISO;
 
     // These latency time are for the CameraLatency test.
     public long mAutoFocusTime;
@@ -384,20 +383,37 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
                 case MANUAL_GAIN_EXPOSURE_CHANGED: {
                     Bundle data;
                     data = msg.getData();
-                        mManualExposureControl = data.getInt("EXPOSURE");
-                        mManualGainISO = data.getInt("ISO");
-                        if (mManualExposureControl < 1) {
-                            mManualExposureControl = 1;
-                        }
+                    mManualExposureControl = data.getInt("EXPOSURE");
+                    mManualGainISO = data.getInt("ISO");
+                    Log.e(TAG, "mManualExposureControl " + mManualExposureControl + " mManualGainISO " + mManualGainISO);
 
-                         mShotParamsExposure = Integer.toString(1000*mManualExposureControl.intValue());
-                         if ( mManualGainISO <= 0) {
-                             mManualGainISO = 400;
-                         }
-                         mShotParamsGain = Integer.toString(mManualGainISO.intValue());
-                        Log.d(TAG,"SHOT mShotParamsGain = "+ mShotParamsGain);
-                        Log.d(TAG,"SHOT mShotParamsExposure) = "+ mShotParamsExposure);
-                        setCameraParameters(UPDATE_PARAM_SHOT_PARAMS);
+                    if (mManualExposureControl <= 0) {
+                        mManualExposureControl = 1;
+                    }
+                    mShotParamsExposure = Integer.toString(1000*mManualExposureControl);
+
+                    if ( mManualGainISO <= 0) {
+                        mManualGainISO = 400;
+                    }
+                    mShotParamsGain = Integer.toString(mManualGainISO);
+                    Log.e(TAG, mShotParamsExposure + " , " + mShotParamsGain);
+
+                    String expGainPair = new String( "(" + mShotParamsExposure + "," + mShotParamsGain + ")" );
+
+                    if ( null == mShotParams && null != mCPCamDevice ) {
+                        mShotParams = mCPCamDevice.getParameters();
+                    }
+
+                    mShotParams.setPictureFormat(ImageFormat.NV21);
+                    mShotParams.set(CPCameraSettings.KEY_SHOTPARAMS_EXP_GAIN_PAIRS, expGainPair);
+                    mShotParams.set(CPCameraSettings.KEY_SHOTPARAMS_BURST, 1);
+
+                    break;
+                }
+                case QUEUE_NEXT_SHOT: {
+                    if ( null != mCPCamDevice ) {
+                        mCPCamDevice.takePicture(null, null, null, mJpegCallback, mShotParams);
+                    }
                     break;
                 }
                 case RELEASE_CAMERA: {
@@ -642,23 +658,30 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         }
     }
 
-    public void popupExposureGainSliders() {
+    private void popupManualGainSliders() {
 
         // CPCAm manual exposure and gain sliders
-            ManualGainExposureSettings manualGainExposureDialog = null;
-            int expMin = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_MIN));
-            int expMax = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_MAX));
-            int expStep = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_STEP));
-            int isoMin = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_MIN));
-            int isoMax = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_MAX));
-            int isoStep = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_STEP));
-            int expValue = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_MANUAL_EXPOSURE));
-            int isoValue = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_MANUAL_GAIN_ISO));
+        ManualGainExposureSettings manualGainExposureDialog = null;
+        int expMin = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_MIN));
+        int expMax = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_MAX));
+        int expStep = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_STEP));
+        int isoMin = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_MIN));
+        int isoMax = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_MAX));
+        int isoStep = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_STEP));
+        int expValue = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_MANUAL_EXPOSURE));
+        int isoValue = Integer.parseInt(mParameters.get(CPCameraSettings.KEY_MANUAL_GAIN_ISO));
 
-            manualGainExposureDialog = new ManualGainExposureSettings(this, mHandler,
-                    expValue, isoValue,expMin, expMax,
-                    isoMin, isoMax,expStep,isoStep);
-            manualGainExposureDialog.show();
+        manualGainExposureDialog = new ManualGainExposureSettings(this,
+                                                          mHandler,
+                                                          expValue,
+                                                          isoValue,
+                                                          expMin,
+                                                          expMax,
+                                                          isoMin,
+                                                          isoMax,
+                                                          expStep,
+                                                          isoStep);
+        manualGainExposureDialog.show();
     }
 
     private class PopupGestureListener
@@ -862,7 +885,10 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
                 camera.setBufferSource(null, mTapOut);
             } catch(IOException e) { e.printStackTrace(); }
 
-            CPCamFocusManager.TempBracketingStates tempState = mFocusManager.getTempBracketingState();
+            if ( mReprocessNextFrame ) {
+                mReprocessNextFrame = false;
+            }
+
             mJpegPictureCallbackTime = System.currentTimeMillis();
             // If postview callback has arrived, the captured image is displayed
             // in postview callback. If not, the captured image is displayed in
@@ -884,17 +910,14 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
             if (!mIsImageCaptureIntent) {
                 enableCameraControls(true);
 
-                if (( tempState != CPCamFocusManager.TempBracketingStates.RUNNING ) &&
-                      !mBurstRunning == true) {
                 // We want to show the taken picture for a while, so we wait
                 // for at least 0.5 second before restarting the preview.
-                    long delay = 500 - mPictureDisplayedToJpegCallbackTime;
-                    if (delay < 0) {
-                        startPreview(true);
-                        startFaceDetection();
-                    } else {
-                        mHandler.sendEmptyMessageDelayed(RESTART_PREVIEW, delay);
-                    }
+                long delay = 500 - mPictureDisplayedToJpegCallbackTime;
+                if (delay < 0) {
+                    startPreview(true);
+                    startFaceDetection();
+                } else {
+                    mHandler.sendEmptyMessageDelayed(RESTART_PREVIEW, delay);
                 }
 
             }
@@ -1165,6 +1188,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     private void setCameraState(int state) {
         mCameraState = state;
         switch (state) {
+            case QUEUED_SHOT_IN_PROGRESS:
             case SNAPSHOT_IN_PROGRESS:
             case FOCUSING:
                 enableCameraControls(false);
@@ -1181,9 +1205,24 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         synchronized (mCameraStateLock) {
             Log.d(TAG,"Capture()");
             // If we are already in the middle of taking a snapshot then ignore.
-            if (mCameraState == SNAPSHOT_IN_PROGRESS || mCPCamDevice == null) {
+            if (mCPCamDevice == null) {
                 return false;
             }
+
+            if ( mCameraState == QUEUED_SHOT_IN_PROGRESS ) {
+                setCameraState(IDLE);
+                mFocusManager.setQueuedShotState(QueuedShotStates.OFF);
+                mExpGainButton.setVisibility(View.INVISIBLE);
+                mReprocessButton.setVisibility(View.INVISIBLE);
+
+                Message msg = new Message();
+                msg.what = RESTART_PREVIEW;
+                msg.arg1 = MODE_RESTART;
+                mHandler.sendMessage(msg);
+
+                return true;
+            }
+
             mCaptureStartTime = System.currentTimeMillis();
             mPostViewPictureCallbackTime = 0;
             mJpegImageData = null;
@@ -1191,29 +1230,29 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
             Util.setRotationParameterCPCam(mParameters, mCameraId, mOrientation);
             Location loc = mLocationManager.getCurrentLocation();
             Util.setGpsParametersCPCam(mParameters, loc);
-            if (canSetParameters()) {
-                mParameters.setPictureFormat(ImageFormat.NV21);
-                mParameters.setPictureSize(mFrameWidth, mFrameHeight);
-                mCPCamDevice.setParameters(mParameters);
-                if(mShotParams == null) {
-                    //If shot params are not set, put default values
-                    mShotParams = mCPCamDevice.getParameters();
-                    mShotParams.set(CPCameraSettings.KEY_SHOTPARAMS_EXP_GAIN_PAIRS,
-                            "(40000,400)");
-                       mShotParams.set(CPCameraSettings.KEY_SHOTPARAMS_BURST, 1);
-                } else {
-                    mCPCamDevice.setParameters(mShotParams);
-                }
+            mParameters.setPictureFormat(ImageFormat.NV21);
+            mParameters.setPictureSize(mFrameWidth, mFrameHeight);
+            mCPCamDevice.setParameters(mParameters);
+            if(mShotParams == null) {
+                //If shot params are not set, put default values
+                mShotParams = mCPCamDevice.getParameters();
+                mShotParams.set(CPCameraSettings.KEY_SHOTPARAMS_EXP_GAIN_PAIRS,
+                                DEFAULT_EXPOSURE_GAIN);
+                   mShotParams.set(CPCameraSettings.KEY_SHOTPARAMS_BURST, 1);
+            } else {
+                mCPCamDevice.setParameters(mShotParams);
             }
 
             try {
-                mCPCamDevice.takePicture(null, null,null,mJpegCallback,mShotParams);
+                mCPCamDevice.takePicture(null, null, null, mJpegCallback, mShotParams);
             } catch (RuntimeException e ) {
                 e.printStackTrace();
                 return false;
             }
             mFaceDetectionStarted = false;
-            setCameraState(SNAPSHOT_IN_PROGRESS);
+            setCameraState(QUEUED_SHOT_IN_PROGRESS);
+            mExpGainButton.setVisibility(View.VISIBLE);
+            mReprocessButton.setVisibility(View.VISIBLE);
             return true;
         }
     }
@@ -1305,7 +1344,6 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
                 mManualExposure = "";
             }
         }
-        ListPreference cpcam_manual_exp_gain = group.findPreference(CPCameraSettings.KEY_SHOTPARAMS_MANUAL_EXPOSURE_GAIN_POPUP_SLIDERS);
 
         getPreferredCameraId();
         mFocusManager = new CPCamFocusManager(mPreferences,
@@ -1375,6 +1413,20 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         mOnScreenIndicators = (Rotatable) findViewById(R.id.on_screen_indicators);
         mLocationManager = new LocationManager(this, this);
 
+        mExpGainButton = (Button) findViewById(R.id.manual_gain_exposure_button);
+        mExpGainButton.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    popupManualGainSliders();
+                }
+        });
+        mReprocessButton = (Button) findViewById(R.id.reprocess_button);
+        mReprocessButton.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    mReprocessNextFrame = true;
+                    mRestartQueueShot = true;
+                }
+        });
+
         // Wait until the camera settings are retrieved.
         synchronized (mCameraPreviewThread) {
             try {
@@ -1426,15 +1478,12 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
                 (IndicatorControlContainer) findViewById(R.id.indicator_control);
         if (mIndicatorControlContainer == null) return;
         loadCameraPreferences();
-        final String[] SETTING_KEYS = {
-                CPCameraSettings.KEY_SHOTPARAMS_MANUAL_EXPOSURE_GAIN_POPUP_SLIDERS
-        };
-        final String[] OTHER_SETTING_KEYS = {};
 
         CameraPicker.setImageResourceId(R.drawable.ic_switch_photo_facing_holo_light);
         mIndicatorControlContainer.initialize(this, mPreferenceGroup,
                 false,
-                SETTING_KEYS, null);
+                null,
+                null);
 
         mIndicatorControlContainer.setListener(this);
         mIndicatorControlContainer.dismissSecondLevelIndicator();
@@ -1653,21 +1702,14 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         // state that autofocus is focusing and a picture will be taken when
         // focus callback arrives.
         if (mFocusManager.isFocusingSnapOnFinish() || mCameraState == SNAPSHOT_IN_PROGRESS) {
-            mSnapshotOnIdle = true;
             return;
         }
 
-        mSnapshotOnIdle = false;
         mFocusManager.doSnap();
     }
 
     @Override
     public void onShutterButtonLongPressed() {
-        if (mPausing || mCameraState == SNAPSHOT_IN_PROGRESS
-                || mCPCamDevice == null || mPicturesRemaining <= 0) return;
-
-        Log.v(TAG, "onShutterButtonLongPressed");
-        mFocusManager.shutterLongPressed();
     }
 
     private OnScreenHint mStorageHint;
@@ -2103,14 +2145,12 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         setPreviewDisplay(mSurfaceHolder);
         setDisplayOrientation();
 
-        if (!mSnapshotOnIdle) {
-            // If the focus mode is continuous autofocus, call cancelAutoFocus to
-            // resume it because it may have been paused by autoFocus call.
-            if (Parameters.FOCUS_MODE_CONTINUOUS_PICTURE.equals(mFocusManager.getFocusMode())) {
-                mCPCamDevice.cancelAutoFocus();
-            }
-            mFocusManager.setAeAwbLock(false); // Unlock AE and AWB.
+        // If the focus mode is continuous autofocus, call cancelAutoFocus to
+        // resume it because it may have been paused by autoFocus call.
+        if (Parameters.FOCUS_MODE_CONTINUOUS_PICTURE.equals(mFocusManager.getFocusMode())) {
+            mCPCamDevice.cancelAutoFocus();
         }
+        mFocusManager.setAeAwbLock(false); // Unlock AE and AWB.
 
         if ( updateAll ) {
             Log.v(TAG, "Updating all parameters!");
@@ -2118,8 +2158,6 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         } else {
             setCameraParameters(UPDATE_PARAM_MODE);
         }
-
-        //setCameraParameters(UPDATE_PARAM_ALL);
 
         // Inform the mainthread to go on the UI initialization.
         if (mCameraPreviewThread != null) {
@@ -2129,7 +2167,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         }
 
         try {
-            Log.v(TAG, "startPreview");
+            Log.v(TAG, "startPreview ");
             mCPCamDevice.startPreview();
         } catch (Throwable ex) {
             closeCamera();
@@ -2137,12 +2175,33 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         }
 
         mZoomState = ZOOM_STOPPED;
-        setCameraState(IDLE);
         mFocusManager.onPreviewStarted();
 
-        if (mSnapshotOnIdle) {
-            mHandler.post(mDoSnapRunnable);
+        if ( mRestartQueueShot ) {
+            mParameters.setPictureFormat(ImageFormat.NV21);
+            mParameters.setPictureSize(mFrameWidth, mFrameHeight);
+            mCPCamDevice.setParameters(mParameters);
+            if(mShotParams == null) {
+                //If shot params are not set, put default values
+                mShotParams = mCPCamDevice.getParameters();
+                mShotParams.set(CPCameraSettings.KEY_SHOTPARAMS_EXP_GAIN_PAIRS,
+                                DEFAULT_EXPOSURE_GAIN);
+                   mShotParams.set(CPCameraSettings.KEY_SHOTPARAMS_BURST, 1);
+            } else {
+                mCPCamDevice.setParameters(mShotParams);
+            }
+
+            mRestartQueueShot = false;
+            setCameraState(QUEUED_SHOT_IN_PROGRESS);
+            // WA: This should be done on first preview callback.
+            //     For some reason callbacks are not called after
+            //     the second iteration.
+            mHandler.sendEmptyMessageDelayed(QUEUE_NEXT_SHOT, CAMERA_RELEASE_DELAY);
+
+        } else {
+            setCameraState(IDLE);
         }
+
     }
 
      private void stopPreview() {
@@ -2379,16 +2438,6 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
            getString(R.string.pref_omap4_camera_sensor_orientation_default);
         mParameters.set(PARM_SENSOR_ORIENTATION, sensorOrientation);
 
-        //CPCAM Manual Exposure and Gain
-        String manualExpGainOnOff = mPreferences.getString(
-                CPCameraSettings.KEY_SHOTPARAMS_MANUAL_EXPOSURE_GAIN_POPUP_SLIDERS, getString(R.string.pref_camera_manual_exp_gain_default));
-        if ( (manualExpGainOnOff.equals("on")) ) {
-            popupExposureGainSliders();
-            Editor editor = mPreferences.edit();
-            editor.putString(CPCameraSettings.KEY_SHOTPARAMS_MANUAL_EXPOSURE_GAIN_POPUP_SLIDERS, "off");
-            editor.commit();
-        }
-
         // Set picture size.
         String pictureSize = mPreferences.getString(
                 CPCameraSettings.KEY_PICTURE_SIZE, null);
@@ -2496,28 +2545,11 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         return restartNeeded;
     }
 
-    private boolean canSetParameters() {
-        boolean ret = true;
-
-        //Hack: Don't apply any new parameters during
-        //      temporal bracketing.
-        if ( null != mFocusManager ) {
-            if ( mFocusManager.getTempBracketingState() == CPCamFocusManager.TempBracketingStates.RUNNING ) {
-                ret = false;
-            }
-        }
-
-        return ret;
-    }
     // We separate the parameters into several subsets, so we can update only
     // the subsets actually need updating. The PREFERENCE set needs extra
     // locking because the preference can be changed from GLThread as well.
     private void setCameraParameters(int updateSet) {
         boolean restartPreview = false;
-
-        if ( !canSetParameters() ) {
-            return;
-        }
 
         mParameters = mCPCamDevice.getParameters();
 
@@ -2538,14 +2570,6 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
             Log.v(TAG,"Capture mode set: " + mParameters.get(CPCameraSettings.KEY_MODE));
 
         }
-        if ((updateSet & UPDATE_PARAM_SHOT_PARAMS ) != 0 ) {
-            mShotParams = mCPCamDevice.getParameters();
-            mShotParams.set(CPCameraSettings.KEY_SHOTPARAMS_EXP_GAIN_PAIRS,
-                    "(" + mShotParamsExposure + "," + mShotParamsGain + ")");
-               mShotParams.set(CPCameraSettings.KEY_SHOTPARAMS_BURST, 1);
-            mCPCamDevice.setParameters(mShotParams);
-        }
-
 
         mCPCamDevice.setParameters(mParameters);
 
@@ -2800,25 +2824,33 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
                 && isSupported(Parameters.FOCUS_MODE_AUTO,
                         mInitialParams.getSupportedFocusModes()));
     }
-    //CPCAM related methods
+
     public void onFrameAvailable(final SurfaceTexture st) {
         // Invoked every time there's a new frame available in SurfaceTexture
         new Thread(new Runnable() {
             public void run() {
-                try {
+                Log.v(TAG, "onFrameAvailable: SurfaceTexture got updated, Tid: " + Process.myTid());
+
+                if (!mReprocessNextFrame &&
+                    ( mCameraState == QUEUED_SHOT_IN_PROGRESS ) ) {
+                    // Queue next shot
+                    st.updateTexImage();
+                    Message msg = new Message();
+                    msg.what = QUEUE_NEXT_SHOT;
+                    mHandler.sendMessage(msg);
+                } else if ( mReprocessNextFrame &&
+                           ( mCameraState == QUEUED_SHOT_IN_PROGRESS ) ) {
+                    // Reprocess
                     try {
                         mParameters.setPictureFormat(ImageFormat.JPEG);
                         mParameters.setPictureSize(mFrameWidth, mFrameHeight);
                         mCPCamDevice.setParameters(mParameters);
                         mTapOut.setDefaultBufferSize(mFrameWidth, mFrameHeight);
                         mCPCamDevice.setBufferSource(mTapOut,null);
-                    } catch (IOException ioe) {
-                        Log.e(TAG, "Error trying to setBufferSource!");
-                    }
-                        Log.e(TAG, "onFrameAvailable: SurfaceTexture got updated, Tid: " + Process.myTid());
                         mCPCamDevice.reprocess(mShotParams);
-                } catch (IOException ioe) {
-                    Log.e(TAG, "Unknown error in processing thread" + "Tid: " +  + Process.myTid());
+                    } catch (IOException ioe) {
+                        ioe.printStackTrace();
+                    }
                 }
             }
         }).start();

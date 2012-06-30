@@ -335,7 +335,7 @@ public class ManualGainExposureSettings extends Dialog {
                 mManualGainValue = progress;
                 String sCaptionLeft = context.getString(R.string.settings_manual_2d_gain_caption);
                 sCaptionLeft = sCaptionLeft + " " + Integer.toString(mManualGainValue + mMinIso);
-//                manualGainCaption.setText(sCaptionLeft);
+                manualGainCaption.setText(sCaptionLeft);
 //                if (mManualGainValue != mISOValue) {
 //                    data.putInt("ISO", mManualGainValue + mMinIso);
 //                } else {
