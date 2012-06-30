@@ -77,6 +77,7 @@ public class Util {
     public static final int ORIENTATION_HYSTERESIS = 5;
 
     public static final String REVIEW_ACTION = "com.android.camera.action.REVIEW";
+    private static final String CPCAM_CLASS_NAME = "com.ti.omap.android.cpcam.CPCam";
 
     // Private intent extras. Test only.
     private static final String EXTRAS_CAMERA_FACING =
@@ -107,6 +108,18 @@ public class Util {
 
     public static int dpToPixel(int dp) {
         return Math.round(sPixelDensity * dp);
+    }
+
+    public static boolean isCPCamLibraryPresent() {
+        boolean ret = true;
+        // Check if CPCam library is present
+        try {
+            Class.forName(CPCAM_CLASS_NAME);
+        } catch (ClassNotFoundException e) {
+            ret = false;
+        }
+
+        return ret;
     }
 
     // Rotates the bitmap by the specified degree.

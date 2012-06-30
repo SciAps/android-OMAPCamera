@@ -64,7 +64,6 @@ public class ModePicker extends RelativeLayout implements View.OnClickListener,
     private View mCurrentModeBar;
     private boolean mSelectionEnabled;
 
-
     private int mCurrentMode = 0;
     private Animation mFadeIn, mFadeOut;
 
@@ -107,6 +106,12 @@ public class ModePicker extends RelativeLayout implements View.OnClickListener,
             mCurrentModeBar = findViewById(R.id.current_mode_bar);
             enableModeSelection(true);
         }
+
+        // Remove CPCam icon if library is not available
+        if ( !Util.isCPCamLibraryPresent() ) {
+            mModeSelectionIcon[MODE_CPCAM].setVisibility(GONE);
+        }
+
         registerOnClickListener();
     }
 

@@ -18,7 +18,8 @@ package com.ti.omap4.android.camera;
 
 import com.ti.omap4.android.camera.CPCamFocusManager.QueuedShotStates;
 import com.ti.omap4.android.camera.ui.CameraPicker;
-import com.ti.omap4.android.camera.ui.CPCamFaceView;
+import com.ti.omap4.android.camera.ui.FaceView;
+import com.ti.omap4.android.camera.ui.FaceViewData;
 import com.ti.omap4.android.camera.ui.IndicatorControlContainer;
 import com.ti.omap4.android.camera.ui.ManualGainExposureSettings;
 import com.ti.omap4.android.camera.ui.PopupManager;
@@ -191,7 +192,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     // An imageview showing showing the last captured picture thumbnail.
     private RotateImageView mThumbnailView;
     private ModePicker mModePicker;
-    private CPCamFaceView mFaceView;
+    private FaceView mFaceView;
     private RotateLayout mFocusAreaIndicator;
     private Rotatable mReviewCancelButton;
     private Rotatable mReviewDoneButton;
@@ -649,7 +650,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         if (mFaceDetectionStarted || mCameraState != IDLE) return;
         if ( ( mParameters.getMaxNumDetectedFaces() > 0 ) && ( null != mCPCamDevice )) {
             mFaceDetectionStarted = true;
-            mFaceView = (CPCamFaceView) findViewById(R.id.cpcam_face_view);
+            mFaceView = (FaceView) findViewById(R.id.face_view);
             mFaceView.clear();
             mFaceView.setVisibility(View.VISIBLE);
             mFaceView.setDisplayOrientation(mDisplayOrientation);
@@ -2640,7 +2641,26 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
 
     @Override
     public void onFaceDetection(Face[] faces, com.ti.omap.android.cpcam.CPCam camera) {
-        mFaceView.setFaces(faces);
+        FaceViewData faceData[] = new FaceViewData[faces.length];
+
+        int i = 0;
+        for ( Face face : faces ) {
+
+            faceData[i] = new FaceViewData();
+            if ( null == faceData[i] ) {
+                break;
+            }
+
+            faceData[i].id = face.id;
+            faceData[i].leftEye = face.leftEye;
+            faceData[i].mouth = face.mouth;
+            faceData[i].rect = face.rect;
+            faceData[i].rightEye = face.rightEye;
+            faceData[i].score = face.score;
+            i++;
+        }
+
+        mFaceView.setFaces(faceData);
     }
 
     private void showTapToFocusToast() {
