@@ -761,7 +761,7 @@ public class CameraSettings {
             final String mechanicalMisalignmentSupported =
                     mParameters.get(KEY_MECHANICAL_MISALIGNMENT_CORRECTION_SUPPORTED);
             ArrayList<String> suppMechanicalMisalignmentCorrection = new ArrayList<String>();
-            if ( mechanicalMisalignmentSupported.equals(Camera.TRUE) ) {
+            if ( mechanicalMisalignmentSupported != null && mechanicalMisalignmentSupported.equals(Camera.TRUE) ) {
                 final String enable = mContext.getString(R.string.pref_camera_mechanical_misalignment_correction_enable);
                 final String disable = mContext.getString(R.string.pref_camera_mechanical_misalignment_correction_disable);
                 suppMechanicalMisalignmentCorrection.add(mechanicalMisalignmentCorrection.findEntryValueByEntry(enable));
