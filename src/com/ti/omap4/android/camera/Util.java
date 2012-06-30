@@ -85,6 +85,7 @@ public class Util {
             "android.intent.extras.CAMERA_FACING";
 
     private static boolean sIsTabletUI;
+    private static boolean sIsPortraitDevice;
     private static float sPixelDensity = 1;
     private static ImageFileNamer sImageFileNamer;
 
@@ -93,7 +94,7 @@ public class Util {
 
     public static void initialize(Context context) {
         sIsTabletUI = (context.getResources().getConfiguration().smallestScreenWidthDp >= 600);
-
+        sIsPortraitDevice = (context.getResources().getConfiguration().screenWidthDp < context.getResources().getConfiguration().screenHeightDp);
         DisplayMetrics metrics = new DisplayMetrics();
         WindowManager wm = (WindowManager)
                 context.getSystemService(Context.WINDOW_SERVICE);
@@ -105,6 +106,10 @@ public class Util {
 
     public static boolean isTabletUI() {
         return sIsTabletUI;
+    }
+
+    public static boolean isPortraitDevice(){
+        return sIsPortraitDevice;
     }
 
     public static int dpToPixel(int dp) {

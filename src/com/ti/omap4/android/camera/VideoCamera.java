@@ -247,7 +247,8 @@ public class VideoCamera extends ActivityBase
     boolean mPreviewing = false; // True if preview is started.
     // The display rotation in degrees.
     private int mDisplayRotation = 0;
-
+    // The Sensor Mount offset in degrees.
+    private int mSensorMountOffset = 0;
     private ContentResolver mContentResolver;
 
     private LocationManager mLocationManager;
@@ -629,7 +630,7 @@ public class VideoCamera extends ActivityBase
                     if (info.facing == CameraInfo.CAMERA_FACING_FRONT) {
                         mDisplayRotation = (360 - mDisplayRotation ) % 360;
                     }
-                    if (!mMediaRecorderRecording && (getSensorOrientation() != mDisplayRotation)) {
+                    if (!mMediaRecorderRecording) {
                         startPreview();
                     }
                 }
@@ -918,7 +919,7 @@ public class VideoCamera extends ActivityBase
     }
 
     private boolean isOrientationPortrait() {
-        if(mDisplayRotation == 90 || mDisplayRotation == 270) {
+        if(((mDisplayRotation+mSensorMountOffset)%360) == 90 || ((mDisplayRotation+mSensorMountOffset)%360) == 270) {
             return true;
         }
         return false;
@@ -2150,8 +2151,19 @@ public class VideoCamera extends ActivityBase
         CameraInfo info = CameraHolder.instance().getCameraInfo()[mCameraId];
 
         // Set Sensor Orientation
-        mParameters.set(PARM_SENSOR_ORIENTATION, mDisplayRotation);
-        Log.v(TAG," >>>> Setting Orientation = "+ mDisplayRotation);
+        // Provide offset to Potrait devices since Sensor Mount would be offset.
+        if(Util.isPortraitDevice()){
+           mSensorMountOffset = 90;
+        }
+
+        if(info.facing == CameraInfo.CAMERA_FACING_FRONT){
+            mParameters.set(PARM_SENSOR_ORIENTATION, (mDisplayRotation + mSensorMountOffset)%360);
+        }else {
+            // Adding 360 to avoid Negative Values
+            mParameters.set(PARM_SENSOR_ORIENTATION, (mDisplayRotation - mSensorMountOffset + 360)%360);
+        }
+        Log.v(TAG," >>>> Setting Orientation & Sensor Offset  = "+ mDisplayRotation + " , " + mSensorMountOffset);
+
 
         //Layouts
         String previewLayout = null;
