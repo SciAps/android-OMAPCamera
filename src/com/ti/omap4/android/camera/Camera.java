@@ -2228,7 +2228,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             }
         }
 
-	    if (mTestIntent != null) {
+        if (mTestIntent != null) {
             unregisterReceiver(mTestReceiver);
             mTestIntent = null;
         }
