@@ -203,6 +203,10 @@ public class IndicatorControlWheelContainer extends IndicatorControlContainer {
     }
 
     @Override
+    public void showCPCamSliders(boolean enabled) {
+    }
+
+    @Override
     public void replace(String key, ListPreference pref, ArrayList<CharSequence[]> entries,ArrayList<CharSequence[]> entryValues){
         mIndicatorControlWheel.replace(key, pref, entries, entryValues);
     }

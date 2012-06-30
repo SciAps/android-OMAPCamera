@@ -71,15 +71,33 @@ public class IndicatorControlBar extends IndicatorControl implements
 
         if (CPcamSlidersSupported) {
             mGainControl = (CPcamGainControlBar) findViewById(R.id.gain_control);
-            mGainControl.setVisibility(View.VISIBLE);
+            mGainControl.setVisibility(View.INVISIBLE);
             mExposureControl = (CPcamExposureControlBar) findViewById(R.id.exposure_control);
-            mExposureControl.setVisibility(View.VISIBLE);
+            mExposureControl.setVisibility(View.INVISIBLE);
             mSecondLevelIcon.setVisibility(View.INVISIBLE);
         }
 
         requestLayout();
 
     }
+
+    public void showCPCamSliders (boolean enabled)
+    {
+        if (enabled) {
+            mGainControl = (CPcamGainControlBar) findViewById(R.id.gain_control);
+            mGainControl.setVisibility(View.VISIBLE);
+            mExposureControl = (CPcamExposureControlBar) findViewById(R.id.exposure_control);
+            mExposureControl.setVisibility(View.VISIBLE);
+            requestLayout();
+        } else {
+            mGainControl = (CPcamGainControlBar) findViewById(R.id.gain_control);
+            mGainControl.setVisibility(View.INVISIBLE);
+            mExposureControl = (CPcamExposureControlBar) findViewById(R.id.exposure_control);
+            mExposureControl.setVisibility(View.INVISIBLE);
+            requestLayout();
+        }
+    }
+
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {

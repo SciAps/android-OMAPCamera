@@ -230,7 +230,7 @@ public class ModePicker extends RelativeLayout implements View.OnClickListener,
         // Grey-out the unselected icons for Phone UI.
         if (mCurrentModeFrame != null) {
             for (int i = 0; i < MODE_NUM; ++i) {
-                Log.d(TAG,"modee: " + mCurrentMode);
+                Log.v(TAG,"modee: " + mCurrentMode);
                 highlightView(mModeSelectionIcon[i], (i == mCurrentMode));
             }
         }
