@@ -634,7 +634,8 @@ public class Util {
         view.setVisibility(View.GONE);
     }
 
-    public static void setRotationParameter(Parameters parameters, int cameraId, int orientation) {
+    public static void setRotationParameter(Parameters parameters,
+            int cameraId, int orientation) {
         // See android.hardware.Camera.Parameters.setRotation for
         // documentation.
         int rotation = 0;
@@ -732,6 +733,83 @@ public class Util {
             }
 
             return result;
+        }
+    }
+    //CPCam related methods
+    public static com.ti.omap.android.cpcam.CPCam openCPCamera(Activity activity, int cameraId)
+            throws CameraHardwareException, CameraDisabledException {
+        // Check if device policy has disabled the camera.
+        DevicePolicyManager dpm = (DevicePolicyManager) activity.getSystemService(
+                Context.DEVICE_POLICY_SERVICE);
+        if (dpm.getCameraDisabled(null)) {
+            throw new CameraDisabledException();
+        }
+
+        try {
+            return CameraHolder.instance().openCPCamera(cameraId);
+        } catch (CameraHardwareException e) {
+            // In eng build, we throw the exception so that test tool
+            // can detect it and report it
+            if ("eng".equals(Build.TYPE)) {
+                throw new RuntimeException("openCamera failed", e);
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    public static void setRotationParameterCPCam(com.ti.omap.android.cpcam.CPCam.Parameters parameters,
+            int cameraId, int orientation) {
+        // See android.hardware.Camera.Parameters.setRotation for
+        // documentation.
+        int rotation = 0;
+        if (orientation != OrientationEventListener.ORIENTATION_UNKNOWN) {
+            CameraInfo info = CameraHolder.instance().getCameraInfo()[cameraId];
+            if (info.facing == CameraInfo.CAMERA_FACING_FRONT) {
+                rotation = (info.orientation - orientation + 360) % 360;
+            } else {  // back-facing camera
+                rotation = (info.orientation + orientation) % 360;
+            }
+        }
+        parameters.setRotation(rotation);
+    }
+
+    public static void setGpsParametersCPCam(com.ti.omap.android.cpcam.CPCam.Parameters parameters,
+            Location loc) {
+        // Clear previous GPS location from the parameters.
+        parameters.removeGpsData();
+
+        // We always encode GpsTimeStamp
+        parameters.setGpsTimestamp(System.currentTimeMillis() / 1000);
+
+        // Set GPS location.
+        if (loc != null) {
+            double lat = loc.getLatitude();
+            double lon = loc.getLongitude();
+            boolean hasLatLon = (lat != 0.0d) || (lon != 0.0d);
+
+            if (hasLatLon) {
+                Log.d(TAG, "Set gps location");
+                parameters.setGpsLatitude(lat);
+                parameters.setGpsLongitude(lon);
+                parameters.setGpsProcessingMethod(loc.getProvider().toUpperCase());
+                if (loc.hasAltitude()) {
+                    parameters.setGpsAltitude(loc.getAltitude());
+                } else {
+                    // for NETWORK_PROVIDER location provider, we may have
+                    // no altitude information, but the driver needs it, so
+                    // we fake one.
+                    parameters.setGpsAltitude(0);
+                }
+                if (loc.getTime() != 0) {
+                    // Location.getTime() is UTC in milliseconds.
+                    // gps-timestamp is UTC in seconds.
+                    long utcTimeSeconds = loc.getTime() / 1000;
+                    parameters.setGpsTimestamp(utcTimeSeconds);
+                }
+            } else {
+                loc = null;
+            }
         }
     }
 }
