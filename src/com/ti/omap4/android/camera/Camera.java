@@ -296,14 +296,10 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mGBCEOff;
     private String mManualExposure;
 
-    // Limits ZSL capture size due to some hardware limitations
-    private static final String PARM_ZSL_SIZE = "2016x1512";
-    private static final String PARM_ZSL_SIZE_14MP = "4416x3312";
-
     private int mBurstImages = 0;
     private boolean mTempBracketingEnabled = false;
 
-    private String mCaptureMode = "high-quality";
+    private String mCaptureMode = new String();
     private String mGBCE = "off";
     private String mBracketRange;
     private String mISO = null;
@@ -1676,29 +1672,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mCameraPreviewThread = null;
     }
 
-    private void overridePictureSettings() {
-        if ( mCameraId == CameraHolder.instance().getBackCameraId() ) {
-            // We limit the picture size during ZSL on
-            // the back facing sensor.
-
-            Editor editor = mPreferences.edit();
-            editor.putString(CameraSettings.KEY_PICTURE_SIZE, PARM_ZSL_SIZE);
-            editor.apply();
-
-            if ( CameraSettings.sizeListToStringList(
-                mParameters.getSupportedPictureSizes()).contains(PARM_ZSL_SIZE_14MP) ) {
-                editor.putString(CameraSettings.KEY_PICTURE_SIZE, PARM_ZSL_SIZE_14MP);
-                editor.apply();
-            }
-
-            if (mIndicatorControlContainer != null) {
-                mIndicatorControlContainer.reloadPreferences();
-                mIndicatorControlContainer.overrideSettings(
-                        CameraSettings.KEY_PICTURE_SIZE, PARM_ZSL_SIZE);
-            }
-        }
-    }
-
     private void overrideCameraSettings(final String flashMode,
             final String whiteBalance, final String focusMode, final String exposure) {
         if (mIndicatorControlContainer != null) {
@@ -2509,6 +2482,12 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
     private void closeCamera() {
         if (mCameraDevice != null) {
+            if (is2DMode()) {
+                // Reset the capture mode before releasing camera
+                mParameters.set(CameraSettings.KEY_MODE, mHighPerformance);
+                mCameraDevice.setParameters(mParameters);
+            }
+
             CameraHolder.instance().release();
             mFaceDetectionStarted = false;
             mCameraDevice.setZoomChangeListener(null);
@@ -2701,11 +2680,37 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         return menu;
     }
 
+    private ListPreference getSupportedListPreference(List<Integer> supportedIntegers, String menuKey){
+        List<String> supported = new ArrayList<String>();
+        ListPreference menu = mPreferenceGroup.findPreference(menuKey);
+        if ( ( menu != null ) && !supportedIntegers.isEmpty() ) {
+            for (Integer item : supportedIntegers) {
+                supported.add(item.toString());
+            }
+            CameraSettings.filterUnsupportedOptions(mPreferenceGroup, menu, supported);
+        }
+
+        return menu;
+    }
+
+    private void updateListPreference(ListPreference listPreference, String menuItem) {
+        if ((listPreference == null) || (menuItem == null) || (mIndicatorControlContainer == null)) return;
+        ArrayList<CharSequence[]> allEntries = new ArrayList<CharSequence[]>();
+        ArrayList<CharSequence[]> allEntryValues = new ArrayList<CharSequence[]>();
+        allEntries.add(listPreference.getEntries());
+        allEntryValues.add(listPreference.getEntryValues());
+        mIndicatorControlContainer.replace(menuItem,
+                                           listPreference,
+                                           allEntries,
+                                           allEntryValues);
+    }
+
     private boolean updateCameraParametersPreference() {
         boolean restartNeeded = false;
         boolean previewLayoutUpdated = false;
         boolean captureLayoutUpdated = false;
         boolean controlUpdateNeeded = false;
+        boolean captureModeUpdated = false;
 
         if (mAeLockSupported) {
             mParameters.setAutoExposureLock(mFocusManager.getAeAwbLock());
@@ -2941,19 +2946,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mAntibanding = antibanding;
         }
 
-        // Set Preview Framerate
-        String framerate =  mPreferences.getString(
-                CameraSettings.KEY_PREVIEW_FRAMERATE, null);
-
-        if ( framerate == null ) {
-            CameraSettings.initialFrameRate(this, mParameters);
-        } else if (!framerate.equals(mLastPreviewFramerate) ) {
-            mParameters.setPreviewFpsRange(Integer.parseInt(framerate) * 1000,
-                    Integer.parseInt(framerate) * 1000);
-            mLastPreviewFramerate = framerate;
-            restartNeeded = true;
-        }
-
         // Auto Convergence
         String autoConvergence = mPreferences.getString(
                 CameraSettings.KEY_AUTO_CONVERGENCE,
@@ -2978,6 +2970,65 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             } else {
                 isManualConvergence = true;
             }
+        }
+
+        // Capture mode
+        String mode = mPreferences.getString(
+                CameraSettings.KEY_MODE_MENU, getString(R.string.pref_camera_mode_default));
+        if ( !mCaptureMode.equals(mode) ) {
+            restartNeeded = true;
+            captureModeUpdated = true;
+            mCaptureMode = mode;
+            setCaptureMode(mode, mParameters);
+            // Capture mode can be applied only
+            // when preview is stopped.
+            mCameraDevice.stopPreview();
+            mCameraDevice.setParameters(mParameters);
+            mParameters = mCameraDevice.getParameters();
+            mInitialParams = mParameters;
+            Log.v(TAG,"Capture mode set: " + mParameters.get(CameraSettings.KEY_MODE));
+
+            CameraSettings settings = new CameraSettings(this,
+                                                         mParameters,
+                                                         mCameraId,
+                                                         CameraHolder.instance().getCameraInfo());
+            mPreferenceGroup = settings.getPreferenceGroup(R.xml.camera_preferences);
+
+            // Update picture size UI with the new sizes
+            ListPreference sizePreference = null;
+            if (mCaptureLayout.equals(CameraSettings.SS_FULL_S3D_LAYOUT)) {
+                sizePreference =
+                        getSupportedListPreference(CameraSettings.KEY_SUPPORTED_PICTURE_SIDEBYSIDE_SIZES,
+                                CameraSettings.KEY_PICTURE_SIZES_SS);
+            } else if (mCaptureLayout.equals(CameraSettings.TB_FULL_S3D_LAYOUT)) {
+                sizePreference =
+                        getSupportedListPreference(CameraSettings.KEY_SUPPORTED_PICTURE_TOPBOTTOM_SIZES,
+                                CameraSettings.KEY_PICTURE_SIZES_TB);
+            } else {
+                sizePreference =
+                        getSupportedListPreference(CameraSettings.KEY_SUPPORTED_PICTURE_SUBSAMPLED_SIZES,
+                                CameraSettings.KEY_PICTURE_SIZE_2D);
+            }
+            updateListPreference(sizePreference, CameraSettings.KEY_PICTURE_SIZE);
+
+            // Update framerate UI with the new entries
+            ListPreference fpsPreference = getSupportedListPreference(mParameters.getSupportedPreviewFrameRates(),
+                                                                      CameraSettings.KEY_PREVIEW_FRAMERATE);
+            updateListPreference(fpsPreference, CameraSettings.KEY_PREVIEW_FRAMERATE);
+
+        }
+
+        // Set Preview Framerate
+        String framerate =  mPreferences.getString(
+                CameraSettings.KEY_PREVIEW_FRAMERATE, null);
+
+        if ( ( framerate == null ) || captureModeUpdated ) {
+            CameraSettings.initialFrameRate(this, mParameters);
+        } else if (!framerate.equals(mLastPreviewFramerate) ) {
+            mParameters.setPreviewFpsRange(Integer.parseInt(framerate) * 1000,
+                    Integer.parseInt(framerate) * 1000);
+            mLastPreviewFramerate = framerate;
+            restartNeeded = true;
         }
 
         // Set picture size.
@@ -3013,8 +3064,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             } else {
                 supported = CameraSettings.sizeListToStringList(mParameters.getSupportedPictureSizes());
             }
-             CameraSettings.setCameraPictureSize(
-                     pictureSize, supported, mParameters);
+             if ( !CameraSettings.setCameraPictureSize(pictureSize, supported, mParameters) ) {
+                 CameraSettings.initialCameraPictureSize(this, mParameters);
+             }
         }
 
         mPreviewPanel = findViewById(R.id.frame_layout);
@@ -3292,14 +3344,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mPictureFormat = pictureFormat;
         }
 
-        // Capture mode
-        String mode = mPreferences.getString(
-                CameraSettings.KEY_MODE_MENU, getString(R.string.pref_camera_mode_default));
-        setCaptureMode(mode, mParameters);
-
-        if ( mode.equals(mHighQualityZsl) ) {
-            overridePictureSettings();
-        }
 
         String bracketRange =  mPreferences.getString(
                 CameraSettings.KEY_BRACKET_RANGE,
@@ -3323,12 +3367,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
               if ( 0 < mBurstImages ) {
                   mBurstRunning = true;
               }
-        }
-
-        if ( !mCaptureMode.equals(mode) ) {
-            restartNeeded = true;
-            mCaptureMode = mode;
-            Log.v(TAG,"Capture mode set: " + mParameters.get(CameraSettings.KEY_MODE));
         }
 
         if (!restartNeeded) {
