@@ -101,7 +101,7 @@ public class ModePicker extends RelativeLayout implements View.OnClickListener,
             mCurrentModeIcon[0] = (RotateImageView) findViewById(R.id.mode_0);
             mCurrentModeIcon[1] = (RotateImageView) findViewById(R.id.mode_1);
             mCurrentModeIcon[2] = (RotateImageView) findViewById(R.id.mode_2);
-            mCurrentModeIcon[3] = (RotateImageView) findViewById(R.id.mode_3);
+            mCurrentModeIcon[3] = (RotateImageView) findViewById(R.id.mode_0);
         } else {
             // current_mode_bar is only for tablet.
             mCurrentModeBar = findViewById(R.id.current_mode_bar);
