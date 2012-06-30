@@ -2287,7 +2287,13 @@ public class VideoCamera extends ActivityBase
         String minframerate = mPreferences.getString(CameraSettings.KEY_VIDEO_MINFRAMERATE, getString(R.string.pref_camera_videominframerate_default));
         frameRange[Parameters.PREVIEW_FPS_MIN_INDEX] = Integer.parseInt(minframerate) * 1000;
 
-        final List<int[]> supportedFpsRanges = mParameters.getSupportedPreviewFpsRange();
+        String extFPS = mParameters.get(CameraSettings.KEY_SUPPORTED_PREVIEW_FRAMERATE_RANGES_EXT);
+        List<int[]> supportedFpsRanges = null;
+        if ( null == extFPS ) {
+            supportedFpsRanges = mParameters.getSupportedPreviewFpsRange();
+        } else {
+            supportedFpsRanges = Util.parseRange(extFPS);
+        }
 
         if ((supportedFpsRanges != null) && (!supportedFpsRanges.contains(frameRange)) &&
                 CameraSettings.getSupportedFramerateRange(frameRange, supportedFpsRanges)) {
