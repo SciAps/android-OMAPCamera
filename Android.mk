@@ -1,3 +1,4 @@
+ifdef OMAP_ENHANCEMENT_CPCAM
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
@@ -21,4 +22,5 @@ include $(BUILD_PACKAGE)
 ifeq ($(strip $(LOCAL_PACKAGE_OVERRIDES)),)
 # Use the following include to make our test apk.
 include $(call all-makefiles-under, $(LOCAL_PATH))
+endif
 endif
