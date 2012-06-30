@@ -31,6 +31,9 @@
     <!-- label for the 'video recording application shown in the top level 'all applications' -->
     <string name="video_camera_label">CamcorderOMAP4</string>
 
+    <!-- label for the icon meaning 'show me all the images that were taken with the cpcam' -->
+    <string name="cpcam_camera_label">CPcamOMAP4</string>
+
     <!-- label for the folder that contains Camera pictures in the gallery -->
     <string name="gallery_camera_bucket_name">Camera pictures</string>
 
@@ -306,6 +309,7 @@
     <string name="pref_camera_mode_entry_hs">High Speed</string>
     <string name="pref_camera_mode_entry_hq">High Quality</string>
     <string name="pref_camera_mode_entry_zsl">ZSL</string>
+    <string name="pref_camera_mode_entry_cpcam">CPCAM</string>
     <string name="pref_camera_mode_entry_temporal_bracketing">Temporal Bracketing</string>
     <string name="pref_camera_mode_entry_exp_bracketing">Exposure Bracketing</string>
     <string name="pref_camera_mode_entry_zoom_bracketing">Zoom Bracketing</string>
@@ -550,6 +554,12 @@
     <string name="pref_exposure_title">Exposure</string>
     <string name="pref_exposure_default" translatable="false">0</string>
 
+    <!-- Manual exposure & Gain settings in preference -->
+    <string name="pref_camera_manual_exp_gain_title">CPCam menu</string>
+    <string name="pref_camera_manual_exp_gain_default" translatable="false">off</string>
+    <string name="pref_camera_manual_exp_gain_entry_on">On</string>
+    <string name="pref_camera_manual_exp_gain_entry_off">Off</string>
+
     <!-- Dialog "OK" button. Dismisses dialog. -->
     <string name="dialog_ok">OK</string>
 
@@ -572,6 +582,9 @@
 
     <!-- The text of menu item to switch the mode to Camera. [CHAR LIMIT=NONE] -->
     <string name="switch_to_camera_label">Switch to camera</string>
+
+    <!-- The text of menu item to switch the mode to CPcam. [CHAR LIMIT=NONE] -->
+    <string name="switch_to_cpcam_label">Switch to CPcam</string>
 
     <!-- The text of menu item to switch the mode to Video. [CHAR LIMIT=NONE] -->
     <string name="switch_to_video_label">Switch to video</string>

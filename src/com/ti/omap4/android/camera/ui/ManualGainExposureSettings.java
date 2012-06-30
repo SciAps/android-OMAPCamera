@@ -128,7 +128,7 @@ public class ManualGainExposureSettings extends Dialog {
 
         manualGainExposurePanel.setVisibility(View.VISIBLE);
 
-        Button btn = (Button) findViewById(R.id.buttonOK);
+   /*     Button btn = (Button) findViewById(R.id.buttonOK);
         btn.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                 Message msg = new Message();
@@ -160,7 +160,7 @@ public class ManualGainExposureSettings extends Dialog {
                 cameraHandler.sendMessage(msg);
                 dismiss();
                 }
-        });
+        }); */
 
         manualExposureControlLeft.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 public void onProgressChanged(SeekBar seekBar,
@@ -238,7 +238,6 @@ public class ManualGainExposureSettings extends Dialog {
             int stepExposure, int stepIso) {
         super(context);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-
         // Given default values
         mManualExposureValue = expValue;
         mManualGainValue = isoValue;
@@ -305,11 +304,21 @@ public class ManualGainExposureSettings extends Dialog {
         manualExposureControl.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 public void onProgressChanged(SeekBar seekBar,
                     int progress, boolean fromUser) {
+                        Message msg = new Message();
+                        data = new Bundle ();
                         manualExposureCaption = (TextView) findViewById(R.id.exposure_caption);
                         mManualExposureValue = progress+1;
                         String sCaptionLeft = context.getString(R.string.settings_manual_2d_exposure_caption);
                         sCaptionLeft = sCaptionLeft + " " + Integer.toString(mManualExposureValue);
                         manualExposureCaption.setText(sCaptionLeft);
+//                        if (mManualExposureValue != mExposureValue) {
+//                            data.putInt("EXPOSURE", mManualExposureValue);
+//                        } else {
+//                            data.putInt("EXPOSURE", mExposureValue);
+//                        }
+//                        msg.what = Camera.MANUAL_GAIN_EXPOSURE_CHANGED;
+//                        msg.setData(data);
+//                        cameraHandler.sendMessage(msg);
                     }
             public void onStartTrackingTouch(SeekBar seekBar) {
             }
@@ -320,11 +329,21 @@ public class ManualGainExposureSettings extends Dialog {
         manualGainControl.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 public void onProgressChanged(SeekBar seekBar,
                     int progress, boolean fromUser) {
+                Message msg = new Message();
+                data = new Bundle ();
                 manualGainCaption = (TextView) findViewById(R.id.gain_caption);
                 mManualGainValue = progress;
                 String sCaptionLeft = context.getString(R.string.settings_manual_2d_gain_caption);
                 sCaptionLeft = sCaptionLeft + " " + Integer.toString(mManualGainValue + mMinIso);
-                manualGainCaption.setText(sCaptionLeft);
+//                manualGainCaption.setText(sCaptionLeft);
+//                if (mManualGainValue != mISOValue) {
+//                    data.putInt("ISO", mManualGainValue + mMinIso);
+//                } else {
+//                    data.putInt("ISO", mISOValue);
+//                }
+//                msg.what = Camera.MANUAL_GAIN_EXPOSURE_CHANGED;
+//                msg.setData(data);
+//                cameraHandler.sendMessage(msg);
             }
             public void onStartTrackingTouch(SeekBar seekBar) {
             }

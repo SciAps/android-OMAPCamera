@@ -248,6 +248,7 @@
         <item>@string/pref_camera_mode_entry_hs</item>
         <item>@string/pref_camera_mode_entry_hq</item>
         <item>@string/pref_camera_mode_entry_zsl</item>
+        <item>@string/pref_camera_mode_entry_cpcam</item>
         <item>@string/pref_camera_mode_entry_temporal_bracketing</item>
         <item>@string/pref_camera_mode_entry_exp_bracketing</item>
         <item>@string/pref_camera_mode_entry_zoom_bracketing</item>
@@ -256,6 +257,7 @@
         <item>high-performance</item>
         <item>high-quality</item>
         <item>high-quality-zsl</item>
+        <item>cp-cam</item>
         <item>temporal-bracketing</item>
         <item>exposure-bracketing</item>
         <item>zoom-bracketing</item>
@@ -690,7 +692,17 @@
         <item>100</item>
     </string-array>
 
-    <!-- Camera Preferences Scene Mode dialog box entries -->
+
+    <string-array name="pref_camera_manual_exp_gain_entries" translatable="false">
+       <item>@string/pref_camera_manual_exp_gain_entry_on</item>
+        <item>@string/pref_camera_manual_exp_gain_entry_off</item>
+    </string-array>
+
+    <string-array name="pref_camera_manual_exp_gain_entryvalues" translatable="false">
+        <item>on</item>
+        <item>off</item>
+    </string-array>
+
     <string-array name="pref_camera_scenemode_entries" translatable="false">
         <item>@string/pref_camera_scenemode_entry_auto</item>
         <item>@string/pref_camera_scenemode_entry_action</item>
