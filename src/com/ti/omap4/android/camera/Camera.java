@@ -3125,6 +3125,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
         if ( ( framerate == null ) || captureModeUpdated ) {
             CameraSettings.initialFrameRate(this, mParameters);
+            restartNeeded = true;
         } else if (!framerate.equals(mLastPreviewFramerate) ) {
             mParameters.setPreviewFpsRange(Integer.parseInt(framerate) * 1000,
                     Integer.parseInt(framerate) * 1000);
