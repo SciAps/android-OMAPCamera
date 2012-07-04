@@ -130,36 +130,38 @@ public class ManualGainExposureSettings extends Dialog {
 
         Button btn = (Button) findViewById(R.id.buttonOK);
         btn.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                Message msg = new Message();
+            public void onClick(View v) {
+            Message msg = new Message();
 
-                data = new Bundle ();
-                if (mManualExposureValueLeft != mExpLeftValue) {
-                    data.putInt("EXPOSURE_LEFT", mManualExposureValueLeft);
-                } else {
-                    data.putInt("EXPOSURE_LEFT", mExpLeftValue);
-                }
-                if (mManualExposureValueRight != mExpRightValue) {
-                    data.putInt("EXPOSURE_RIGHT", mManualExposureValueRight);
-                } else {
-                    data.putInt("EXPOSURE_RIGHT", mExpRightValue);
-                }
-                if (mManualGainValueLeft != mIsoLeftValue) {
-                    data.putInt("ISO_LEFT", mManualGainValueLeft + mMinIso);
-                } else {
-                    data.putInt("ISO_LEFT", mIsoLeftValue);
-                }
-                if (mManualGainValueRight != mIsoRightValue) {
-                    data.putInt("ISO_RIGHT", mManualGainValueRight +mMinIso);
-                } else {
-                    data.putInt("ISO_RIGHT", mIsoRightValue);
-                }
+            data = new Bundle ();
+            if (mManualExposureValueLeft != mExpLeftValue) {
+                data.putInt("EXPOSURE_LEFT", mManualExposureValueLeft);
+            } else {
+                data.putInt("EXPOSURE_LEFT", mExpLeftValue);
+            }
+            if (mManualExposureValueRight != mExpRightValue) {
+                data.putInt("EXPOSURE_RIGHT", mManualExposureValueRight);
+            } else {
+                data.putInt("EXPOSURE_RIGHT", mExpRightValue);
+            }
+            if (mManualGainValueLeft != mIsoLeftValue) {
+                data.putInt("ISO_LEFT", mManualGainValueLeft + mMinIso);
+            } else {
+                data.putInt("ISO_LEFT", mIsoLeftValue);
+            }
+            if (mManualGainValueRight != mIsoRightValue) {
+                data.putInt("ISO_RIGHT", mManualGainValueRight +mMinIso);
+            } else {
+                data.putInt("ISO_RIGHT", mIsoRightValue);
+            }
 
-                msg.what = Camera.MANUAL_GAIN_EXPOSURE_CHANGED;
-                msg.setData(data);
-                cameraHandler.sendMessage(msg);
-                dismiss();
-                }
+            msg.what = Camera.MANUAL_GAIN_EXPOSURE_CHANGED;
+            msg.setData(data);
+            cameraHandler.sendMessage(msg);
+            dismiss();
+        }
+
+
         });
 
         manualExposureControlLeft.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
