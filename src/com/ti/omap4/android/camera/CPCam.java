@@ -148,6 +148,9 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     private static final String EXPOSURE_TIME_METADATA = "exposure-time";
     private static final String EXPOSURE_TIME_REQUESTED_METADATA = "exposure-time-req";
 
+    private static final String PARM_IPP = "ipp";
+    private static final String PARM_IPP_NONE = "off";
+
     private static final int SCREEN_DELAY = 2 * 60 * 1000;
     private static final int CAMERA_RELEASE_DELAY = 1000;
 
@@ -1149,7 +1152,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
                 mShotParams = mCPCamDevice.getParameters();
                 mShotParams.set(CPCameraSettings.KEY_SHOTPARAMS_EXP_GAIN_PAIRS,
                                 DEFAULT_EXPOSURE_GAIN);
-                   mShotParams.set(CPCameraSettings.KEY_SHOTPARAMS_BURST, 1);
+                mShotParams.set(CPCameraSettings.KEY_SHOTPARAMS_BURST, 1);
             } else {
                 mCPCamDevice.setParameters(mShotParams);
             }
@@ -2095,6 +2098,8 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
             mParameters.setPreviewFpsRange(min,max);
         }
         mParameters.setRecordingHint(false);
+        //Disable IPP (LDCNSF) for reprocess - will be enabled later when Ducati support is added
+        mParameters.set(PARM_IPP, PARM_IPP_NONE);
     }
 
     private boolean is2DMode(){
