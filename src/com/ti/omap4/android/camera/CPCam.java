@@ -148,9 +148,6 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     private static final String EXPOSURE_TIME_METADATA = "exposure-time";
     private static final String EXPOSURE_TIME_REQUESTED_METADATA = "exposure-time-req";
 
-    private static final String PARM_IPP = "ipp";
-    private static final String PARM_IPP_NONE = "off";
-
     private static final int SCREEN_DELAY = 2 * 60 * 1000;
     private static final int CAMERA_RELEASE_DELAY = 1000;
 
@@ -2712,8 +2709,6 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
                     try {
                         mParameters.setPictureFormat(ImageFormat.JPEG);
                         mParameters.setPictureSize(mFrameWidth, mFrameHeight);
-                        //Disable IPP (LDCNSF) for reprocess - will be supported later
-                        mParameters.set(PARM_IPP, PARM_IPP_NONE);
                         mCPCamDevice.setParameters(mParameters);
                         mTapOut.setDefaultBufferSize(mFrameWidth, mFrameHeight);
                         mCPCamDevice.setBufferSource(mTapOut,null);
