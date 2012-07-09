@@ -315,6 +315,10 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     private boolean mQuickCapture;
     private IntentFilter mTestIntent = null;
 
+    // This state is saved at the start of onPause, and used for further
+    // state retrieve in onResume
+    private int mCameraSavedState = PREVIEW_STOPPED;
+
     /**
      * This Handler is used to post message back onto the main thread of the
      * application
@@ -1110,6 +1114,41 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         }
     }
 
+    private boolean setUpQueuedShot() {
+        mCaptureStartTime = System.currentTimeMillis();
+        mPostViewPictureCallbackTime = 0;
+        mJpegImageData = null;
+        // Set rotation and gps data.
+        Util.setRotationParameterCPCam(mParameters, mCameraId, mOrientation);
+        Location loc = mLocationManager.getCurrentLocation();
+        Util.setGpsParametersCPCam(mParameters, loc);
+        mParameters.setPictureFormat(ImageFormat.NV21);
+        mParameters.setPictureSize(mFrameWidth, mFrameHeight);
+        mCPCamDevice.setParameters(mParameters);
+        if(mShotParams == null) {
+            //If shot params are not set, put default values
+            mShotParams = mCPCamDevice.getParameters();
+            mShotParams.set(CPCameraSettings.KEY_SHOTPARAMS_EXP_GAIN_PAIRS,
+                            DEFAULT_EXPOSURE_GAIN);
+               mShotParams.set(CPCameraSettings.KEY_SHOTPARAMS_BURST, 1);
+        } else {
+            mCPCamDevice.setParameters(mShotParams);
+        }
+
+        try {
+            mCPCamDevice.takePicture(null, null, null, mJpegCallback, mShotParams);
+        } catch (RuntimeException e ) {
+            e.printStackTrace();
+            return false;
+        }
+        mFaceDetectionStarted = false;
+        setCameraState(QUEUED_SHOT_IN_PROGRESS);
+        mReprocessButton.setVisibility(View.VISIBLE);
+        mExpGainButton.setVisibility(View.VISIBLE);
+        mIndicatorControlContainer.showCPCamSliders(true);
+        return true;
+    }
+
     @Override
     public boolean capture() {
         synchronized (mCameraStateLock) {
@@ -1130,42 +1169,10 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
                 msg.what = RESTART_PREVIEW;
                 msg.arg1 = MODE_RESTART;
                 mHandler.sendMessage(msg);
-
                 return true;
             }
 
-            mCaptureStartTime = System.currentTimeMillis();
-            mPostViewPictureCallbackTime = 0;
-            mJpegImageData = null;
-            // Set rotation and gps data.
-            Util.setRotationParameterCPCam(mParameters, mCameraId, mOrientation);
-            Location loc = mLocationManager.getCurrentLocation();
-            Util.setGpsParametersCPCam(mParameters, loc);
-            mParameters.setPictureFormat(ImageFormat.NV21);
-            mParameters.setPictureSize(mFrameWidth, mFrameHeight);
-            mCPCamDevice.setParameters(mParameters);
-            if(mShotParams == null) {
-                //If shot params are not set, put default values
-                mShotParams = mCPCamDevice.getParameters();
-                mShotParams.set(CPCameraSettings.KEY_SHOTPARAMS_EXP_GAIN_PAIRS,
-                                DEFAULT_EXPOSURE_GAIN);
-                   mShotParams.set(CPCameraSettings.KEY_SHOTPARAMS_BURST, 1);
-            } else {
-                mCPCamDevice.setParameters(mShotParams);
-            }
-
-            try {
-                mCPCamDevice.takePicture(null, null, null, mJpegCallback, mShotParams);
-            } catch (RuntimeException e ) {
-                e.printStackTrace();
-                return false;
-            }
-            mFaceDetectionStarted = false;
-            setCameraState(QUEUED_SHOT_IN_PROGRESS);
-            mReprocessButton.setVisibility(View.VISIBLE);
-            mExpGainButton.setVisibility(View.VISIBLE);
-            mIndicatorControlContainer.showCPCamSliders(true);
-            return true;
+            return setUpQueuedShot();
         }
     }
 
@@ -1696,11 +1703,23 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         }
         // Dismiss open menu if exists.
         PopupManager.getInstance(this).notifyShowPopup(null);
+
+        try {
+            mCPCamDevice.setBufferSource(null, mTapOut);
+        } catch (IOException ioe) {
+            Log.e(TAG, "Error trying to setBufferSource!");
+        }
+
+        if (mCameraSavedState == QUEUED_SHOT_IN_PROGRESS) synchronized (mCameraStateLock) {
+            setUpQueuedShot();
+        }
+
     }
 
     @Override
     protected void onPause() {
         mPausing = true;
+        mCameraSavedState = mCameraState;
 
         // Delay Camera release if
         // burst is still running
