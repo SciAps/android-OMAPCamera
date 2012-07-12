@@ -298,6 +298,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mManualExposure;
 
     private int mBurstImages = 0;
+    private int mCurrBurstImages = 0;
     private boolean mTempBracketingEnabled = false;
 
     private String mCaptureMode = new String();
@@ -328,6 +329,11 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private long mPostViewPictureCallbackTime;
     private long mRawPictureCallbackTime;
     private long mJpegPictureCallbackTime;
+    private double mBurstTimeStamp = 0;
+    private double mBurstTmpTimeStamp = 0;
+    private double mBurstFPSsum = 0;
+    private boolean mIsBurstStampInitialized = false;
+    private boolean mIsBurstTimeStampsSwapNeeded = false;
     private long mOnResumeTime;
     private long mPicturesRemaining;
     private byte[] mJpegImageData;
@@ -1146,6 +1152,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
             if ( tempState == FocusManager.TempBracketingStates.RUNNING ) {
                 mBurstImages --;
+
                 if (mBurstImages == 0 ) {
                     mHandler.sendEmptyMessageDelayed(RESTART_PREVIEW, 0);
                     mTempBracketingEnabled = true;
@@ -1155,9 +1162,40 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
             if (mBurstRunning) {
                 mBurstImages --;
+
+                /* If mBurstRunning */
+                /* ----> starts calculating the delay and FPS between two Burst frames */
+                if(!mIsBurstStampInitialized) {
+                    /* Going here only for first Jpeg Callback:
+                     * Save it;s timestamp to mBurstTimeStamp
+                     */
+                    mBurstTimeStamp = System.currentTimeMillis();
+                    mIsBurstStampInitialized = true;
+
+                } else {
+                    /* Update mBurstTmpTimeStamp with every new callback arrived */
+                    mBurstTmpTimeStamp = System.currentTimeMillis();
+                }
+
+                if(mBurstTimeStamp != 0 && mBurstTmpTimeStamp != 0){
+                    if(mBurstTimeStamp != mBurstTmpTimeStamp &&
+                            (mBurstTmpTimeStamp > mBurstTimeStamp)) {
+                        mBurstFPSsum += 1000/(mBurstTmpTimeStamp - mBurstTimeStamp);
+                    }
+                    /* Copy mBurstTmpTimeStamp to mBurstTimeStamp needed for next measurement */
+                    mBurstTimeStamp = mBurstTmpTimeStamp;
+                }
+                /* ----> End of calculating*/
+
                 if (mBurstImages == 0) {
+                    Log.v(TAG,"PPM: Average Jpeg Callbacks FPS in Burst:" + (mBurstFPSsum)/mCurrBurstImages);
                     resetBurst();
                     mBurstRunning = false;
+                    mIsBurstStampInitialized = false;
+                    /* Reset Burst Timestamp initialization if burst completed */
+                    mBurstTimeStamp = 0;
+                    mBurstTmpTimeStamp = 0;
+                    mBurstFPSsum = 0;
                     mHandler.sendEmptyMessageDelayed(RESTART_PREVIEW, 0);
                 }
             }
@@ -1398,7 +1436,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 }
                 Util.broadcastNewPicture(Camera.this, uri);
             }
+
         }
+
     }
 
     private void setCameraState(int state) {
@@ -3401,6 +3441,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         if (( burst != mBurstImages ) &&
                 ( mode.equals(mHighPerformance) ) ) {
               mBurstImages = burst;
+              mCurrBurstImages = mBurstImages -1;
               mParameters.set(PARM_BURST, mBurstImages);
               if ( 0 < mBurstImages ) {
                   mBurstRunning = true;
