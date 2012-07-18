@@ -108,10 +108,6 @@ public class Util {
         return sIsTabletUI;
     }
 
-    public static boolean isPortraitDevice(){
-        return sIsPortraitDevice;
-    }
-
     public static int dpToPixel(int dp) {
         return Math.round(sPixelDensity * dp);
     }

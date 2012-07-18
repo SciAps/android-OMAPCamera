@@ -2178,20 +2178,11 @@ public class VideoCamera extends ActivityBase
 
         CameraInfo info = CameraHolder.instance().getCameraInfo()[mCameraId];
 
-        // Set Sensor Orientation
-        // Provide offset to Potrait devices since Sensor Mount would be offset.
-        if(Util.isPortraitDevice()){
-           mSensorMountOffset = 90;
-        }
+        // Read Camera Mounting Orientation
+        mSensorMountOffset = info.orientation;
 
-        if(info.facing == CameraInfo.CAMERA_FACING_FRONT){
-            mParameters.set(PARM_SENSOR_ORIENTATION, (mDisplayRotation + mSensorMountOffset)%360);
-        }else {
-            // Adding 360 to avoid Negative Values
-            mParameters.set(PARM_SENSOR_ORIENTATION, (mDisplayRotation - mSensorMountOffset + 360)%360);
-        }
+        mParameters.set(PARM_SENSOR_ORIENTATION, (mDisplayRotation - mSensorMountOffset+360)%360);
         Log.v(TAG," >>>> Setting Orientation & Sensor Offset  = "+ mDisplayRotation + " , " + mSensorMountOffset);
-
 
         //Layouts
         String previewLayout = null;
