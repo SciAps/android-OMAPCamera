@@ -1887,8 +1887,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
     @OnClickAttr
     public void onReviewDoneClicked(View v) {
-        setResultEx(RESULT_OK);
-        finish();
+        doAttach();
     }
 
     @OnClickAttr
@@ -1916,6 +1915,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                     outputStream.close();
 
                     setResultEx(RESULT_OK);
+                    finish();
                 } catch (IOException ex) {
                     // ignore exception
                 } finally {
@@ -1927,6 +1927,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 bitmap = Util.rotate(bitmap, orientation);
                 setResultEx(RESULT_OK,
                         new Intent("inline-data").putExtra("data", bitmap));
+                finish();
             }
         } else {
             // Save the image to a temp file and invoke the cropper

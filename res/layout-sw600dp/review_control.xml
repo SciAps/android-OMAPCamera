@@ -25,6 +25,7 @@
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:visibility="gone"
+            android:onClick="onReviewDoneClicked"
             android:layout_marginTop="36dp">
         <LinearLayout style="@style/ReviewControlGroup"
                 android:onClick="onReviewDoneClicked">
@@ -51,6 +52,7 @@
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:visibility="gone"
+            android:onClick="onReviewCancelClicked"
             android:layout_marginBottom="36dp">
         <LinearLayout style="@style/ReviewControlGroup"
                 android:onClick="onReviewCancelClicked">
