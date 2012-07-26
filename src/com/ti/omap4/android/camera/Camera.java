@@ -2170,7 +2170,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mZoomControl.startZoomControl();
         }
 
-        if (mCaptureMode.equals(mTemporalBracketing)) {
+        if (mCaptureMode.equals(mTemporalBracketing) && mPausing) {
             mCaptureMode = getString(R.string.pref_camera_mode_default);
         }
 
