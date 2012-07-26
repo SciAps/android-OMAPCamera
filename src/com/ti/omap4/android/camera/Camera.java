@@ -300,6 +300,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private int mBurstImages = 0;
     private int mCurrBurstImages = 0;
     private boolean mTempBracketingEnabled = false;
+    private boolean mTempBracketingStarted = false;
 
     private String mCaptureMode = new String();
     private String mGBCE = "off";
@@ -1459,7 +1460,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     public boolean capture() {
         synchronized (mCameraStateLock) {
             // If we are already in the middle of taking a snapshot then ignore.
-            if (mCameraState == SNAPSHOT_IN_PROGRESS || mCameraDevice == null) {
+            if (mCameraState == SNAPSHOT_IN_PROGRESS || mCameraDevice == null ||
+                (mTempBracketingEnabled && ( !mTempBracketingStarted ) ) ) {
                 return false;
             }
             mCaptureStartTime = System.currentTimeMillis();
@@ -2658,6 +2660,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
         mParameters.set(CameraSettings.KEY_TEMPORAL_BRACKETING, TRUE);
         mCameraDevice.setParameters(mParameters);
+        mTempBracketingStarted = true;
     }
 
     private void stopTemporalBracketing() {
@@ -2665,6 +2668,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mParameters.set(CameraSettings.KEY_TEMPORAL_BRACKETING, FALSE);
         mCameraDevice.setParameters(mParameters);
         mParameters.remove(CameraSettings.KEY_TEMPORAL_BRACKETING);
+        mTempBracketingStarted = false;
     }
 
     private void stopPreview() {
