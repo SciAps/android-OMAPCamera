@@ -1058,6 +1058,31 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 return;
             }
 
+            if ( mBurstRunning ) {
+                /* If mBurstRunning */
+                /* ----> starts calculating the delay and FPS between two Burst frames */
+                if(!mIsBurstStampInitialized) {
+                    /* Going here only for first Jpeg Callback:
+                     * Save it;s timestamp to mBurstTimeStamp
+                     */
+                    mBurstTimeStamp = System.currentTimeMillis();
+                    mIsBurstStampInitialized = true;
+
+                } else {
+                    /* Update mBurstTmpTimeStamp with every new callback arrived */
+                    mBurstTmpTimeStamp = System.currentTimeMillis();
+                }
+
+                if(mBurstTimeStamp != 0 && mBurstTmpTimeStamp != 0){
+                    if(mBurstTimeStamp != mBurstTmpTimeStamp &&
+                            (mBurstTmpTimeStamp > mBurstTimeStamp)) {
+                        mBurstFPSsum += 1000/(mBurstTmpTimeStamp - mBurstTimeStamp);
+                    }
+                    /* Copy mBurstTmpTimeStamp to mBurstTimeStamp needed for next measurement */
+                    mBurstTimeStamp = mBurstTmpTimeStamp;
+                }
+                /* ----> End of calculating*/
+            }
             FocusManager.TempBracketingStates tempState = mFocusManager.getTempBracketingState();
             mJpegPictureCallbackTime = System.currentTimeMillis();
             // If postview callback has arrived, the captured image is displayed
@@ -1109,12 +1134,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 }
             }
 
-            // Check this in advance of each shot so we don't add to shutter
-            // latency. It's true that someone else could write to the SD card in
-            // the mean time and fill it, but that could have happened between the
-            // shutter press and saving the JPEG too.
-            checkStorage();
-
             if (!mHandler.hasMessages(RESTART_PREVIEW)) {
                 long now = System.currentTimeMillis();
                 mJpegCallbackFinishTime = now - mJpegPictureCallbackTime;
@@ -1164,30 +1183,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             if (mBurstRunning) {
                 mBurstImages --;
 
-                /* If mBurstRunning */
-                /* ----> starts calculating the delay and FPS between two Burst frames */
-                if(!mIsBurstStampInitialized) {
-                    /* Going here only for first Jpeg Callback:
-                     * Save it;s timestamp to mBurstTimeStamp
-                     */
-                    mBurstTimeStamp = System.currentTimeMillis();
-                    mIsBurstStampInitialized = true;
-
-                } else {
-                    /* Update mBurstTmpTimeStamp with every new callback arrived */
-                    mBurstTmpTimeStamp = System.currentTimeMillis();
-                }
-
-                if(mBurstTimeStamp != 0 && mBurstTmpTimeStamp != 0){
-                    if(mBurstTimeStamp != mBurstTmpTimeStamp &&
-                            (mBurstTmpTimeStamp > mBurstTimeStamp)) {
-                        mBurstFPSsum += 1000/(mBurstTmpTimeStamp - mBurstTimeStamp);
-                    }
-                    /* Copy mBurstTmpTimeStamp to mBurstTimeStamp needed for next measurement */
-                    mBurstTimeStamp = mBurstTmpTimeStamp;
-                }
-                /* ----> End of calculating*/
-
                 if (mBurstImages == 0) {
                     Log.v(TAG,"PPM: Average Jpeg Callbacks FPS in Burst:" + (mBurstFPSsum)/mCurrBurstImages);
                     resetBurst();
@@ -1197,8 +1192,15 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                     mBurstTimeStamp = 0;
                     mBurstTmpTimeStamp = 0;
                     mBurstFPSsum = 0;
+                    checkStorage();
                     mHandler.sendEmptyMessageDelayed(RESTART_PREVIEW, 0);
                 }
+            } else {
+                // Check this in advance of each shot so we don't add to shutter
+                // latency. It's true that someone else could write to the SD card in
+                // the mean time and fill it, but that could have happened between the
+                // shutter press and saving the JPEG too.
+                checkStorage();
             }
         }
     }
@@ -2043,7 +2045,11 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         if (mPausing || collapseCameraControls()) return;
 
         // Do not take the picture if there is not enough storage.
-        if (mPicturesRemaining <= 0) {
+        long remaining = mPicturesRemaining;
+        if ( 0 < mBurstImages ) {
+            remaining -= mBurstImages;
+        }
+        if ( remaining <= 0) {
             Log.i(TAG, "Not enough space or storage not ready. remaining=" + mPicturesRemaining);
             return;
         }
