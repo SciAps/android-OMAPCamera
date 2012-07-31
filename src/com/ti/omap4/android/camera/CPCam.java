@@ -623,6 +623,15 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
 
         mCpcamGainControl.setOnGainChangeListener(new CpcamGainChangeListener());
         mCpcamExposureControl.setOnExposureChangeListener(new CpcamExposureChangeListener());
+
+        if ( !mIsRelativeExposureGainPair ) {
+            int resetISO = (isoMax - isoMin ) / 2;
+            mCpcamGainControl.setGainIndex(resetISO);
+            onCpcamGainValueChanged(resetISO);
+        }
+        int resetExp = ( expMax - expMin ) / 2;
+        mCpcamExposureControl.setExposureIndex(resetExp);
+        onCpcamExposureValueChanged(resetExp);
     }
 
     private void onCpcamGainValueChanged(int index) {
