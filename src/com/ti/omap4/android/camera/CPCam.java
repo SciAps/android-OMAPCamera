@@ -95,6 +95,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.sql.Date;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -740,7 +741,8 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     private void updateMetadataIndicator(String exposure,
                                          String exposureReq,
                                          String gain,
-                                         String gainReq) {
+                                         String gainReq,
+                                         String evCompSet) {
         String metadata = new String();
         try {
             if ( null !=  exposure ) {
@@ -760,7 +762,11 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         }
 
         if ( null != gainReq ) {
-            metadata += "Gain Requested: " + gainReq;
+            metadata += "Gain Requested: " + gainReq + "\n";
+        }
+
+        if ( null != evCompSet ) {
+            metadata += "EV compensation set[EV]: " + evCompSet + "\n";
         }
 
         mMetaDataIndicator.setText(metadata);
@@ -784,15 +790,23 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         String gain = Integer.toString(metaData.analogGain);
         String gainRequested = null;
         String exposureRequested = null;
+        String evCompSet = null;
         if(!mIsRelativeExposureGainPair) {
             gainRequested = Integer.toString(metaData.analogGainReq);
             exposureRequested = Integer.toString(metaData.exposureTimeReq);
+        } else {
+            DecimalFormat evFormat = new DecimalFormat("#.##");
+            float expStepScale = mParameters.getExposureCompensationStep();
+            expStepScale *= expStepScale;
+            float evCompCurrent = mManualExposureControl * expStepScale;
+            evCompSet = evFormat.format(evCompCurrent);
         }
 
         updateMetadataIndicator(exposure,
                                 exposureRequested,
                                 gain,
-                                gainRequested);
+                                gainRequested,
+                                evCompSet);
 
     }
 
