@@ -734,14 +734,26 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
                                          String gainReq) {
         String metadata = new String();
         try {
-            int expTime = Integer.parseInt(exposure) / 1000;
-            int expTimeReq = Integer.parseInt(exposureReq) / 1000;
-            metadata =  "Exposure[ms]: " + expTime + "\n" ;
-            metadata += "Exposure Requested[ms]: " + expTimeReq + "\n";
+            if ( null !=  exposure ) {
+                int expTime = Integer.parseInt(exposure) / 1000;
+                metadata =  "Exposure[ms]: " + expTime + "\n" ;
+            }
+
+            if ( null != exposureReq ) {
+                int expTimeReq = Integer.parseInt(exposureReq) / 1000;
+                metadata += "Exposure Requested[ms]: " + expTimeReq + "\n";
+            }
+
         } catch ( NumberFormatException e ) { e.printStackTrace(); }
 
-        metadata += "Gain: " + gain + "\n";
-        metadata += "Gain Requested: " + gainReq;
+        if ( null != gain ) {
+            metadata += "Gain: " + gain + "\n";
+        }
+
+        if ( null != gainReq ) {
+            metadata += "Gain Requested: " + gainReq;
+        }
+
         mMetaDataIndicator.setText(metadata);
         mMetaDataIndicator.setVisibility(View.VISIBLE);
     }
@@ -756,12 +768,17 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
 
     }
 
+
     private void updateOnScreenMetadataIndicators(CPCamMetadata metaData) {
         if (metaData == null) return;
         String exposure = Integer.toString(metaData.exposureTime);
-        String exposureRequested = Integer.toString(metaData.exposureTimeReq);
         String gain = Integer.toString(metaData.analogGain);
-        String gainRequested = Integer.toString(metaData.analogGainReq);
+        String gainRequested = null;
+        String exposureRequested = null;
+        if(!mIsRelativeExposureGainPair) {
+            gainRequested = Integer.toString(metaData.analogGainReq);
+            exposureRequested = Integer.toString(metaData.exposureTimeReq);
+        }
 
         updateMetadataIndicator(exposure,
                                 exposureRequested,
