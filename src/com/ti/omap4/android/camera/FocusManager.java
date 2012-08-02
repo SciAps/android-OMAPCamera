@@ -296,12 +296,12 @@ public class FocusManager {
         // Convert the coordinates to driver format.
         // AE area is bigger because exposure is sensitive and
         // easy to over- or underexposure if area is too small.
-        if (CameraSettings.TB_FULL_S3D_LAYOUT.equals(mPreviewLayout)) {
+        if (CameraSettings.SS_FULL_S3D_LAYOUT.equals(mPreviewLayout)) {
             calculateTapArea(focusWidth, focusHeight * 2, 1f, x, y, previewWidth, previewHeight,
                     mFocusArea.get(0).rect);
             calculateTapArea(focusWidth, focusHeight * 2, 1, x, y, previewWidth, previewHeight,
                     mMeteringArea.get(0).rect);
-        } else if (CameraSettings.SS_FULL_S3D_LAYOUT.equals(mPreviewLayout)) {
+        } else if (CameraSettings.TB_FULL_S3D_LAYOUT.equals(mPreviewLayout)) {
             calculateTapArea(focusWidth * 2, focusHeight, 1f, x, y, previewWidth, previewHeight,
                     mFocusArea.get(0).rect);
             calculateTapArea(focusWidth * 2, focusHeight, 1, x, y, previewWidth, previewHeight,
@@ -313,7 +313,7 @@ public class FocusManager {
                     mMeteringArea.get(0).rect);
         }
 
-	// Use margin to set the focus indicator to the touched area.
+        // Use margin to set the focus indicator to the touched area.
         RelativeLayout.LayoutParams p =
                 (RelativeLayout.LayoutParams) mFocusIndicatorRotateLayout.getLayoutParams();
         int left = Util.clamp(x - focusWidth / 2, 0, previewWidth - focusWidth);
@@ -350,21 +350,21 @@ public class FocusManager {
         float y = e.getY();
         int previewWidth = mPreviewFrame.getWidth();
         int previewHeight = mPreviewFrame.getHeight();
-        if (CameraSettings.TB_FULL_S3D_LAYOUT.equals(previewLayout)) {
+        if (CameraSettings.SS_FULL_S3D_LAYOUT.equals(previewLayout)) {
             if (y < previewHeight / 2) {
                 return onTouch(e);
             } else {
                 e.setLocation(x, y - previewHeight / 2);
                 return onTouch(e);
             }
-        } else if (CameraSettings.SS_FULL_S3D_LAYOUT.equals(previewLayout)) {
+        } else if (CameraSettings.TB_FULL_S3D_LAYOUT.equals(previewLayout)) {
             if (x < previewWidth / 2) {
                 return onTouch(e);
             } else {
                 e.setLocation(x - previewWidth / 2, y);
                 return onTouch(e);
             }
-        } else if (CameraSettings.SS_SUB_S3D_LAYOUT.equals(previewLayout)) {
+        } else if (CameraSettings.TB_SUB_S3D_LAYOUT.equals(previewLayout)) {
             if (x < previewWidth / 2) {
                 e.setLocation(x * 2, y);
                 return onTouch(e);
@@ -372,7 +372,7 @@ public class FocusManager {
                 e.setLocation((x - previewWidth / 2) * 2, y);
                 return onTouch(e);
             }
-        } else if (CameraSettings.TB_SUB_S3D_LAYOUT.equals(previewLayout)) {
+        } else if (CameraSettings.SS_SUB_S3D_LAYOUT.equals(previewLayout)) {
             if (y < previewHeight / 2) {
                 e.setLocation(x, y * 2);
                 return onTouch(e);
@@ -480,6 +480,17 @@ public class FocusManager {
 
     public List<Area> getMeteringAreas() {
         return mMeteringArea;
+    }
+
+
+    public void drawFocusRectangle() {
+        // Set the length of focus indicator according to preview frame size.
+        int len = Math.min(mPreviewFrame.getWidth(), mPreviewFrame.getHeight()) / 4;
+        ViewGroup.LayoutParams layout = mFocusIndicator.getLayoutParams();
+        layout.width = len;
+        layout.height = len;
+
+        mFocusIndicator.showSuccess();
     }
 
     public void updateFocusUI() {

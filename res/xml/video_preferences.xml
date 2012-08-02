@@ -47,6 +47,12 @@
             camera:title="@string/pref_camera_previewsize_title"
             camera:entries="@array/pref_camera_previewsize_entries"
             camera:entryValues="@array/pref_camera_tb_previewsize_entryvalues" />
+    <ListPreference
+            camera:key="pref_camera_video_mode_key"
+            camera:defaultValue="@string/pref_camera_video_mode_default"
+            camera:title="@string/pref_camera_video_mode_title"
+            camera:entries="@array/pref_camera_video_mode_entries"
+            camera:entryValues="@array/pref_camera_video_mode_entryvalues" />
     <IconListPreference
             camera:key="pref_video_quality_key"
             camera:defaultValue="@string/pref_video_quality_default"
@@ -74,17 +80,9 @@
             camera:entries="@array/pref_camera_videoencoder_entries"
             camera:entryValues="@array/pref_camera_videoencoder_entryvalues"/>
    <ListPreference
-            camera:key="pref_camera_videoframerate_key"
-            camera:defaultValue="@string/pref_camera_videoframerate_default"
-            camera:title="@string/pref_camera_videoframerate_title"
-            camera:entries="@array/pref_camera_videoframerate_entries"
-            camera:entryValues="@array/pref_camera_videoframerate_entryvalues"/>
-    <ListPreference
-            camera:key="pref_camera_videominframerate_key"
-            camera:defaultValue="@string/pref_camera_videominframerate_default"
-            camera:title="@string/pref_camera_videominframerate_title"
-            camera:entries="@array/pref_camera_videominframerate_entries"
-            camera:entryValues="@array/pref_camera_videominframerate_entryvalues"/>
+            camera:key="pref_camera_videoframerate_range_key"
+            camera:defaultValue="@string/pref_camera_videoframerate_range_default"
+            camera:title="@string/pref_camera_videoframerate_range_title"/>
    <ListPreference
             camera:key="pref_camera_videobitrate_key"
             camera:defaultValue="@string/pref_camera_videobitrate_default"
@@ -171,4 +169,10 @@
            camera:title="@string/pref_camera_s3d_title"
            camera:entries="@array/pref_camera_s3d_entries"
            camera:entryValues="@array/pref_camera_s3d_entryvalues" />
+    <ListPreference
+           camera:key="pref_camera_video_record_container_key"
+           camera:title="@string/pref_video_record_container_title"
+           camera:defaultValue="@string/pref_video_record_container_default"
+           camera:entries="@array/pref_video_record_container_entries"
+           camera:entryValues="@array/pref_video_record_container_entryvalues"/>
 </PreferenceGroup>

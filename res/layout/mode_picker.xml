@@ -65,7 +65,7 @@
     <RelativeLayout android:id="@+id/mode_selection"
             android:orientation="horizontal"
             android:layout_height="match_parent"
-            android:layout_width="198dp"
+            android:layout_width="228dp"
             android:background="@drawable/bg_switcher"
             android:visibility="gone">
         <LinearLayout
@@ -93,9 +93,17 @@
                     android:contentDescription="@string/switch_to_panorama_label"
                     android:layout_height="match_parent"
                     android:layout_width="wrap_content"
+                    android:layout_marginRight="10dp"
                     android:scaleType="center"
                     android:background="@drawable/bg_pressed"
                     android:src="@drawable/ic_switch_pan_holo_light" />
+            <com.ti.omap4.android.camera.ui.RotateImageView android:id="@+id/mode_cpcam"
+                    android:contentDescription="@string/switch_to_cpcam_label"
+                    android:layout_height="match_parent"
+                    android:layout_width="wrap_content"
+                    android:scaleType="center"
+                    android:background="@drawable/bg_pressed"
+                    android:src="@drawable/ic_switch_cpcam_camera_holo_light" />
         </LinearLayout>
         <View android:layout_height="match_parent"
                 android:layout_width="1dp"

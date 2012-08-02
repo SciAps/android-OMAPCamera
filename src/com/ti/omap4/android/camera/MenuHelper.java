@@ -46,6 +46,7 @@ public class MenuHelper {
     private static final String CAMERA_CLASS = "com.ti.omap4.android.camera.Camera";
     private static final String PANORAMA_CLASS = "com.ti.omap4.android.camera.panorama.PanoramaActivity";
     private static final String VIDEO_CAMERA_CLASS = "com.ti.omap4.android.camera.VideoCamera";
+    private static final String CPCAM_CLASS = "com.ti.omap4.android.camera.CPCam";
 
     public static void addSwitchModeMenuItem(Menu menu, int mode,
             final Runnable r) {
@@ -62,6 +63,11 @@ public class MenuHelper {
             case ModePicker.MODE_PANORAMA:
                 labelId = R.string.switch_to_panorama_label;
                 iconId = R.drawable.btn_ic_panorama;
+                break;
+            case ModePicker.MODE_CPCAM:
+                labelId = R.string.switch_to_cpcam_label;
+                iconId = android.R.drawable.ic_menu_camera;
+                //Log.d(TAG,"name: " + android.R.drawable.ic_menu_camera);
                 break;
             default:
                   // incorrect mode, do nothing.
@@ -110,6 +116,10 @@ public class MenuHelper {
             case ModePicker.MODE_CAMERA:
                 action = MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA;
                 className = CAMERA_CLASS;
+                break;
+            case ModePicker.MODE_CPCAM:
+                action = CPCAM_CLASS;
+                className = CPCAM_CLASS;
                 break;
             default:
                 Log.e(TAG, "unknown camera mode:" + mode);

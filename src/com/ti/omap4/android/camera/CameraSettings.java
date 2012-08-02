@@ -46,10 +46,10 @@ public class CameraSettings {
     public static final String KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL = "pref_video_time_lapse_frame_interval_key";
     public static final String KEY_AUDIO_ENCODER = "pref_camera_audioencoder_key";
     public static final String KEY_VIDEO_ENCODER = "pref_camera_videoencoder_key";
-    public static final String KEY_VIDEO_FRAMERATE = "pref_camera_videoframerate_key";
-    public static final String KEY_VIDEO_MINFRAMERATE = "pref_camera_videominframerate_key";
+    public static final String KEY_VIDEO_FRAMERATE_RANGE = "pref_camera_videoframerate_range_key";
     public static final String KEY_VIDEO_BITRATE = "pref_camera_videobitrate_key";
     public static final String KEY_VIDEO_FORMAT = "pref_camera_video_format_key";
+    public static final String KEY_VIDEO_FILE_CONTAINER = "pref_camera_video_record_container_key";
     public static final String KEY_VIDEO_TIMER = "pref_camera_video_timer_key";
     public static final String KEY_VSTAB = "pref_camera_vstab_key";
     public static final String KEY_VNF = "pref_camera_vnf_key";
@@ -82,6 +82,7 @@ public class CameraSettings {
     public static final String KEY_PREVIEW_FRAMERATE = "pref_camera_previewframerate_key";
     public static final String KEY_SATURATION = "pref_camera_saturation_key";
     public static final String KEY_SHARPNESS = "pref_camera_sharpness_key";
+    public static final String KEY_VIDEO_MODE = "pref_camera_video_mode_key";
 
     public static final String KEY_MECHANICAL_MISALIGNMENT_CORRECTION_SUPPORTED = "mechanical-misalignment-correction-supported";
     public static final String KEY_MECHANICAL_MISALIGNMENT_CORRECTION = "mechanical-misalignment-correction";
@@ -143,8 +144,14 @@ public class CameraSettings {
     public static final String KEY_SUPPORTED_PICTURE_FORMATS = "picture-format-values";
 
     public static final String KEY_SUPPORTED_PREVIEW_FRAMERATES_EXT = "preview-fps-ext-values";
+    public static final String KEY_SUPPORTED_PREVIEW_FRAMERATE_RANGES_EXT = "preview-fps-range-ext-values";
 
     public static final String EXPOSURE_DEFAULT_VALUE = "0";
+
+    //CPCAM shot parameres
+    public static final String KEY_SHOTPARAMS_MANUAL_EXPOSURE_GAIN_POPUP_SLIDERS = "pref_camera_manual_exp_gain_key";
+    public static final String KEY_SHOTPARAMS_BURST = "burst-capture";
+    public static final String KEY_SHOTPARAMS_EXP_GAIN_PAIRS = "exp-gain-pairs";
 
     public static final int CURRENT_VERSION = 5;
     public static final int CURRENT_LOCAL_VERSION = 2;
@@ -409,6 +416,7 @@ public class CameraSettings {
         ListPreference flashMode = group.findPreference(KEY_FLASH_MODE);
         ListPreference focusMode = group.findPreference(KEY_FOCUS_MODE);
         ListPreference exposure = group.findPreference(KEY_EXPOSURE_COMPENSATION_MENU);
+        ListPreference cpcam_manual_exp_gain = group.findPreference(KEY_SHOTPARAMS_MANUAL_EXPOSURE_GAIN_POPUP_SLIDERS);
         ListPreference colorEffect = group.findPreference(KEY_COLOR_EFFECT);
         ListPreference autoConvergence = group.findPreference(KEY_AUTO_CONVERGENCE);
         ListPreference iso = group.findPreference(KEY_ISO);
@@ -424,8 +432,6 @@ public class CameraSettings {
         ListPreference vnf = group.findPreference(KEY_VNF);
         ListPreference exposureMode = group.findPreference(KEY_EXPOSURE_MODE_MENU);
         ListPreference previewFramerate = group.findPreference(KEY_PREVIEW_FRAMERATE);
-        ListPreference videoFramerate = group.findPreference(KEY_VIDEO_FRAMERATE);
-        ListPreference videoMinFramerate = group.findPreference(KEY_VIDEO_MINFRAMERATE);
         ListPreference mechanicalMisalignmentCorrection = group.findPreference(KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU);
         ListPreference mode = group.findPreference(KEY_MODE_MENU);
         ListPreference pictureFormat = group.findPreference(KEY_PICTURE_FORMAT_MENU);
@@ -439,6 +445,7 @@ public class CameraSettings {
         ListPreference previewSizeTB = group.findPreference(KEY_PREVIEW_SIZES_TB);
         ListPreference previewSizeSS = group.findPreference(KEY_PREVIEW_SIZES_SS);
         ListPreference s3d = group.findPreference(KEY_S3D_MENU);
+        ListPreference videoMode = group.findPreference(KEY_VIDEO_MODE);
 
         checkPreferenceSizeMatches(previewSize, previewSizeTB);
         checkPreferenceSizeMatches(previewSize, previewSizeSS);
@@ -464,6 +471,13 @@ public class CameraSettings {
                 supp.add("none");
             }
             filterUnsupportedOptions(group, s3d, supp);
+        }
+
+        if (cpcam_manual_exp_gain != null) {
+            List<String> supp = new ArrayList<String>();
+            supp.add("on");
+            supp.add("off");
+            filterUnsupportedOptions(group, cpcam_manual_exp_gain, supp);
         }
 
         if (previewSize2d != null) {
@@ -683,14 +697,17 @@ public class CameraSettings {
 
         List<Integer> fpsList = getSupportedFramerates(mParameters);
 
-        if (videoFramerate != null) {
-            filterUnsupportedOptionsInt(group,
-                    videoFramerate, fpsList);
+        if(videoMode != null){
+            ArrayList<String> suppMode = new ArrayList<String>();
+            String modeValues = mParameters.get(KEY_CAP_MODE_VALUES);
+            if(modeValues != null && !modeValues.equals("")){
+                for(String item : modeValues.split(",")){
+                    suppMode.add(item);
+                }
+            }
+            filterUnsupportedOptions(group, videoMode, suppMode);
         }
-        if (videoMinFramerate != null) {
-            filterUnsupportedOptionsInt(group,
-                    videoMinFramerate, fpsList);
-        }
+
         if (sceneMode != null) {
             filterUnsupportedOptions(group,
                     sceneMode, mParameters.getSupportedSceneModes());
@@ -748,7 +765,7 @@ public class CameraSettings {
             final String mechanicalMisalignmentSupported =
                     mParameters.get(KEY_MECHANICAL_MISALIGNMENT_CORRECTION_SUPPORTED);
             ArrayList<String> suppMechanicalMisalignmentCorrection = new ArrayList<String>();
-            if ( mechanicalMisalignmentSupported.equals(Camera.TRUE) ) {
+            if ( mechanicalMisalignmentSupported != null && mechanicalMisalignmentSupported.equals(Camera.TRUE) ) {
                 final String enable = mContext.getString(R.string.pref_camera_mechanical_misalignment_correction_enable);
                 final String disable = mContext.getString(R.string.pref_camera_mechanical_misalignment_correction_disable);
                 suppMechanicalMisalignmentCorrection.add(mechanicalMisalignmentCorrection.findEntryValueByEntry(enable));

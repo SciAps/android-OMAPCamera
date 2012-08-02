@@ -31,6 +31,9 @@
     <!-- label for the 'video recording application shown in the top level 'all applications' -->
     <string name="video_camera_label">CamcorderOMAP4</string>
 
+    <!-- label for the icon meaning 'show me all the images that were taken with the cpcam' -->
+    <string name="cpcam_camera_label">CPcamOMAP4</string>
+
     <!-- label for the folder that contains Camera pictures in the gallery -->
     <string name="gallery_camera_bucket_name">Camera pictures</string>
 
@@ -133,41 +136,12 @@
 
     <!-- Settings screen, Camcorder setting category title -->
     <string name="pref_camcorder_settings_category">Camcorder settings</string>
-    <!-- Settings screen, Video FrameRate category title -->
-    <string name="pref_camera_videoframerate_category">Video FrameRate</string>
 
-    <!-- Default Video FrameRate setting. A numerical value. Do not translate. -->
-    <string name="pref_camera_videoframerate_default">30</string>
+    <!-- Default Video FrameRate setting. A string value -->
+    <string name="pref_camera_videoframerate_range_default" translatable="false">30000,30000</string>
 
-    <!-- Settings screen, Select Video FrameRate title -->
-    <string name="pref_camera_videoframerate_title">Select Video Max FrameRate</string>
-
-    <!-- Settings screen, Video FrameRate dialog radio button choices -->
-    <string name="pref_camera_videoframerate_entry_1">5</string>
-    <string name="pref_camera_videoframerate_entry_2">10</string>
-    <string name="pref_camera_videoframerate_entry_3">15</string>
-    <string name="pref_camera_videoframerate_entry_4">24</string>
-    <string name="pref_camera_videoframerate_entry_5">27</string>
-    <string name="pref_camera_videoframerate_entry_6">30</string>
-    <string name="pref_camera_videoframerate_entry_7">60</string>
-
-    <!-- Settings screen, Videomin FrameRate category title -->
-    <string name="pref_camera_videominframerate_category">VideoMINFrameRate</string>
-
-    <!-- Default Video FrameRate setting. A numerical value. Do not translate. -->
-    <string name="pref_camera_videominframerate_default">30</string>
-
-    <!-- Settings screen, Select Video FrameRate title -->
-    <string name="pref_camera_videominframerate_title">Select Video Min FrameRate</string>
-
-    <!-- Settings screen, Video FrameRate dialog radio button choices -->
-    <string name="pref_camera_videominframerate_entry_1">5</string>
-    <string name="pref_camera_videominframerate_entry_2">10</string>
-    <string name="pref_camera_videominframerate_entry_3">15</string>
-    <string name="pref_camera_videominframerate_entry_4">24</string>
-    <string name="pref_camera_videominframerate_entry_5">27</string>
-    <string name="pref_camera_videominframerate_entry_6">30</string>
-    <string name="pref_camera_videominframerate_entry_7">60</string>
+    <!-- Settings screen, Select Video FrameRate range title -->
+    <string name="pref_camera_videoframerate_range_title">Select FrameRate Range</string>
 
     <!-- Settings screen, Video BitRate category title -->
     <string name="pref_camera_videobitrate_category">Video BitRate</string>
@@ -300,6 +274,11 @@
     <string name="pref_camera_previewframerate_entry_thirty">30</string>
 
     <string name="pref_omap4_camera_sensor_orientation_default">0</string>
+
+    <string name="pref_camera_video_mode_title">Video mode</string>
+    <string name="pref_camera_video_mode_default">video-mode</string>
+    <string name="pref_camera_video_mode_entry_st">Standard</string>
+    <string name="pref_camera_video_mode_entry_hq">High Quality</string>
 
     <string name="pref_camera_mode_title">Capture mode</string>
     <string name="pref_camera_mode_default">high-quality</string>
@@ -573,6 +552,9 @@
     <!-- The text of menu item to switch the mode to Camera. [CHAR LIMIT=NONE] -->
     <string name="switch_to_camera_label">Switch to camera</string>
 
+    <!-- The text of menu item to switch the mode to CPcam. [CHAR LIMIT=NONE] -->
+    <string name="switch_to_cpcam_label">Switch to CPcam</string>
+
     <!-- The text of menu item to switch the mode to Video. [CHAR LIMIT=NONE] -->
     <string name="switch_to_video_label">Switch to video</string>
 
@@ -679,6 +661,10 @@
     <string name="accessibility_back_to_first_level">Close setting controls</string>
     <!-- The zoom control button. [CHAR LIMIT = NONE] -->
     <string name="accessibility_zoom_control">Zoom control</string>
+    <!-- The zoom control button. [CHAR LIMIT = NONE] -->
+    <string name="accessibility_cpcam_gain_control">Gain control</string>
+    <!-- The zoom control button. [CHAR LIMIT = NONE] -->
+    <string name="accessibility_cpcam_exposure_control">Exposure control</string>
     <!-- The decrement button in camera preference such as exposure, picture size. [CHAR LIMIT = NONE] -->
     <string name="accessibility_decrement">Decrease %1$s</string>
     <!-- The increment button in camera preference such as exposure, picture size. [CHAR LIMIT = NONE] -->
@@ -762,7 +748,16 @@
 
     <string name="settings_manual_2d_exposure_caption"> Manual Exposure [ms]: </string>
     <string name="settings_manual_2d_gain_caption">Manual ISO: </string>
+    <string name="shot_title_caption">Shots: </string>
 
     <string name="settings_manual_gain_exposure_button_ok">Ok</string>
     <string name="settings_manual_exposure_title_popup">Manual Exposure Settings</string>
+    <string name="manual_gain_button">Absolute</string>
+    <string name="reprocess_button">Reprocess</string>
+
+    <!-- Video File Container Setting -->
+    <string name="pref_video_record_container_title">Video File Container</string>
+    <string name="pref_video_record_container_default" translatable="false">mp4</string>
+    <string name="pref_video_record_container_mp4">MP4</string>
+    <string name="pref_video_record_container_3gp">3GP</string>
 </resources>

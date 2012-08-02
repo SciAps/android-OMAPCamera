@@ -193,6 +193,7 @@ public class VideoCamera extends ActivityBase
     private String mVNFEnable = "";
     private String mVNFDisable = "";
 
+    private String mCaptureMode = new String();
     private Integer mManualConvergenceValue = new Integer(0);
     private String mManualConvergence;
     private boolean isManualConvergence = false;
@@ -247,7 +248,8 @@ public class VideoCamera extends ActivityBase
     boolean mPreviewing = false; // True if preview is started.
     // The display rotation in degrees.
     private int mDisplayRotation = 0;
-
+    // The Sensor Mount offset in degrees.
+    private int mSensorMountOffset = 0;
     private ContentResolver mContentResolver;
 
     private LocationManager mLocationManager;
@@ -573,6 +575,7 @@ public class VideoCamera extends ActivityBase
                     CameraSettings.KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL};
                     //CameraSettings.KEY_VIDEO_QUALITY}; //Disabling redundant Video Qualily Menu
         final String[] OTHER_SETTING_KEYS = {
+                    CameraSettings.KEY_VIDEO_MODE,
                     CameraSettings.KEY_VIDEO_PREVIEW_LAYOUT,
                     CameraSettings.KEY_VIDEO_FORMAT,
                     CameraSettings.KEY_S3D_MENU,
@@ -584,13 +587,15 @@ public class VideoCamera extends ActivityBase
                     CameraSettings.KEY_VIDEO_BITRATE,
                     CameraSettings.KEY_VSTAB,
                     CameraSettings.KEY_VNF,
-                    CameraSettings.KEY_VIDEO_FRAMERATE,
-                    CameraSettings.KEY_VIDEO_MINFRAMERATE,
-                    CameraSettings.KEY_RECORD_LOCATION};
+                    CameraSettings.KEY_RECORD_LOCATION,
+                    CameraSettings.KEY_VIDEO_FRAMERATE_RANGE,
+                    CameraSettings.KEY_VIDEO_FILE_CONTAINER};
 
         CameraPicker.setImageResourceId(R.drawable.ic_switch_video_facing_holo_light);
         mIndicatorControlContainer.initialize(this, mPreferenceGroup,
-                mParameters.isZoomSupported(), SETTING_KEYS, OTHER_SETTING_KEYS);
+                mParameters.isZoomSupported(), false, SETTING_KEYS, OTHER_SETTING_KEYS);
+        fillVideoFramerateRangeItems();
+
         mIndicatorControlContainer.setListener(this);
         mPopupGestureDetector = new GestureDetector(this,
                 new PopupGestureListener());
@@ -629,7 +634,7 @@ public class VideoCamera extends ActivityBase
                     if (info.facing == CameraInfo.CAMERA_FACING_FRONT) {
                         mDisplayRotation = (360 - mDisplayRotation ) % 360;
                     }
-                    if (!mMediaRecorderRecording && (getSensorOrientation() != mDisplayRotation)) {
+                    if (!mMediaRecorderRecording) {
                         startPreview();
                     }
                 }
@@ -873,13 +878,14 @@ public class VideoCamera extends ActivityBase
         mProfile = CamcorderProfile.get(mCameraId, quality);
 
         mVideoEncoder = getIntPreference(CameraSettings.KEY_VIDEO_ENCODER,CameraSettings.DEFAULT_VIDEO_ENCODER_VALUE);
-        mVideoFramerate = getIntPreference(CameraSettings.KEY_VIDEO_FRAMERATE,CameraSettings.DEFAULT_VIDEO_FRAMERATE_VALUE);
+        int[] fpsRange =  getFrameRateRange();
         mVideoBitrate = getIntPreference(CameraSettings.KEY_VIDEO_BITRATE,CameraSettings.DEFAULT_VIDEO_BITRATE_VALUE);
         mAudioEncoder = getIntPreference(CameraSettings.KEY_AUDIO_ENCODER,CameraSettings.DEFAULT_AUDIO_ENCODER_VALUE);
-        mProfile.videoFrameRate = mVideoFramerate;
+        mProfile.videoFrameRate = fpsRange[Parameters.PREVIEW_FPS_MAX_INDEX]/1000;
         mProfile.videoBitRate = mVideoBitrate;
         mProfile.videoCodec = mVideoEncoder;
         mProfile.audioCodec = mAudioEncoder;
+        mProfile.fileFormat = getVideoFileContainer();
         updateVideoFormat(mVideoFormat);
         getDesiredPreviewSize();
     }
@@ -918,7 +924,7 @@ public class VideoCamera extends ActivityBase
     }
 
     private boolean isOrientationPortrait() {
-        if(mDisplayRotation == 90 || mDisplayRotation == 270) {
+        if(((mDisplayRotation+mSensorMountOffset)%360) == 90 || ((mDisplayRotation+mSensorMountOffset)%360) == 270) {
             return true;
         }
         return false;
@@ -1410,7 +1416,7 @@ public class VideoCamera extends ActivityBase
             mMediaRecorder.setCaptureRate((1000 / (double) mTimeBetweenTimeLapseFrameCaptureMs));
         }
 
-	mMediaRecorder.setVideoFrameRate(mProfile.videoFrameRate);
+        mMediaRecorder.setVideoFrameRate(mProfile.videoFrameRate);
         mMediaRecorder.setVideoSize(mProfile.videoFrameWidth, mProfile.videoFrameHeight);
         mMediaRecorder.setVideoEncodingBitRate(mProfile.videoBitRate);
 
@@ -1665,6 +1671,13 @@ public class VideoCamera extends ActivityBase
                 switchToOtherMode(ModePicker.MODE_PANORAMA);
             }
         });
+        if ( Util.isCPCamLibraryPresent() ) {
+            MenuHelper.addSwitchModeMenuItem(menu, ModePicker.MODE_CPCAM, new Runnable() {
+                public void run() {
+                    switchToOtherMode(ModePicker.MODE_CPCAM);
+                }
+            });
+        }
 
         if (mNumberOfCameras > 1) {
             menu.add(R.string.switch_camera_id)
@@ -2097,6 +2110,29 @@ public class VideoCamera extends ActivityBase
         return supported == null ? false : supported.indexOf(value) >= 0;
     }
 
+    private void fillVideoFramerateRangeItems() {
+        List<int[]> supportedFpsRanges;
+        String extFPS = mParameters.get(CameraSettings.KEY_SUPPORTED_PREVIEW_FRAMERATE_RANGES_EXT);
+        if ( null == extFPS ) {
+            supportedFpsRanges = mParameters.getSupportedPreviewFpsRange();
+        } else {
+            supportedFpsRanges = Util.parseRange(extFPS);
+        }
+        if (supportedFpsRanges.isEmpty()) {
+            throw new RuntimeException("There are no supported framerate ranges.");
+        }
+        ListPreference pref = mPreferenceGroup.findPreference(CameraSettings.KEY_VIDEO_FRAMERATE_RANGE);
+        CharSequence[] ranges = new CharSequence [supportedFpsRanges.size()];
+        CharSequence[] values = new CharSequence [supportedFpsRanges.size()];
+        for (int i = 0; i < supportedFpsRanges.size(); i++) {
+            int [] range = supportedFpsRanges.get(i);
+            ranges[i] = range[Parameters.PREVIEW_FPS_MIN_INDEX]/1000 + ".." + range[Parameters.PREVIEW_FPS_MAX_INDEX]/1000;
+            values[i] = range[Parameters.PREVIEW_FPS_MIN_INDEX] + "," + range[Parameters.PREVIEW_FPS_MAX_INDEX];
+        }
+        pref.setEntries(ranges);
+        pref.setEntryValues(values);
+    }
+
     private void filterVideoBitrateItems(int resolution) {
         if (mPreferenceGroup == null) return;
 
@@ -2142,9 +2178,11 @@ public class VideoCamera extends ActivityBase
 
         CameraInfo info = CameraHolder.instance().getCameraInfo()[mCameraId];
 
-        // Set Sensor Orientation
-        mParameters.set(PARM_SENSOR_ORIENTATION, mDisplayRotation);
-        Log.v(TAG," >>>> Setting Orientation = "+ mDisplayRotation);
+        // Read Camera Mounting Orientation
+        mSensorMountOffset = info.orientation;
+
+        mParameters.set(PARM_SENSOR_ORIENTATION, (mDisplayRotation - mSensorMountOffset+360)%360);
+        Log.v(TAG," >>>> Setting Orientation & Sensor Offset  = "+ mDisplayRotation + " , " + mSensorMountOffset);
 
         //Layouts
         String previewLayout = null;
@@ -2271,25 +2309,11 @@ public class VideoCamera extends ActivityBase
                 CameraProfile.QUALITY_HIGH);
         mParameters.setJpegQuality(jpegQuality);
 
-        int[] frameRange = new int[2];
-        // Set FrameRate
-        String framerate = mPreferences.getString(CameraSettings.KEY_VIDEO_FRAMERATE, getString(R.string.pref_camera_videoframerate_default));
-        frameRange[Parameters.PREVIEW_FPS_MAX_INDEX] = Integer.parseInt(framerate) * 1000;
+        int[] fpsRange =  getFrameRateRange();
 
-        // Set MIN FrameRate
-        String minframerate = mPreferences.getString(CameraSettings.KEY_VIDEO_MINFRAMERATE, getString(R.string.pref_camera_videominframerate_default));
-        frameRange[Parameters.PREVIEW_FPS_MIN_INDEX] = Integer.parseInt(minframerate) * 1000;
-
-        final List<int[]> supportedFpsRanges = mParameters.getSupportedPreviewFpsRange();
-
-        if ((supportedFpsRanges != null) && (!supportedFpsRanges.contains(frameRange)) &&
-                CameraSettings.getSupportedFramerateRange(frameRange, supportedFpsRanges)) {
-            upadateIndicatorFpsRange(frameRange[Parameters.PREVIEW_FPS_MIN_INDEX]/1000, frameRange[Parameters.PREVIEW_FPS_MAX_INDEX]/1000);
-        }
-
-        mProfile.videoFrameRate = frameRange[Parameters.PREVIEW_FPS_MAX_INDEX]/1000;
-        mParameters.setPreviewFpsRange(frameRange[Parameters.PREVIEW_FPS_MIN_INDEX], frameRange[Parameters.PREVIEW_FPS_MAX_INDEX]);
-        Log.v(TAG,"Framerate is set to [" + frameRange[Parameters.PREVIEW_FPS_MAX_INDEX]/1000 + ", " + frameRange[Parameters.PREVIEW_FPS_MIN_INDEX]/1000 + "]");
+        mProfile.videoFrameRate = fpsRange[Parameters.PREVIEW_FPS_MAX_INDEX]/1000;
+        mParameters.setPreviewFpsRange(fpsRange[Parameters.PREVIEW_FPS_MIN_INDEX], fpsRange[Parameters.PREVIEW_FPS_MAX_INDEX]);
+        Log.v(TAG,"Framerate range is set to [" + fpsRange[Parameters.PREVIEW_FPS_MAX_INDEX] + ", " + fpsRange[Parameters.PREVIEW_FPS_MIN_INDEX] + "]");
 
         // Set Bitrate
         String bitrate = mPreferences.getString(CameraSettings.KEY_VIDEO_BITRATE, (getString(R.string.pref_camera_videobitrate_default)));
@@ -2331,15 +2355,52 @@ public class VideoCamera extends ActivityBase
             Log.w(TAG, "invalid exposure range: " + value);
         }
 
+        if ( mCaptureMode.isEmpty() ) {
+            String mode = mPreferences.getString(CameraSettings.KEY_VIDEO_MODE, null);
+            if ( null != mode ) {
+                mCaptureMode = mode;
+                mParameters.set(CameraSettings.KEY_MODE, mCaptureMode);
+            }
+        } else {
+            mParameters.set(CameraSettings.KEY_MODE, mCaptureMode);
+        }
+
         mCameraDevice.setParameters(mParameters);
         // Keep preview size up to date.
         mParameters = mCameraDevice.getParameters();
     }
 
+    private int[] getFrameRateRange() {
+        int[] fpsRange = new int[2];
+        String framerateRangeString = mPreferences.getString(CameraSettings.KEY_VIDEO_FRAMERATE_RANGE, getString(R.string.pref_camera_videoframerate_range_default));
+        int index = framerateRangeString.indexOf(',');
+        fpsRange[Parameters.PREVIEW_FPS_MIN_INDEX] = Integer.valueOf(framerateRangeString.substring(0, index));
+        fpsRange[Parameters.PREVIEW_FPS_MAX_INDEX] = Integer.valueOf(framerateRangeString.substring(index + 1, framerateRangeString.length()));
+        if (mParameters == null) {
+            return fpsRange;
+        }
+        String extFPS = mParameters.get(CameraSettings.KEY_SUPPORTED_PREVIEW_FRAMERATE_RANGES_EXT);
+        List<int[]> supportedFpsRanges = null;
+        if ( null == extFPS ) {
+            supportedFpsRanges = mParameters.getSupportedPreviewFpsRange();
+        } else {
+            supportedFpsRanges = Util.parseRange(extFPS);
+        }
+
+        if (supportedFpsRanges == null || supportedFpsRanges.isEmpty()) {
+            throw new RuntimeException("There are no supported framerate ranges.");
+        }
+
+        if ((!supportedFpsRanges.contains(fpsRange)) &&
+                CameraSettings.getSupportedFramerateRange(fpsRange, supportedFpsRanges)) {
+            upadateIndicatorFpsRange(fpsRange[Parameters.PREVIEW_FPS_MIN_INDEX], fpsRange[Parameters.PREVIEW_FPS_MAX_INDEX]);
+        }
+        return fpsRange;
+    }
+
     private void upadateIndicatorFpsRange(int minFps, int maxFps) {
         Editor editor = mPreferences.edit();
-        editor.putString(CameraSettings.KEY_VIDEO_MINFRAMERATE, String.valueOf(minFps));
-        editor.putString(CameraSettings.KEY_VIDEO_FRAMERATE, String.valueOf(maxFps));
+        editor.putString(CameraSettings.KEY_VIDEO_FRAMERATE_RANGE, minFps + "," + maxFps);
         editor.apply();
         if (mIndicatorControlContainer != null) {
             mIndicatorControlContainer.reloadPreferences();
@@ -2603,15 +2664,20 @@ public class VideoCamera extends ActivityBase
             isPreviewRestartRequired = true;
             Log.v(TAG, "videoPreferencesChanged : isPreviewRestartRequired="+isPreviewRestartRequired);
         }
-        // If Min / Max FPS is increased then, we need to restart preview for Port FPS to get updated.
-        String framerate = mPreferences.getString(CameraSettings.KEY_VIDEO_FRAMERATE, (getString(R.string.pref_camera_videoframerate_default)));
-        int maxFrameRate = Integer.parseInt(framerate);
-        String minframerate = mPreferences.getString(CameraSettings.KEY_VIDEO_MINFRAMERATE, (getString(R.string.pref_camera_videominframerate_default)));
-        int minFrameRate = Integer.parseInt(minframerate);
-        if((maxFrameRate > mProfile.videoFrameRate)||(minFrameRate > mProfile.videoFrameRate)){
-            Log.v(TAG, " FPS has been increased beyond port FPS. So restarting Preveiw ");
+
+        int[] fpsRange = getFrameRateRange();
+        if ((fpsRange[Parameters.PREVIEW_FPS_MIN_INDEX]/1000 != mProfile.videoFrameRate)) {
             isPreviewRestartRequired = true;
         }
+
+        // Capture mode
+        String mode = mPreferences.getString(CameraSettings.KEY_VIDEO_MODE,
+                                             getString(R.string.pref_camera_video_mode_default));
+        if ( !mCaptureMode.equals(mode) ) {
+            mCaptureMode = mode;
+            isPreviewRestartRequired = true;
+        }
+
         Log.v(TAG, "videoPreferencesChanged -");
         return isPreviewRestartRequired;
     }
@@ -3026,5 +3092,18 @@ public class VideoCamera extends ActivityBase
         Editor editor = mPreferences.edit();
         editor.putBoolean(CameraSettings.KEY_VIDEO_FIRST_USE_HINT_SHOWN, false);
         editor.apply();
+    }
+
+    private int getVideoFileContainer() {
+        String fileFormatString = mPreferences.getString(CameraSettings.KEY_VIDEO_FILE_CONTAINER,
+                getString(R.string.pref_video_record_container_default));
+        if (fileFormatString.equals("mp4")) {
+            return MediaRecorder.OutputFormat.MPEG_4;
+        }
+        if (fileFormatString.equals("3gp")) {
+            return MediaRecorder.OutputFormat.THREE_GPP;
+        }
+        Log.v(TAG, "Unknown file format. Reset file format to mp4");
+        return MediaRecorder.OutputFormat.MPEG_4;
     }
 }

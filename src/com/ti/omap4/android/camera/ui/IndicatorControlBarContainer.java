@@ -30,7 +30,6 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
-
 /**
  * The IndicatorControlBarContainer is a IndicatorControl containing
  * IndicatorControlBar, SecondIndicatorControlBar and ZoomControlBar for Phone UI.
@@ -59,9 +58,7 @@ public class IndicatorControlBarContainer extends IndicatorControlContainer {
 
     @Override
     protected void onFinishInflate() {
-        mIndicatorControlBar = (IndicatorControlBar)
-                findViewById(R.id.indicator_bar);
-        mIndicatorControlBar.setOnIndicatorEventListener(this);
+
         mSecondLevelIndicatorControlBar = (SecondLevelIndicatorControlBar)
                 findViewById(R.id.second_level_indicator_bar);
         mSecondLevelIndicatorControlBar.setOnIndicatorEventListener(this);
@@ -69,10 +66,19 @@ public class IndicatorControlBarContainer extends IndicatorControlContainer {
 
     @Override
     public void initialize(Context context, PreferenceGroup group,
-            boolean isZoomSupported, String[] secondLevelKeys,
+            boolean isZoomSupported, boolean isCPcamSlidersSupported, String[] secondLevelKeys,
             String[] secondLevelOtherSettingKeys) {
 
-        mIndicatorControlBar.initialize(context, group, isZoomSupported);
+        if (isCPcamSlidersSupported) {
+            mIndicatorControlBar = (IndicatorControlBar)
+                findViewById(R.id.cpcam_indicator_bar);
+            mIndicatorControlBar.setOnIndicatorEventListener(this);
+        } else {
+            mIndicatorControlBar = (IndicatorControlBar)
+                findViewById(R.id.indicator_bar);
+            mIndicatorControlBar.setOnIndicatorEventListener(this);
+        }
+        mIndicatorControlBar.initialize(context, group, isZoomSupported, isCPcamSlidersSupported);
 
         mSecondLevelIndicatorControlBar.initialize(context, group,
                 secondLevelKeys, secondLevelOtherSettingKeys);
@@ -165,7 +171,9 @@ public class IndicatorControlBarContainer extends IndicatorControlContainer {
 
     @Override
     public void setEnabled(boolean enabled) {
+        if (mIndicatorControlBar != null) {
         mIndicatorControlBar.setEnabled(enabled);
+        }
         mSecondLevelIndicatorControlBar.setEnabled(enabled);
     }
 
@@ -179,6 +187,11 @@ public class IndicatorControlBarContainer extends IndicatorControlContainer {
         if (mSecondLevelIndicatorControlBar.getVisibility() == View.VISIBLE) {
             leaveSecondLevelIndicator();
         }
+    }
+
+    @Override
+    public void showCPCamSliders(boolean enabled) {
+        mIndicatorControlBar.showCPCamSliders(enabled);
     }
 
     @Override

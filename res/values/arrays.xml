@@ -261,6 +261,15 @@
         <item>zoom-bracketing</item>
     </string-array>
 
+    <string-array name="pref_camera_video_mode_entries" translatable="false">
+        <item>@string/pref_camera_video_mode_entry_st</item>
+        <item>@string/pref_camera_video_mode_entry_hq</item>
+    </string-array>
+    <string-array name="pref_camera_video_mode_entryvalues" translatable="false">
+        <item>video-mode</item>
+        <item>video-mode-hq</item>
+    </string-array>
+
     <string-array name="pref_camera_bracketrange_entries" translatable="false">
         <item>@string/pref_camera_bracketrange_entry_one</item>
         <item>@string/pref_camera_bracketrange_entry_two</item>
@@ -404,49 +413,6 @@
         <item>1</item>
         <item>2</item>
         <item>3</item>
-    </string-array>
-
-    <!-- Camera Preferences Video FrameRate dialog box entries -->
-    <string-array name="pref_camera_videoframerate_entries">
-        <item>@string/pref_camera_videoframerate_entry_1</item>
-        <item>@string/pref_camera_videoframerate_entry_2</item>
-        <item>@string/pref_camera_videoframerate_entry_3</item>
-        <item>@string/pref_camera_videoframerate_entry_4</item>
-        <item>@string/pref_camera_videoframerate_entry_5</item>
-        <item>@string/pref_camera_videoframerate_entry_6</item>
-        <item>@string/pref_camera_videoframerate_entry_7</item>
-    </string-array>
-
-    <string-array name="pref_camera_videoframerate_entryvalues">
-        <item>5</item>
-        <item>10</item>
-        <item>15</item>
-        <item>24</item>
-        <item>27</item>
-        <item>30</item>
-        <item>60</item>
-    </string-array>
-
-
-   <!-- Camera Preferences Video MIN  FrameRate dialog box entries -->
-    <string-array name="pref_camera_videominframerate_entries">
-        <item>@string/pref_camera_videominframerate_entry_1</item>
-        <item>@string/pref_camera_videominframerate_entry_2</item>
-        <item>@string/pref_camera_videominframerate_entry_3</item>
-        <item>@string/pref_camera_videominframerate_entry_4</item>
-        <item>@string/pref_camera_videominframerate_entry_5</item>
-        <item>@string/pref_camera_videominframerate_entry_6</item>
-        <item>@string/pref_camera_videominframerate_entry_7</item>
-    </string-array>
-
-    <string-array name="pref_camera_videominframerate_entryvalues">
-        <item>5</item>
-        <item>10</item>
-        <item>15</item>
-        <item>24</item>
-        <item>27</item>
-        <item>30</item>
-        <item>60</item>
     </string-array>
 
     <!-- Camera Preferences Video BitRate dialog box entries -->
@@ -690,7 +656,6 @@
         <item>100</item>
     </string-array>
 
-    <!-- Camera Preferences Scene Mode dialog box entries -->
     <string-array name="pref_camera_scenemode_entries" translatable="false">
         <item>@string/pref_camera_scenemode_entry_auto</item>
         <item>@string/pref_camera_scenemode_entry_action</item>
@@ -976,5 +941,15 @@
        <item>jpeg</item>
        <item>jps</item>
        <item>mpo</item>
+    </string-array>
+
+    <!-- Video File Container Setting -->
+    <string-array name="pref_video_record_container_entries" translatable="false">
+       <item>@string/pref_video_record_container_mp4</item>
+       <item>@string/pref_video_record_container_3gp</item>
+    </string-array>
+    <string-array name="pref_video_record_container_entryvalues" translatable="false">
+       <item>mp4</item>
+       <item>3gp</item>
     </string-array>
 </resources>

@@ -246,6 +246,13 @@ public class PanoramaActivity extends ActivityBase implements
                 switchToOtherMode(ModePicker.MODE_VIDEO);
             }
         });
+        if ( Util.isCPCamLibraryPresent() ) {
+            MenuHelper.addSwitchModeMenuItem(menu, ModePicker.MODE_CPCAM, new Runnable() {
+                public void run() {
+                    switchToOtherMode(ModePicker.MODE_CPCAM);
+                }
+            });
+        }
     }
 
     @Override
