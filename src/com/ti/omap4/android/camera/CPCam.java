@@ -52,7 +52,7 @@ import com.ti.omap.android.cpcam.CPCam.Parameters;
 import com.ti.omap.android.cpcam.CPCam.PictureCallback;
 import com.ti.omap.android.cpcam.CPCam.PreviewCallback;
 import com.ti.omap.android.cpcam.CPCam.Size;
-import android.hardware.CameraSound;
+import android.media.MediaActionSound;
 import android.location.Location;
 import android.media.CameraProfile;
 import android.net.Uri;
@@ -214,7 +214,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     // We use a thread in ImageSaver to do the work of saving images and
     // generating thumbnails. This reduces the shot-to-shot time.
     private ImageSaver mImageSaver;
-    private CameraSound mCameraSound;
+    private MediaActionSound mCameraSound;
 
     private S3DViewWrapper s3dView;
     private boolean mS3dViewEnabled = false;
@@ -1191,7 +1191,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
 
     @Override
     public void playSound(int soundId) {
-        mCameraSound.playSound(soundId);
+        mCameraSound.play(soundId);
     }
 
     private boolean saveDataToFile(String filePath, byte[] data) {
@@ -1360,7 +1360,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         // Do this after starting preview because it depends on camera
         // parameters.
         initializeIndicatorControl();
-        mCameraSound = new CameraSound();
+        mCameraSound = new MediaActionSound();
         // Make sure preview is started.
         try {
             mCameraPreviewThread.join();
