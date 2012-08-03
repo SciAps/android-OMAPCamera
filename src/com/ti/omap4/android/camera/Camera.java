@@ -1770,7 +1770,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         // focus mode, instead, we read it from driver
         if (!Parameters.SCENE_MODE_AUTO.equals(mSceneMode)) {
             overrideCameraSettings(mParameters.getFlashMode(),
-                    mParameters.getWhiteBalance(), mParameters.getFocusMode(),
+                    mParameters.getWhiteBalance(), null,
                     getString(R.string.pref_exposure_default));
         } else {
             overrideCameraSettings(null, null, null, null);
@@ -3332,6 +3332,11 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mParameters.setJpegQuality(jpegQuality);
         }
 
+        // Set focus mode.
+        String focusMode = mFocusManager.getFocusMode();
+        mFocusManager.overrideFocusMode(null);
+        mParameters.setFocusMode(focusMode);
+
         // For the following settings, we need to check if the settings are
         // still supported by latest driver, if not, ignore the settings.
 
@@ -3364,15 +3369,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                     whiteBalance = Parameters.WHITE_BALANCE_AUTO;
                 }
             }
-
-            // Set focus mode.
-            String focusMode = mFocusManager.getFocusMode();
-            mFocusManager.overrideFocusMode(null);
-            mParameters.setFocusMode(focusMode);
         } else {
             resetExposureCompensation();
 
-            mFocusManager.overrideFocusMode(mParameters.getFocusMode());
             // Set Color Effects to None.
             Editor editor = mPreferences.edit();
             editor.putString(CameraSettings.KEY_COLOR_EFFECT, Parameters.EFFECT_NONE);
