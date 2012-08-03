@@ -1631,9 +1631,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             }
         }
 
-        getPreferredCameraId();
-        mFocusManager = new FocusManager(mPreferences,
-                defaultFocusModes);
         mTouchManager = new TouchManager();
 
         mIsImageCaptureIntent = isImageCaptureIntent();
