@@ -54,6 +54,7 @@ LOCAL_MODULE    := libjni_msc
 include $(BUILD_SHARED_LIBRARY)
 
 # CPCAM
+ifeq (0,1)
 include $(CLEAR_VARS)
 LOCAL_C_INCLUDES := $(COMMON_C_INCLUDES)
 LOCAL_CFLAGS := $(COMMON_CFLAGS)
@@ -69,3 +70,4 @@ LOCAL_SRC_FILES += \
 LOCAL_MODULE    := libjni_process
 
 include $(BUILD_SHARED_LIBRARY)
+endif
