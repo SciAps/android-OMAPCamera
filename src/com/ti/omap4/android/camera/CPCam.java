@@ -52,6 +52,7 @@ import com.ti.omap.android.cpcam.CPCam.Parameters;
 import com.ti.omap.android.cpcam.CPCam.PictureCallback;
 import com.ti.omap.android.cpcam.CPCam.PreviewCallback;
 import com.ti.omap.android.cpcam.CPCam.Size;
+import com.ti.omap.android.cpcam.CPCamBufferQueue;
 import android.media.MediaActionSound;
 import android.location.Location;
 import android.media.CameraProfile;
@@ -106,7 +107,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         View.OnTouchListener, ShutterButton.OnShutterButtonListener,
         SurfaceHolder.Callback, ModePicker.OnModeChangeListener,
         FaceDetectionListener,CameraPreference.OnPreferenceChangedListener,
-        TouchManager.Listener, SurfaceTexture.OnFrameAvailableListener,
+        TouchManager.Listener, com.ti.omap.android.cpcam.CPCamBufferQueue.OnFrameAvailableListener,
         LocationManager.Listener, ShutterButton.OnShutterButtonLongPressListener {
 
     private static final String TAG = "CPCam";
@@ -136,7 +137,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     private static final String DEFAULT_EXPOSURE_GAIN = "(40000,400)";
     private static final String ABSOLUTE_EXP_GAIN_TEXT = "Absolute";
     private static final String RELATIVE_EXP_GAIN_TEXT = "Relative";
-    private SurfaceTexture mTapOut;
+    private com.ti.omap.android.cpcam.CPCamBufferQueue mTapOut;
     Context mContext;
     private int mFrameWidth,mFrameHeight;
     // When setCameraParametersWhenIdle() is called, we accumulate the subsets
@@ -524,7 +525,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
 
         mFirstTimeInitialized = true;
         addIdleHandler();
-        mTapOut = new SurfaceTexture(0, false, EGL10.EGL_NONE);
+        mTapOut = new CPCamBufferQueue(true);
         mTapOut.setOnFrameAvailableListener(this);
 
         try {
@@ -821,11 +822,11 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
             if (mPausing) {
                 return;
             }
-            // WA: Re-create SurfaceTexture before next shot
+            // WA: Re-create CPCamBufferQueue before next shot
             try {
                 camera.setBufferSource(null, null);
                 mTapOut.release();
-                mTapOut = new SurfaceTexture(0, false, EGL10.EGL_NONE);
+                mTapOut = new CPCamBufferQueue(true);
                 mTapOut.setOnFrameAvailableListener(CPCam.this);
                 camera.setBufferSource(null, mTapOut);
             } catch(IOException e) { e.printStackTrace(); }
@@ -2706,7 +2707,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
                         mInitialParams.getSupportedFocusModes()));
     }
 
-    public void onFrameAvailable(final SurfaceTexture st) {
+    public void onFrameAvailable(final CPCamBufferQueue bq) {
         // Invoked every time there's a new frame available in SurfaceTexture
         new Thread(new Runnable() {
             public void run() {
@@ -2715,7 +2716,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
                 if (!mReprocessNextFrame &&
                     ( mCameraState == QUEUED_SHOT_IN_PROGRESS ) ) {
                     // Queue next shot
-                    st.updateTexImage();
+                    final int slot = bq.acquireBuffer();
                     mHandler.post( new Runnable()  {
                         @Override
                         public void run() {
@@ -2726,6 +2727,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
                     Message msg = new Message();
                     msg.what = QUEUE_NEXT_SHOT;
                     mHandler.sendMessage(msg);
+                    bq.releaseBuffer(slot);
                 } else if ( mReprocessNextFrame &&
                            ( mCameraState == QUEUED_SHOT_IN_PROGRESS ) ) {
                     // Reprocess
