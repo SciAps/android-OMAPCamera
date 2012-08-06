@@ -53,6 +53,7 @@ import com.ti.omap.android.cpcam.CPCam.PictureCallback;
 import com.ti.omap.android.cpcam.CPCam.PreviewCallback;
 import com.ti.omap.android.cpcam.CPCam.Size;
 import com.ti.omap.android.cpcam.CPCamBufferQueue;
+import com.ti.omap.android.cpcam.CPCamMetadata;
 import android.media.MediaActionSound;
 import android.location.Location;
 import android.media.CameraProfile;
@@ -756,24 +757,13 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
 
     }
 
-    private void updateOnScreenMetadataIndicators() {
-        StringTokenizer st = new StringTokenizer(mTapOut.getMetadata(), ";=");
-        String exposure = new String();
-        String exposureRequested = new String();
-        String gain = new String();
-        String gainRequested = new String();
-        while(st.hasMoreTokens()){
-            String str = st.nextToken();
-            if ( str.equals(ANALOG_GAIN_METADATA)) {
-                gain = st.nextToken();
-            } else if (str.equals(EXPOSURE_TIME_METADATA)) {
-                exposure = st.nextToken();
-            } else if (str.equals(ANALOG_GAIN_REQUESTED_METADATA)) {
-                gainRequested = st.nextToken();
-            } else if (str.equals(EXPOSURE_TIME_REQUESTED_METADATA)) {
-                exposureRequested = st.nextToken();
-            }
-        }
+    private void updateOnScreenMetadataIndicators(CPCamMetadata metaData) {
+        if (metaData == null) return;
+        String exposure = Integer.toString(metaData.exposureTime);
+        String exposureRequested = Integer.toString(metaData.exposureTimeReq);
+        String gain = Integer.toString(metaData.analogGain);
+        String gainRequested = Integer.toString(metaData.analogGainReq);
+
         updateMetadataIndicator(exposure,
                                 exposureRequested,
                                 gain,
@@ -2720,7 +2710,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
                     mHandler.post( new Runnable()  {
                         @Override
                         public void run() {
-                            updateOnScreenMetadataIndicators();
+                            updateOnScreenMetadataIndicators(CPCamMetadata.getMetadata(bq, slot));
                         }
                     });
 
