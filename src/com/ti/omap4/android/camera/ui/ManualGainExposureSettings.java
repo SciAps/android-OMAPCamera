@@ -128,7 +128,7 @@ public class ManualGainExposureSettings extends Dialog {
 
         manualGainExposurePanel.setVisibility(View.VISIBLE);
 
-   /*     Button btn = (Button) findViewById(R.id.buttonOK);
+        Button btn = (Button) findViewById(R.id.buttonOK);
         btn.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                 Message msg = new Message();
@@ -160,7 +160,7 @@ public class ManualGainExposureSettings extends Dialog {
                 cameraHandler.sendMessage(msg);
                 dismiss();
                 }
-        }); */
+        });
 
         manualExposureControlLeft.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 public void onProgressChanged(SeekBar seekBar,

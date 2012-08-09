@@ -20,7 +20,6 @@ import com.ti.omap4.android.camera.CPCamFocusManager.QueuedShotStates;
 import com.ti.omap4.android.camera.ui.FaceView;
 import com.ti.omap4.android.camera.ui.FaceViewData;
 import com.ti.omap4.android.camera.ui.IndicatorControlContainer;
-import com.ti.omap4.android.camera.ui.ManualGainExposureSettings;
 import com.ti.omap4.android.camera.ui.PopupManager;
 import com.ti.omap4.android.camera.ui.Rotatable;
 import com.ti.omap4.android.camera.ui.RotateImageView;
