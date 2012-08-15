@@ -3574,7 +3574,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             params.remove(PARM_ZOOM_BRACKETING_RANGE);
         } else if ( mode.equals(mHighQualityZsl) ) {
             params.set(CameraSettings.KEY_MODE, mHighQualityZsl);
-            params.set(PARM_IPP, PARM_IPP_NONE);
+            params.set(PARM_IPP, PARM_IPP_LDCNSF);
             mTempBracketingEnabled = false;
             params.remove(PARM_EXPOSURE_BRACKETING_RANGE);
             params.set(CameraSettings.KEY_TEMPORAL_BRACKETING, FALSE);
