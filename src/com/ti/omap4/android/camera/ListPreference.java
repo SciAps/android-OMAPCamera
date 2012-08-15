@@ -110,20 +110,29 @@ public class ListPreference extends CameraPreference {
             mValue = getSharedPreferences().getString(mKey, findSupportedDefaultValue());
             mLoaded = true;
         }
+
         String entry = findEntryByValue(mValue, allEntries, allEntryValues);
         if (entries != null && entryValues != null && entries.length > 0 && entryValues.length > 0) {
             clearAllEntries();
             mEntries = entries;
             mEntryValues = entryValues;
         }
+
+        boolean isFound = false;
         if (entry != null) {
             for (int i=0;i<mEntries.length;i++) {
                 if (entry.equals(mEntries[i].toString())) {
                     mValue = mEntryValues[i].toString();
+                    isFound = true;
                     break;
                 }
             }
         }
+
+        if(!isFound){
+            mValue = mEntryValues[0].toString();
+        }
+
         persistStringValue(mValue);
     }
     public String getKey() {
