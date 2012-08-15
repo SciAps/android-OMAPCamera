@@ -3929,6 +3929,10 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
     @Override
     public void onFaceDetection(Face[] faces, android.hardware.Camera camera) {
+        // Sometimes onFaceDetection is called after onPause.
+        // Ex: onPause during burst capture. Ignore it.
+        if (mPausing || isFinishing()) return;
+
         FaceViewData faceData[] = new FaceViewData[faces.length];
 
         int i = 0;
