@@ -619,7 +619,7 @@ public class VideoCamera extends ActivityBase
             // We keep the last known orientation. So if the user first orient
             // the camera then point the camera to floor or sky, we still have
             // the correct orientation.
-            if (orientation == ORIENTATION_UNKNOWN) return;
+            if ((orientation == ORIENTATION_UNKNOWN) || (mCameraDevice == null)) return;
             mOrientation = Util.roundOrientation(orientation, mOrientation);
             // When the screen is unlocked, display rotation may change. Always
             // calculate the up-to-date orientationCompensation.
