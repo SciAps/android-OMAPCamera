@@ -2180,7 +2180,9 @@ public class VideoCamera extends ActivityBase
 
         // Read Camera Mounting Orientation
         mSensorMountOffset = info.orientation;
-
+        if (!is2DMode()) {
+            mDisplayRotation = mSensorMountOffset;
+        }
         mParameters.set(PARM_SENSOR_ORIENTATION, (mDisplayRotation - mSensorMountOffset+360)%360);
         Log.v(TAG," >>>> Setting Orientation & Sensor Offset  = "+ mDisplayRotation + " , " + mSensorMountOffset);
 
