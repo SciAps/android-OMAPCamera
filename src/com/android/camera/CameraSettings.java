@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+
 /**
  *  Provides utilities and keys for Camera settings.
  */
@@ -55,6 +56,7 @@ public class CameraSettings {
     public static final String KEY_CAMERA_ID = "pref_camera_id_key";
     public static final String KEY_CAMERA_FIRST_USE_HINT_SHOWN = "pref_camera_first_use_hint_shown_key";
     public static final String KEY_VIDEO_FIRST_USE_HINT_SHOWN = "pref_video_first_use_hint_shown_key";
+    public static final String KEY_ANTIBANDING = "pref_camera_antibanding_key";
 
     public static final String EXPOSURE_DEFAULT_VALUE = "0";
 
@@ -167,6 +169,7 @@ public class CameraSettings {
                 group.findPreference(KEY_VIDEOCAMERA_FLASH_MODE);
         ListPreference videoEffect = group.findPreference(KEY_VIDEO_EFFECT);
         ListPreference previewSize = group.findPreference(KEY_PREVIEW_SIZE);
+        ListPreference antibanding = group.findPreference(KEY_ANTIBANDING);
 
         ArrayList<CharSequence[]> allPictureEntries = new ArrayList<CharSequence[]>();
         ArrayList<CharSequence[]> allPictureEntryValues = new ArrayList<CharSequence[]>();
@@ -185,6 +188,10 @@ public class CameraSettings {
             filterUnsupportedOptions(group, videoQuality, getSupportedVideoQuality());
         }
 
+        if (antibanding != null) {
+            filterUnsupportedOptions(group,
+                    antibanding, mParameters.getSupportedAntibanding());
+        }
         if (pictureSize != null) {
             filterUnsupportedOptions(group, pictureSize, sizeListToStringList(
                     mParameters.getSupportedPictureSizes()));
