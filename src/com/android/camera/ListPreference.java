@@ -69,6 +69,46 @@ public class ListPreference extends CameraPreference {
         a.recycle();
     }
 
+    private void clearAllEntries(){
+        mEntries = null;
+        mEntryValues = null;
+    }
+
+    private String findEntryByValue(String value,ArrayList<CharSequence[]> allEntries, ArrayList<CharSequence[]> allEntryValues){
+        for (int i=0; i<allEntryValues.size();i++) {
+            for (int j=0;j<allEntryValues.get(i).length;j++) {
+                if (allEntryValues.get(i)[j].equals(value)) {
+                    return allEntries.get(i)[j].toString();
+                }
+            }
+        }
+        return null;
+    }
+
+    public void clearAndSetEntries(ArrayList<CharSequence[]> allEntries, ArrayList<CharSequence[]> allEntryValues,
+                                    CharSequence[] entries, CharSequence[] entryValues ){
+        if (entries.length != entryValues.length) return;
+        if (!mLoaded) {
+            mValue = getSharedPreferences().getString(mKey, findSupportedDefaultValue());
+            mLoaded = true;
+        }
+        String entry = findEntryByValue(mValue, allEntries, allEntryValues);
+        if (entries != null && entryValues != null && entries.length > 0 && entryValues.length > 0) {
+            clearAllEntries();
+            mEntries = entries;
+            mEntryValues = entryValues;
+        }
+        if (entry != null) {
+            for (int i=0;i<mEntries.length;i++) {
+                if (entry.equals(mEntries[i].toString())) {
+                    mValue = mEntryValues[i].toString();
+                    break;
+                }
+            }
+        }
+        persistStringValue(mValue);
+    }
+
     public String getKey() {
         return mKey;
     }

@@ -30,6 +30,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
+
 /**
  *  Provides utilities and keys for Camera settings.
  */
@@ -42,6 +43,7 @@ public class CameraSettings {
     public static final String KEY_VIDEO_QUALITY = "pref_video_quality_key";
     public static final String KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL = "pref_video_time_lapse_frame_interval_key";
     public static final String KEY_PICTURE_SIZE = "pref_camera_picturesize_key";
+    public static final String KEY_PREVIEW_SIZE = "pref_camera_previewsize_key";
     public static final String KEY_JPEG_QUALITY = "pref_camera_jpegquality_key";
     public static final String KEY_FOCUS_MODE = "pref_camera_focusmode_key";
     public static final String KEY_FLASH_MODE = "pref_camera_flashmode_key";
@@ -133,6 +135,23 @@ public class CameraSettings {
         return false;
     }
 
+    public static boolean setCameraPreviewSize(
+            String candidate, List<String> supported, Parameters parameters) {
+         int index = candidate.indexOf('x');
+         if (index == NOT_FOUND) return false;
+         int width = Integer.parseInt(candidate.substring(0, index));
+         int height = Integer.parseInt(candidate.substring(index + 1));
+         for (String item: supported) {
+             int w = Integer.parseInt(item.substring(0, item.indexOf("x")));
+             int h = Integer.parseInt(item.substring(item.indexOf("x") + 1));
+             if (w == width && h == height) {
+                 parameters.setPreviewSize(w, h);
+                 return true;
+             }
+         }
+         return false;
+      }
+
     private void initPreference(PreferenceGroup group) {
         ListPreference videoQuality = group.findPreference(KEY_VIDEO_QUALITY);
         ListPreference timeLapseInterval = group.findPreference(KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL);
@@ -147,6 +166,18 @@ public class CameraSettings {
         ListPreference videoFlashMode =
                 group.findPreference(KEY_VIDEOCAMERA_FLASH_MODE);
         ListPreference videoEffect = group.findPreference(KEY_VIDEO_EFFECT);
+        ListPreference previewSize = group.findPreference(KEY_PREVIEW_SIZE);
+
+        ArrayList<CharSequence[]> allPictureEntries = new ArrayList<CharSequence[]>();
+        ArrayList<CharSequence[]> allPictureEntryValues = new ArrayList<CharSequence[]>();
+
+        if (pictureSize != null) {
+            ListPreference pictureSizes = group.findPreference(KEY_PICTURE_SIZE);
+            if (pictureSizes !=null) {
+                pictureSizes.clearAndSetEntries(allPictureEntries, allPictureEntryValues,
+                        pictureSize.getEntries(), pictureSize.getEntryValues());
+            }
+        }
 
         // Since the screen could be loaded from different resources, we need
         // to check if the preference is available here
@@ -284,7 +315,7 @@ public class CameraSettings {
         }
     }
 
-    private static List<String> sizeListToStringList(List<Size> sizes) {
+    public static List<String> sizeListToStringList(List<Size> sizes) {
         ArrayList<String> list = new ArrayList<String>();
         for (Size size : sizes) {
             list.add(String.format("%dx%d", size.width, size.height));

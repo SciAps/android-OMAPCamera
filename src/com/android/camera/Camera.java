@@ -109,6 +109,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final int UPDATE_PARAM_PREFERENCE = 4;
     private static final int UPDATE_PARAM_ALL = -1;
 
+    private String mPreviewSize = null;
+
     // When setCameraParametersWhenIdle() is called, we accumulate the subsets
     // needed to be updated in mUpdateSet.
     private int mUpdateSet;
@@ -1292,6 +1294,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_SCENE_MODE};
         final String[] OTHER_SETTING_KEYS = {
                 CameraSettings.KEY_RECORD_LOCATION,
+                CameraSettings.KEY_PREVIEW_SIZE,
                 CameraSettings.KEY_PICTURE_SIZE,
                 CameraSettings.KEY_FOCUS_MODE};
 
@@ -1988,7 +1991,19 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         }
     }
 
+    private String elementExists(String[] firstArr, String[] secondArr){
+        for (int i = 0; i < firstArr.length; i++) {
+            for (int j = 0; j < secondArr.length; j++) {
+                if (firstArr[i].equals(secondArr[j])) {
+                    return firstArr[i];
+                }
+            }
+        }
+        return null;
+    }
+
     private void updateCameraParametersPreference() {
+
         if (mAeLockSupported) {
             mParameters.setAutoExposureLock(mFocusManager.getAeAwbLock());
         }
@@ -2074,6 +2089,20 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             Log.w(TAG, "invalid exposure range: " + value);
         }
 
+        String[] previewDefaults = getResources().getStringArray(R.array.pref_camera_previewsize_default_array);
+        String defaultPreviewSize = "";
+        String[] previewSizes2D = getResources().getStringArray(R.array.pref_camera_previewsize_entryvalues);
+        defaultPreviewSize = elementExists(previewDefaults, previewSizes2D);
+
+
+        String previewSize = mPreferences.getString(CameraSettings.KEY_PREVIEW_SIZE, defaultPreviewSize);
+        if (previewSize !=null && !previewSize.equals(mPreviewSize)) {
+            List<String> supported = new ArrayList<String>();
+            supported = CameraSettings.sizeListToStringList(mParameters.getSupportedPreviewSizes());
+            CameraSettings.setCameraPreviewSize(previewSize, supported, mParameters);
+            mPreviewSize = previewSize;
+        }
+
         if (Parameters.SCENE_MODE_AUTO.equals(mSceneMode)) {
             // Set flash mode.
             String flashMode = mPreferences.getString(
@@ -2118,6 +2147,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 mCameraDevice.setAutoFocusMoveCallback(null);
             }
         }
+
     }
 
     // We separate the parameters into several subsets, so we can update only

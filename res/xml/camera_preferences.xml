@@ -71,4 +71,10 @@
             camera:icons="@array/camera_id_icons"
             camera:entries="@array/camera_id_entries"
             camera:largeIcons="@array/camera_id_largeicons" />
+    <ListPreference
+            camera:key="pref_camera_previewsize_key"
+            camera:defaultValue="@array/pref_camera_previewsize_default_array"
+            camera:title="@string/pref_camera_previewsize_title"
+            camera:entries="@array/pref_camera_previewsize_entries"
+            camera:entryValues="@array/pref_camera_previewsize_entryvalues" />
 </PreferenceGroup>
