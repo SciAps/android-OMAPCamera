@@ -57,6 +57,10 @@ public class CameraSettings {
     public static final String KEY_CAMERA_FIRST_USE_HINT_SHOWN = "pref_camera_first_use_hint_shown_key";
     public static final String KEY_VIDEO_FIRST_USE_HINT_SHOWN = "pref_video_first_use_hint_shown_key";
     public static final String KEY_ANTIBANDING = "pref_camera_antibanding_key";
+    public static final String KEY_CONTRAST = "pref_camera_contrast_key";
+    public static final String KEY_BRIGHTNESS = "pref_camera_brightness_key";
+    public static final String KEY_SATURATION = "pref_camera_saturation_key";
+    public static final String KEY_SHARPNESS = "pref_camera_sharpness_key";
 
     public static final String EXPOSURE_DEFAULT_VALUE = "0";
 

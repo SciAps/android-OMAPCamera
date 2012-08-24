@@ -162,6 +162,41 @@
     <string name="pref_camera_previewsize_entry_hd">720p</string>
     <string name="pref_camera_previewsize_entry_fullhd">Full HD</string>
 
+    <!-- Settings JPEG Quality mode title -->
+    <string name="pref_camera_jpegquality_title">Jpeg Quality</string>
+    <string name="pref_camera_jpegquality_default">2</string>
+    <string name="pref_camera_jpegquality_entry_low">Normal</string>
+    <string name="pref_camera_jpegquality_entry_medium">Fine</string>
+    <string name="pref_camera_jpegquality_entry_high">Superfine</string>
+
+    <!-- Settings contrast mode title -->
+    <string name="pref_camera_contrast_title">Contrast</string>
+    <string name="pref_camera_contrast_default">100</string>
+    <string name="pref_camera_contrast_entry_low">Low</string>
+    <string name="pref_camera_contrast_entry_medium">Medium</string>
+    <string name="pref_camera_contrast_entry_high">High</string>
+
+    <!-- Settings brightness mode title -->
+    <string name="pref_camera_brightness_title">Brightness</string>
+    <string name="pref_camera_brightness_default">50</string>
+    <string name="pref_camera_brightness_entry_low">Low</string>
+    <string name="pref_camera_brightness_entry_medium">Medium</string>
+    <string name="pref_camera_brightness_entry_high">High</string>
+
+    <!-- Settings saturation mode title -->
+    <string name="pref_camera_saturation_title">Saturation</string>
+    <string name="pref_camera_saturation_default">100</string>
+    <string name="pref_camera_saturation_entry_low">Low</string>
+    <string name="pref_camera_saturation_entry_medium">Medium</string>
+    <string name="pref_camera_saturation_entry_high">High</string>
+
+    <!-- Settings sharpness mode title -->
+    <string name="pref_camera_sharpness_title">Sharpness</string>
+    <string name="pref_camera_sharpness_default">100</string>
+    <string name="pref_camera_sharpness_entry_low">Low</string>
+    <string name="pref_camera_sharpness_entry_medium">Medium</string>
+    <string name="pref_camera_sharpness_entry_high">High</string>
+
     <!-- Settings Antibanding mode title -->
     <string name="pref_camera_antibanding_default" translatable="false">auto</string>
     <string name="pref_camera_antibanding_title">Antibanding</string>

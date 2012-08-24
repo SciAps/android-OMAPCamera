@@ -111,6 +111,15 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
     private String mPreviewSize = null;
     private String mAntibanding = null;
+    private String mContrast = null;
+    private String mBrightness = null;
+    private String mSaturation = null;
+    private String mSharpness = null;
+
+    private static final String PARM_CONTRAST = "contrast";
+    private static final String PARM_BRIGHTNESS = "brightness";
+    private static final String PARM_SHARPNESS = "sharpness";
+    private static final String PARM_SATURATION = "saturation";
 
     private boolean mPausing;
 
@@ -1297,6 +1306,10 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_SCENE_MODE};
         final String[] OTHER_SETTING_KEYS = {
                 CameraSettings.KEY_RECORD_LOCATION,
+                CameraSettings.KEY_CONTRAST,
+                CameraSettings.KEY_BRIGHTNESS,
+                CameraSettings.KEY_SHARPNESS,
+                CameraSettings.KEY_SATURATION,
                 CameraSettings.KEY_ANTIBANDING,
                 CameraSettings.KEY_PREVIEW_SIZE,
                 CameraSettings.KEY_PICTURE_SIZE,
@@ -1562,6 +1575,22 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private void initDefaults() {
         if ( null == mAntibanding || mPausing ) {
             mAntibanding = getString(R.string.pref_camera_antibanding_default);
+        }
+
+        if ( null == mContrast || mPausing ) {
+            mContrast = getString(R.string.pref_camera_contrast_default);
+        }
+
+        if ( null == mBrightness || mPausing ) {
+            mBrightness = getString(R.string.pref_camera_brightness_default);
+        }
+
+        if ( null == mSaturation || mPausing ) {
+            mSaturation = getString(R.string.pref_camera_saturation_default);
+        }
+
+        if ( null == mSharpness || mPausing ) {
+            mSharpness = getString(R.string.pref_camera_sharpness_default);
         }
     }
 
@@ -2046,6 +2075,43 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                     pictureSize, supported, mParameters);
         }
         Size size = mParameters.getPictureSize();
+
+        // Set Contrast
+        String contrast = mPreferences.getString(
+                CameraSettings.KEY_CONTRAST,
+                getString(R.string.pref_camera_contrast_default));
+
+        if ( !contrast.equals(mContrast) ) {
+            mParameters.set(PARM_CONTRAST, Integer.parseInt(contrast) );
+            mContrast = contrast;
+        }
+        // Set brightness
+        String brightness = mPreferences.getString(
+                CameraSettings.KEY_BRIGHTNESS,
+                getString(R.string.pref_camera_brightness_default));
+
+        if ( !brightness.equals(mBrightness) ) {
+            mParameters.set(PARM_BRIGHTNESS, Integer.parseInt(brightness) );
+            mBrightness = brightness;
+        }
+        // Set Saturation
+        String saturation =  mPreferences.getString(
+                CameraSettings.KEY_SATURATION,
+                getString(R.string.pref_camera_saturation_default));
+
+        if ( !saturation.equals(mSaturation) ) {
+            mParameters.set(PARM_SATURATION, Integer.parseInt(saturation) );
+            mSaturation = saturation;
+        }
+        // Set Sharpness
+        String sharpness = mPreferences.getString(
+                CameraSettings.KEY_SHARPNESS,
+                getString(R.string.pref_camera_sharpness_default));
+
+        if ( !sharpness.equals(mSharpness) ) {
+            mParameters.set(PARM_SHARPNESS, Integer.parseInt(sharpness) );
+            mSharpness = sharpness;
+        }
 
         //Antibanding
         String antibanding = mPreferences.getString(

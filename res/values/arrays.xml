@@ -65,6 +65,67 @@
         <item>off</item>
     </string-array>
 
+    <!-- Camera Preferences JPEG Quality dialog box entries -->
+    <string-array name="pref_camera_jpegquality_entries" translatable="false">
+        <item>@string/pref_camera_jpegquality_entry_low</item>
+        <item>@string/pref_camera_jpegquality_entry_medium</item>
+        <item>@string/pref_camera_jpegquality_entry_high</item>
+    </string-array>
+
+    <string-array name="pref_camera_jpegquality_entryvalues" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+    <!-- Camera Preferences contrast dialog box entries -->
+    <string-array name="pref_camera_contrast_entries" translatable="false">
+        <item>@string/pref_camera_contrast_entry_low</item>
+        <item>@string/pref_camera_contrast_entry_medium</item>
+        <item>@string/pref_camera_contrast_entry_high</item>
+    </string-array>
+    <string-array name="pref_camera_contrast_entryvalues" translatable="false">
+        <item>0</item>
+        <item>100</item>
+        <item>200</item>
+    </string-array>
+
+    <!-- Camera Preferences brightness dialog box entries -->
+    <string-array name="pref_camera_brightness_entries" translatable="false">>
+        <item>@string/pref_camera_brightness_entry_low</item>
+        <item>@string/pref_camera_brightness_entry_medium</item>
+        <item>@string/pref_camera_brightness_entry_high</item>
+    </string-array>
+    <string-array name="pref_camera_brightness_entryvalues" translatable="false">>
+        <item>0</item>
+        <item>50</item>
+        <item>100</item>
+    </string-array>
+
+    <!-- Camera Preferences saturation dialog box entries -->
+    <string-array name="pref_camera_saturation_entries" translatable="false">
+        <item>@string/pref_camera_saturation_entry_low</item>
+        <item>@string/pref_camera_saturation_entry_medium</item>
+        <item>@string/pref_camera_saturation_entry_high</item>
+    </string-array>
+    <string-array name="pref_camera_saturation_entryvalues" translatable="false">
+        <item>0</item>
+        <item>100</item>
+        <item>200</item>
+    </string-array>
+
+    <!-- Camera Preferences sharpness dialog box entries -->
+    <string-array name="pref_camera_sharpness_entries" translatable="false">
+        <item>@string/pref_camera_sharpness_entry_low</item>
+        <item>@string/pref_camera_sharpness_entry_medium</item>
+        <item>@string/pref_camera_sharpness_entry_high</item>
+    </string-array>
+    <string-array name="pref_camera_sharpness_entryvalues" translatable="false">
+        <item>0</item>
+        <item>100</item>
+        <item>200</item>
+    </string-array>
+
     <!-- Camera Preferences Picture size dialog box entries -->
     <string-array name="pref_camera_previewsize_default_array" translatable="false">
         <item>640x480</item>
