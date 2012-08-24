@@ -212,15 +212,6 @@ public class CameraSettings {
             filterUnsupportedOptions(group,
                     flashMode, mParameters.getSupportedFlashModes());
         }
-        if (focusMode != null) {
-            if (mParameters.getMaxNumFocusAreas() == 0) {
-                filterUnsupportedOptions(group,
-                        focusMode, mParameters.getSupportedFocusModes());
-            } else {
-                // Remove the focus mode if we can use tap-to-focus.
-                removePreference(group, focusMode.getKey());
-            }
-        }
         if (videoFlashMode != null) {
             filterUnsupportedOptions(group,
                     videoFlashMode, mParameters.getSupportedFlashModes());
