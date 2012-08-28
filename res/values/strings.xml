@@ -162,6 +162,14 @@
     <string name="pref_camera_previewsize_entry_hd">720p</string>
     <string name="pref_camera_previewsize_entry_fullhd">Full HD</string>
 
+    <string name="pref_camera_mode_title">Capture mode</string>
+    <string name="pref_camera_mode_default">high-quality</string>
+    <string name="pref_camera_mode_entry_hs">High Speed</string>
+    <string name="pref_camera_mode_entry_hq">High Quality</string>
+    <string name="pref_camera_mode_entry_zsl">ZSL</string>
+    <string name="pref_camera_mode_entry_temporal_bracketing">Temporal Bracketing</string>
+    <string name="pref_camera_mode_entry_exp_bracketing">Exposure Bracketing</string>
+    
     <!-- Settings JPEG Quality mode title -->
     <string name="pref_camera_jpegquality_title">Jpeg Quality</string>
     <string name="pref_camera_jpegquality_default">2</string>

@@ -26,6 +26,7 @@ import android.util.TypedValue;
 import java.util.ArrayList;
 import java.util.List;
 
+
 /**
  * A type of <code>CameraPreference</code> whose number of possible values
  * is limited.
@@ -182,6 +183,15 @@ public class ListPreference extends CameraPreference {
     @Override
     public void reloadValue() {
         this.mLoaded = false;
+    }
+
+    public String findEntryValueByEntry(String entry) {
+        for (int i = 0, n = mEntries.length; i < n; ++i) {
+            if (Util.equals(mEntries[i], entry)) {
+                return mEntryValues[i].toString();
+            }
+        }
+        return null;
     }
 
     public void filterUnsupported(List<String> supported) {

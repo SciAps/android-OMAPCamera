@@ -61,6 +61,10 @@ public class CameraSettings {
     public static final String KEY_BRIGHTNESS = "pref_camera_brightness_key";
     public static final String KEY_SATURATION = "pref_camera_saturation_key";
     public static final String KEY_SHARPNESS = "pref_camera_sharpness_key";
+    public static final String KEY_MODE = "mode";
+    public static final String KEY_MODE_MENU = "pref_camera_mode_key";
+    public static final String KEY_TEMPORAL_BRACKETING = "temporal-bracketing";
+    public static final String KEY_CAP_MODE_VALUES = "mode-values";
 
     public static final String EXPOSURE_DEFAULT_VALUE = "0";
 
@@ -106,7 +110,12 @@ public class CameraSettings {
         // When launching the camera app first time, we will set the picture
         // size to the first one in the list defined in "arrays.xml" and is also
         // supported by the driver.
-        List<Size> supported = parameters.getSupportedPictureSizes();
+        List<String> supported = new ArrayList<String>();
+        List<Size> suppSizes = parameters.getSupportedPictureSizes();
+        if (suppSizes != null) {
+            supported = sizeListToStringList(suppSizes);
+        }
+
         if (supported == null) return;
         for (String candidate : context.getResources().getStringArray(
                 R.array.pref_camera_picturesize_entryvalues)) {
@@ -127,13 +136,15 @@ public class CameraSettings {
     }
 
     public static boolean setCameraPictureSize(
-            String candidate, List<Size> supported, Parameters parameters) {
+            String candidate, List<String> supported, Parameters parameters) {
         int index = candidate.indexOf('x');
         if (index == NOT_FOUND) return false;
         int width = Integer.parseInt(candidate.substring(0, index));
         int height = Integer.parseInt(candidate.substring(index + 1));
-        for (Size size : supported) {
-            if (size.width == width && size.height == height) {
+        for (String item : supported) {
+            int w = Integer.parseInt(item.substring(0, item.indexOf("x")));
+            int h = Integer.parseInt(item.substring(item.indexOf("x") + 1));
+            if (w == width && h == height) {
                 parameters.setPictureSize(width, height);
                 return true;
             }
@@ -174,6 +185,7 @@ public class CameraSettings {
         ListPreference videoEffect = group.findPreference(KEY_VIDEO_EFFECT);
         ListPreference previewSize = group.findPreference(KEY_PREVIEW_SIZE);
         ListPreference antibanding = group.findPreference(KEY_ANTIBANDING);
+        ListPreference mode = group.findPreference(KEY_MODE_MENU);
 
         ArrayList<CharSequence[]> allPictureEntries = new ArrayList<CharSequence[]>();
         ArrayList<CharSequence[]> allPictureEntryValues = new ArrayList<CharSequence[]>();
@@ -218,6 +230,16 @@ public class CameraSettings {
         }
         if (exposure != null) buildExposureCompensation(group, exposure);
         if (cameraIdPref != null) buildCameraId(group, cameraIdPref);
+        if(mode !=null){
+            ArrayList<String> suppMode = new ArrayList<String>();
+            String modeValues = mParameters.get(KEY_CAP_MODE_VALUES);
+            if(modeValues != null && !modeValues.equals("")){
+                for(String item : modeValues.split(",")){
+                    suppMode.add(item);
+                }
+            }
+            filterUnsupportedOptions(group, mode, suppMode);
+        }
 
         if (timeLapseInterval != null) resetIfInvalid(timeLapseInterval);
         if (videoEffect != null) {

@@ -102,12 +102,15 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final int START_PREVIEW_DONE = 11;
     private static final int OPEN_CAMERA_FAIL = 12;
     private static final int CAMERA_DISABLED = 13;
+    private static final int MODE_RESTART = 14;
+    private static final int RESTART_PREVIEW = 15;
 
     // The subset of parameters we need to update in setCameraParameters().
     private static final int UPDATE_PARAM_INITIALIZE = 1;
     private static final int UPDATE_PARAM_ZOOM = 2;
     private static final int UPDATE_PARAM_PREFERENCE = 4;
     private static final int UPDATE_PARAM_ALL = -1;
+    private static final int UPDATE_PARAM_MODE = 8;
 
     private String mPreviewSize = null;
     private String mAntibanding = null;
@@ -120,6 +123,28 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final String PARM_BRIGHTNESS = "brightness";
     private static final String PARM_SHARPNESS = "sharpness";
     private static final String PARM_SATURATION = "saturation";
+    private static final String PARM_EXPOSURE_BRACKETING_RANGE = "exp-bracketing-range";
+    private static final String EXPOSURE_BRACKETING_RANGE_VALUE = "-30,0,30";
+    private static final String PARM_IPP = "ipp";
+    private static final String PARM_IPP_LDCNSF = "ldc-nsf";
+    private static final String PARM_IPP_NONE = "off";
+    private static final String PARM_GBCE = "gbce";
+    private static final String PARM_GLBCE = "glbce";
+    private static final String PARM_GBCE_OFF = "disable";
+    private static final int EXPOSURE_BRACKETING_COUNT = 3;
+    private boolean mTempBracketingEnabled = false;
+    private boolean mTempBracketingStarted = false;
+    private int mBurstImages = 0;
+    private String mCaptureMode = new String();
+
+    public static final String TRUE = "true";
+    public static final String FALSE = "false";
+
+    private String mTemporalBracketing;
+    private String mExposureBracketing;
+    private String mHighPerformance;
+    private String mHighQuality;
+    private String mHighQualityZsl;
 
     private boolean mPausing;
 
@@ -303,7 +328,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 setCameraParameters(UPDATE_PARAM_ALL);
                 mHandler.sendEmptyMessage(CAMERA_OPEN_DONE);
                 if (mCancelled) return;
-                startPreview();
+                startPreview(true);
                 mHandler.sendEmptyMessage(START_PREVIEW_DONE);
                 mOnResumeTime = SystemClock.uptimeMillis();
                 mHandler.sendEmptyMessage(CHECK_DISPLAY_ROTATION);
@@ -323,6 +348,22 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
+                case RESTART_PREVIEW: {
+                    boolean updateAllParams = true;
+                    if ( msg.arg1 == MODE_RESTART ) {
+                        updateAllParams = false;
+                    }
+                    startPreview(updateAllParams);
+                    startFaceDetection();
+                    if (mJpegPictureCallbackTime != 0) {
+                        long now = System.currentTimeMillis();
+                        mJpegCallbackFinishTime = now - mJpegPictureCallbackTime;
+                        Log.v(TAG, "mJpegCallbackFinishTime = "
+                                + mJpegCallbackFinishTime + "ms");
+                        mJpegPictureCallbackTime = 0;
+                    }
+                    break;
+                }
                 case CLEAR_SCREEN_DELAY: {
                     getWindow().clearFlags(
                             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -814,7 +855,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
             mFocusManager.updateFocusUI(); // Ensure focus indicator is hidden.
             if (!mIsImageCaptureIntent) {
-                startPreview();
+                startPreview(true);
                 setCameraState(IDLE);
                 startFaceDetection();
             }
@@ -1229,6 +1270,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mPreferences = new ComboPreferences(this);
         CameraSettings.upgradeGlobalPreferences(mPreferences.getGlobal());
         mCameraId = getPreferredCameraId(mPreferences);
+        PreferenceInflater inflater = new PreferenceInflater(this);
+        PreferenceGroup group =
+            (PreferenceGroup) inflater.inflate(R.xml.camera_preferences);
 
         mContentResolver = getContentResolver();
 
@@ -1243,6 +1287,34 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         // This must be done before startPreview.
         mIsImageCaptureIntent = isImageCaptureIntent();
         createCameraScreenNail(!mIsImageCaptureIntent);
+
+        ListPreference captureMode = group.findPreference(CameraSettings.KEY_MODE_MENU);
+        if (captureMode != null) {
+            mTemporalBracketing = captureMode.findEntryValueByEntry(getString(R.string.pref_camera_mode_entry_temporal_bracketing));
+            if (mTemporalBracketing == null) {
+                mTemporalBracketing = "";
+            }
+
+            mExposureBracketing = captureMode.findEntryValueByEntry(getString(R.string.pref_camera_mode_entry_exp_bracketing));
+            if (mExposureBracketing == null) {
+                mExposureBracketing = "";
+            }
+
+            mHighPerformance = captureMode.findEntryValueByEntry(getString(R.string.pref_camera_mode_entry_hs));
+            if (mHighPerformance == null) {
+                mHighPerformance = "";
+            }
+
+            mHighQuality = captureMode.findEntryValueByEntry(getString(R.string.pref_camera_mode_entry_hq));
+            if (mHighQuality == null) {
+                mHighQuality = "";
+            }
+
+            mHighQualityZsl = captureMode.findEntryValueByEntry(getString(R.string.pref_camera_mode_entry_zsl));
+            if (mHighQualityZsl == null) {
+                mHighQualityZsl = "";
+            }
+        }
 
         mPreferences.setLocalId(this, mCameraId);
         CameraSettings.upgradeLocalPreferences(mPreferences.getLocal());
@@ -1306,14 +1378,15 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_SCENE_MODE};
         final String[] OTHER_SETTING_KEYS = {
                 CameraSettings.KEY_RECORD_LOCATION,
+                CameraSettings.KEY_FOCUS_MODE,
+                CameraSettings.KEY_MODE_MENU,
                 CameraSettings.KEY_CONTRAST,
                 CameraSettings.KEY_BRIGHTNESS,
                 CameraSettings.KEY_SHARPNESS,
                 CameraSettings.KEY_SATURATION,
                 CameraSettings.KEY_ANTIBANDING,
                 CameraSettings.KEY_PREVIEW_SIZE,
-                CameraSettings.KEY_PICTURE_SIZE,
-                CameraSettings.KEY_FOCUS_MODE};
+                CameraSettings.KEY_PICTURE_SIZE};
 
         CameraPicker.setImageResourceId(R.drawable.ic_switch_photo_facing_holo_light);
         mIndicatorControlContainer.initialize(this, mPreferenceGroup,
@@ -1418,7 +1491,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         if (mPaused) return;
 
         hidePostCaptureAlert();
-        startPreview();
+        startPreview(true);
         setCameraState(IDLE);
         startFaceDetection();
     }
@@ -1947,7 +2020,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mFocusManager.setDisplayOrientation(mDisplayOrientation);
     }
 
-    private void startPreview() {
+    private void startPreview(boolean updateAll) {
         mFocusManager.resetTouchFocus();
 
         mCameraDevice.setErrorCallback(mErrorCallback);
@@ -1967,7 +2040,13 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             }
             mFocusManager.setAeAwbLock(false); // Unlock AE and AWB.
         }
-        setCameraParameters(UPDATE_PARAM_ALL);
+
+        if ( updateAll ) {
+            Log.v(TAG, "Updating all parameters!");
+            setCameraParameters(UPDATE_PARAM_INITIALIZE | UPDATE_PARAM_ZOOM | UPDATE_PARAM_PREFERENCE);
+        } else {
+            setCameraParameters(UPDATE_PARAM_MODE);
+        }
 
         if (mSurfaceTexture == null) {
             Size size = mParameters.getPreviewSize();
@@ -2045,7 +2124,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         return null;
     }
 
-    private void updateCameraParametersPreference() {
+    private boolean updateCameraParametersPreference() {
+        boolean restartNeeded = false;
 
         if (mAeLockSupported) {
             mParameters.setAutoExposureLock(mFocusManager.getAeAwbLock());
@@ -2064,15 +2144,37 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mParameters.setMeteringAreas(mFocusManager.getMeteringAreas());
         }
 
+     // Capture mode
+        String mode = mPreferences.getString(
+                CameraSettings.KEY_MODE_MENU, getString(R.string.pref_camera_mode_default));
+        if ( !mCaptureMode.equals(mode) ) {
+            restartNeeded = true;
+            mCaptureMode = mode;
+            setCaptureMode(mode, mParameters);
+            // Capture mode can be applied only
+            // when preview is stopped.
+            mCameraDevice.stopPreview();
+            mCameraDevice.setParameters(mParameters);
+            mParameters = mCameraDevice.getParameters();
+            mInitialParams = mParameters;
+            Log.v(TAG,"Capture mode set: " + mParameters.get(CameraSettings.KEY_MODE));
+
+            CameraSettings settings = new CameraSettings(this,
+                                                         mParameters,
+                                                         mCameraId,
+                                                         CameraHolder.instance().getCameraInfo());
+            mPreferenceGroup = settings.getPreferenceGroup(R.xml.camera_preferences);
+        }
+
         // Set picture size.
         String pictureSize = mPreferences.getString(
                 CameraSettings.KEY_PICTURE_SIZE, null);
         if (pictureSize == null) {
             CameraSettings.initialCameraPictureSize(this, mParameters);
         } else {
-            List<Size> supported = mParameters.getSupportedPictureSizes();
-            CameraSettings.setCameraPictureSize(
-                    pictureSize, supported, mParameters);
+            List<String> supported = new ArrayList<String>();
+            supported = CameraSettings.sizeListToStringList(mParameters.getSupportedPictureSizes());
+            CameraSettings.setCameraPictureSize(pictureSize, supported, mParameters);
         }
         Size size = mParameters.getPictureSize();
 
@@ -2238,12 +2340,15 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             }
         }
 
+        return restartNeeded;
     }
 
     // We separate the parameters into several subsets, so we can update only
     // the subsets actually need updating. The PREFERENCE set needs extra
     // locking because the preference can be changed from GLThread as well.
     private void setCameraParameters(int updateSet) {
+        boolean restartPreview = false;
+
         if ((updateSet & UPDATE_PARAM_INITIALIZE) != 0) {
             updateCameraParametersInitialize();
         }
@@ -2253,10 +2358,24 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         }
 
         if ((updateSet & UPDATE_PARAM_PREFERENCE) != 0) {
-            updateCameraParametersPreference();
+            restartPreview = updateCameraParametersPreference();
+        }
+
+        if ((updateSet & UPDATE_PARAM_MODE) != 0 ) {
+               updateCameraParametersPreference();
         }
 
         mCameraDevice.setParameters(mParameters);
+
+        if ( ( restartPreview ) && ( mCameraState != PREVIEW_STOPPED ) ) {
+            // This will only restart the preview
+            // without trying to apply any new
+            // camera parameters.
+            Message msg = new Message();
+            msg.what = RESTART_PREVIEW;
+            msg.arg1 = MODE_RESTART;
+            mHandler.sendMessage(msg);
+        }
     }
 
     // If the Camera is idle, update the parameters immediately, otherwise
@@ -2276,6 +2395,64 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             if (!mHandler.hasMessages(SET_CAMERA_PARAMETERS_WHEN_IDLE)) {
                 mHandler.sendEmptyMessageDelayed(
                         SET_CAMERA_PARAMETERS_WHEN_IDLE, 1000);
+            }
+        }
+    }
+
+    private void setCaptureMode(String mode, Parameters params) {
+        if ( mode.equals(mHighPerformance) ) {
+            params.set(CameraSettings.KEY_MODE, mHighPerformance);
+            params.set(PARM_IPP, PARM_IPP_NONE);
+            mTempBracketingEnabled = false;
+            params.remove(PARM_EXPOSURE_BRACKETING_RANGE);
+            params.set(CameraSettings.KEY_TEMPORAL_BRACKETING, FALSE);
+        } else if ( mode.equals(mHighQuality) ) {
+            params.set(CameraSettings.KEY_MODE, mHighQuality);
+            params.set(PARM_IPP, PARM_IPP_LDCNSF);
+            mTempBracketingEnabled = false;
+            params.remove(PARM_EXPOSURE_BRACKETING_RANGE);
+            params.set(CameraSettings.KEY_TEMPORAL_BRACKETING, FALSE);
+        } else if ( mode.equals(mHighQualityZsl) ) {
+            params.set(CameraSettings.KEY_MODE, mHighQualityZsl);
+            params.set(PARM_IPP, PARM_IPP_LDCNSF);
+            mTempBracketingEnabled = false;
+            params.remove(PARM_EXPOSURE_BRACKETING_RANGE);
+            params.set(CameraSettings.KEY_TEMPORAL_BRACKETING, FALSE);
+        } else if ( mode.equals(mTemporalBracketing) ) {
+            params.set(CameraSettings.KEY_MODE, mTemporalBracketing);
+            params.set(PARM_IPP, PARM_IPP_NONE);
+            params.set(PARM_GBCE, PARM_GBCE_OFF);
+
+            //Enable Temporal Bracketing
+            mTempBracketingEnabled = true;
+            params.remove(PARM_EXPOSURE_BRACKETING_RANGE);
+
+        } else if ( mode.equals(mExposureBracketing) ) {
+
+            params.set(CameraSettings.KEY_MODE, mExposureBracketing);
+            //Disable GBCE by default
+            params.set(PARM_GBCE, PARM_GBCE_OFF);
+            params.set(PARM_IPP, PARM_IPP_NONE);
+            params.set(PARM_EXPOSURE_BRACKETING_RANGE, EXPOSURE_BRACKETING_RANGE_VALUE);
+            mBurstImages = EXPOSURE_BRACKETING_COUNT;
+
+            //Disable Temporal Brackerting
+            mTempBracketingEnabled = false;
+            params.set(CameraSettings.KEY_TEMPORAL_BRACKETING, FALSE);
+
+        } else {
+            // Default to HQ with LDC&NSF
+            params.set(CameraSettings.KEY_MODE, mHighQuality);
+            params.set(PARM_IPP, PARM_IPP_LDCNSF);
+            params.remove(PARM_EXPOSURE_BRACKETING_RANGE);
+        }
+
+        if ( null != mFocusManager ) {
+            if( mTempBracketingEnabled ) {
+                mFocusManager.setTempBracketingState(FocusManager.TempBracketingStates.ACTIVE);
+            }
+            else {
+                mFocusManager.setTempBracketingState(FocusManager.TempBracketingStates.OFF);
             }
         }
     }
@@ -2391,7 +2568,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         boolean mirror = (info.facing == CameraInfo.CAMERA_FACING_FRONT);
         mFocusManager.setMirror(mirror);
         mFocusManager.setParameters(mInitialParams);
-        startPreview();
+        startPreview(false);
         setCameraState(IDLE);
         startFaceDetection();
         initializeIndicatorControl();
