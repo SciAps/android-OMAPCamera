@@ -119,4 +119,16 @@
             camera:title="@string/pref_camera_mode_title"
             camera:entries="@array/pref_camera_mode_entries"
             camera:entryValues="@array/pref_camera_mode_entryvalues" />
+    <ListPreference
+            camera:key="pref_camera_bracketrange_key"
+            camera:defaultValue="@string/pref_camera_bracketrange_default"
+            camera:title="@string/pref_camera_bracketrange_title"
+            camera:entries="@array/pref_camera_bracketrange_entries"
+            camera:entryValues="@array/pref_camera_bracketrange_entryvalues" />
+    <ListPreference
+            camera:key="pref_camera_burst_key"
+            camera:defaultValue="@string/pref_camera_burst_default"
+            camera:title="@string/pref_camera_burst_title"
+            camera:entries="@array/pref_camera_burst_entries"
+            camera:entryValues="@array/pref_camera_burst_entryvalues" />
 </PreferenceGroup>

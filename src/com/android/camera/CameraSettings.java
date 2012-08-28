@@ -65,6 +65,8 @@ public class CameraSettings {
     public static final String KEY_MODE_MENU = "pref_camera_mode_key";
     public static final String KEY_TEMPORAL_BRACKETING = "temporal-bracketing";
     public static final String KEY_CAP_MODE_VALUES = "mode-values";
+    public static final String KEY_BRACKET_RANGE = "pref_camera_bracketrange_key";
+    public static final String KEY_BURST = "pref_camera_burst_key";
 
     public static final String EXPOSURE_DEFAULT_VALUE = "0";
 
@@ -202,6 +204,11 @@ public class CameraSettings {
         // to check if the preference is available here
         if (videoQuality != null) {
             filterUnsupportedOptions(group, videoQuality, getSupportedVideoQuality());
+        }
+
+        if (focusMode != null) {
+            filterUnsupportedOptions(group,
+                    focusMode, mParameters.getSupportedFocusModes());
         }
 
         if (antibanding != null) {

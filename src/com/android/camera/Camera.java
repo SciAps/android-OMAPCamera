@@ -104,6 +104,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final int CAMERA_DISABLED = 13;
     private static final int MODE_RESTART = 14;
     private static final int RESTART_PREVIEW = 15;
+    public static final int RELEASE_CAMERA = 16;
 
     // The subset of parameters we need to update in setCameraParameters().
     private static final int UPDATE_PARAM_INITIALIZE = 1;
@@ -111,6 +112,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final int UPDATE_PARAM_PREFERENCE = 4;
     private static final int UPDATE_PARAM_ALL = -1;
     private static final int UPDATE_PARAM_MODE = 8;
+
 
     private String mPreviewSize = null;
     private String mAntibanding = null;
@@ -125,16 +127,33 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final String PARM_SATURATION = "saturation";
     private static final String PARM_EXPOSURE_BRACKETING_RANGE = "exp-bracketing-range";
     private static final String EXPOSURE_BRACKETING_RANGE_VALUE = "-30,0,30";
+    private static final String PARM_ZOOM_BRACKETING_RANGE = "zoom-bracketing-range";
     private static final String PARM_IPP = "ipp";
+    private static final String PARM_BURST = "burst-capture";
     private static final String PARM_IPP_LDCNSF = "ldc-nsf";
     private static final String PARM_IPP_NONE = "off";
     private static final String PARM_GBCE = "gbce";
     private static final String PARM_GLBCE = "glbce";
     private static final String PARM_GBCE_OFF = "disable";
+    private static final String PARM_TEMPORAL_BRACKETING_RANGE_POS = "temporal-bracketing-range-positive";
+    private static final String PARM_TEMPORAL_BRACKETING_RANGE_NEG = "temporal-bracketing-range-negative";
     private static final int EXPOSURE_BRACKETING_COUNT = 3;
+    private static final int ZOOM_BRACKETING_COUNT = 10;
+    private static final int CAMERA_RELEASE_DELAY = 3000;
+
     private boolean mTempBracketingEnabled = false;
     private boolean mTempBracketingStarted = false;
+    private boolean mIsBurstStampInitialized = false;
+    private boolean mIsBurstTimeStampsSwapNeeded = false;
+    private boolean mBurstRunning = false;
+
     private int mBurstImages = 0;
+    private int mCurrBurstImages = 0;
+
+    private double mBurstTimeStamp = 0;
+    private double mBurstTmpTimeStamp = 0;
+    private double mBurstFPSsum = 0;
+
     private String mCaptureMode = new String();
 
     public static final String TRUE = "true";
@@ -145,6 +164,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mHighPerformance;
     private String mHighQuality;
     private String mHighQualityZsl;
+    private String mZoomBracketing;
+    private String mBracketRange;
 
     private boolean mPausing;
 
@@ -354,14 +375,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                         updateAllParams = false;
                     }
                     startPreview(updateAllParams);
-                    startFaceDetection();
-                    if (mJpegPictureCallbackTime != 0) {
-                        long now = System.currentTimeMillis();
-                        mJpegCallbackFinishTime = now - mJpegPictureCallbackTime;
-                        Log.v(TAG, "mJpegCallbackFinishTime = "
-                                + mJpegCallbackFinishTime + "ms");
-                        mJpegPictureCallbackTime = 0;
-                    }
                     break;
                 }
                 case CLEAR_SCREEN_DELAY: {
@@ -440,6 +453,11 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                     mCameraDisabled = true;
                     Util.showErrorAndFinish(Camera.this,
                             R.string.camera_disabled);
+                    break;
+                }
+                case RELEASE_CAMERA: {
+                    stopPreview();
+                    closeCamera();
                     break;
                 }
             }
@@ -831,10 +849,43 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         @Override
         public void onPictureTaken(
                 final byte [] jpegData, final android.hardware.Camera camera) {
-            if (mPaused) {
+            if (mPausing) {
+                if (mBurstImages > 0) {
+                    resetBurst();
+                    mBurstImages = 0;
+                    mHandler.sendEmptyMessageDelayed(RELEASE_CAMERA,
+                                                     CAMERA_RELEASE_DELAY);
+                }
                 return;
             }
 
+            if ( mBurstRunning ) {
+                /* If mBurstRunning */
+                /* ----> starts calculating the delay and FPS between two Burst frames */
+                if(!mIsBurstStampInitialized) {
+                    /* Going here only for first Jpeg Callback:
+                     * Save it;s timestamp to mBurstTimeStamp
+                     */
+                    mBurstTimeStamp = System.currentTimeMillis();
+                    mIsBurstStampInitialized = true;
+
+                } else {
+                    /* Update mBurstTmpTimeStamp with every new callback arrived */
+                    mBurstTmpTimeStamp = System.currentTimeMillis();
+                }
+
+                if(mBurstTimeStamp != 0 && mBurstTmpTimeStamp != 0){
+                    if(mBurstTimeStamp != mBurstTmpTimeStamp &&
+                            (mBurstTmpTimeStamp > mBurstTimeStamp)) {
+                        mBurstFPSsum += 1000/(mBurstTmpTimeStamp - mBurstTimeStamp);
+                    }
+                    /* Copy mBurstTmpTimeStamp to mBurstTimeStamp needed for next measurement */
+                    mBurstTimeStamp = mBurstTmpTimeStamp;
+                }
+                /* ----> End of calculating*/
+            }
+
+            FocusManager.TempBracketingStates tempState = mFocusManager.getTempBracketingState();
             mJpegPictureCallbackTime = System.currentTimeMillis();
             // If postview callback has arrived, the captured image is displayed
             // in postview callback. If not, the captured image is displayed in
@@ -885,11 +936,66 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 }
             }
 
-            // Check this in advance of each shot so we don't add to shutter
-            // latency. It's true that someone else could write to the SD card in
-            // the mean time and fill it, but that could have happened between the
-            // shutter press and saving the JPEG too.
-            checkStorage();
+            if (mCaptureMode.equals(mExposureBracketing) ) {
+                mBurstImages --;
+                if (mBurstImages == 0 ) {
+                    mHandler.sendEmptyMessageDelayed(RESTART_PREVIEW, 0);
+                }
+            }
+
+            //reset burst in case of exposure bracketing
+            if (mCaptureMode.equals(mExposureBracketing) && mBurstImages == 0) {
+                mBurstImages = EXPOSURE_BRACKETING_COUNT;
+                mParameters.set(PARM_BURST, mBurstImages);
+                mCameraDevice.setParameters(mParameters);
+            }
+
+            if (mCaptureMode.equals(mZoomBracketing) ) {
+                mBurstImages --;
+                if (mBurstImages == 0 ) {
+                    mHandler.sendEmptyMessageDelayed(RESTART_PREVIEW, 0);
+                }
+            }
+
+            //reset burst in case of zoom bracketing
+            if (mCaptureMode.equals(mZoomBracketing) && mBurstImages == 0) {
+                mBurstImages = ZOOM_BRACKETING_COUNT;
+                mParameters.set(PARM_BURST, mBurstImages);
+                mCameraDevice.setParameters(mParameters);
+            }
+
+            if ( tempState == FocusManager.TempBracketingStates.RUNNING ) {
+                mBurstImages --;
+
+                if (mBurstImages == 0 ) {
+                    mHandler.sendEmptyMessageDelayed(RESTART_PREVIEW, 0);
+                    mTempBracketingEnabled = true;
+                    stopTemporalBracketing();
+                }
+            }
+
+            if (mBurstRunning) {
+                mBurstImages --;
+
+                if (mBurstImages == 0) {
+                    Log.v(TAG,"PPM: Average Jpeg Callbacks FPS in Burst:" + (mBurstFPSsum)/mCurrBurstImages);
+                    resetBurst();
+                    mBurstRunning = false;
+                    mIsBurstStampInitialized = false;
+                    /* Reset Burst Timestamp initialization if burst completed */
+                    mBurstTimeStamp = 0;
+                    mBurstTmpTimeStamp = 0;
+                    mBurstFPSsum = 0;
+                    checkStorage();
+                    mHandler.sendEmptyMessageDelayed(RESTART_PREVIEW, 0);
+                }
+            } else {
+                // Check this in advance of each shot so we don't add to shutter
+                // latency. It's true that someone else could write to the SD card in
+                // the mean time and fill it, but that could have happened between the
+                // shutter press and saving the JPEG too.
+                checkStorage();
+            }
 
             long now = System.currentTimeMillis();
             mJpegCallbackFinishTime = now - mJpegPictureCallbackTime;
@@ -1349,6 +1455,23 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         }
     }
 
+    private void overrideCameraBurst(final String burst) {
+        if (burst != null) {
+            Editor editor = mPreferences.edit();
+            editor.putString(CameraSettings.KEY_BURST, burst);
+            editor.apply();
+            if ( !mCaptureMode.equals(mExposureBracketing) &&
+                    !mCaptureMode.equals(mZoomBracketing)) {
+                mParameters.set(PARM_BURST, burst);
+                mCameraDevice.setParameters(mParameters);
+            }
+            mBurstRunning = false;
+            if (mIndicatorControlContainer != null) {
+                mIndicatorControlContainer.reloadPreferences();
+            }
+        }
+    }
+
     private void updateSceneModeUI() {
         // If scene mode is set, we cannot set flash mode, white balance, and
         // focus mode, instead, we read it from driver
@@ -1357,6 +1480,12 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                     mParameters.getWhiteBalance(), mParameters.getFocusMode());
         } else {
             overrideCameraSettings(null, null, null);
+        }
+
+        if ( !mCaptureMode.equals(mHighPerformance) ) {
+            overrideCameraBurst(getString(R.string.pref_camera_burst_default));
+        } else {
+            overrideCameraBurst(null);
         }
     }
 
@@ -1380,6 +1509,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_RECORD_LOCATION,
                 CameraSettings.KEY_FOCUS_MODE,
                 CameraSettings.KEY_MODE_MENU,
+                CameraSettings.KEY_BURST,
+                CameraSettings.KEY_BRACKET_RANGE,
                 CameraSettings.KEY_CONTRAST,
                 CameraSettings.KEY_BRIGHTNESS,
                 CameraSettings.KEY_SHARPNESS,
@@ -1672,6 +1803,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mPaused = false;
         super.onResume();
         if (mOpenCameraFail || mCameraDisabled) return;
+
+        mHandler.removeMessages(RELEASE_CAMERA);
 
         initDefaults();
 
@@ -2061,19 +2194,41 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         }
 
         mCameraDevice.setPreviewTextureAsync(mSurfaceTexture);
-        Log.v(TAG, "startPreview");
-        mCameraDevice.startPreviewAsync();
+        try {
+            Log.v(TAG, "startPreview");
+            mCameraDevice.startPreviewAsync();
+        } catch (Throwable ex) {
+            closeCamera();
+            throw new RuntimeException("startPreview failed", ex);
+        }
 
+        setCameraState(IDLE);
         mFocusManager.onPreviewStarted();
+        if ( mTempBracketingEnabled ) {
+            mFocusManager.setTempBracketingState(FocusManager.TempBracketingStates.ACTIVE);
+        }
 
         if (mSnapshotOnIdle) {
             mHandler.post(mDoSnapRunnable);
         }
     }
 
+    private void stopTemporalBracketing() {
+        mFocusManager.setTempBracketingState(FocusManager.TempBracketingStates.OFF);
+        mParameters.set(CameraSettings.KEY_TEMPORAL_BRACKETING, FALSE);
+        mCameraDevice.setParameters(mParameters);
+        mParameters.remove(CameraSettings.KEY_TEMPORAL_BRACKETING);
+        mTempBracketingStarted = false;
+    }
+
     private void stopPreview() {
         if (mCameraDevice != null && mCameraState != PREVIEW_STOPPED) {
             Log.v(TAG, "stopPreview");
+
+            if ( mTempBracketingEnabled ) {
+                stopTemporalBracketing();
+            }
+
             mCameraDevice.cancelAutoFocus(); // Reset the focus.
             mCameraDevice.stopPreview();
             mFaceDetectionStarted = false;
@@ -2144,7 +2299,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mParameters.setMeteringAreas(mFocusManager.getMeteringAreas());
         }
 
-     // Capture mode
+        // Capture mode
         String mode = mPreferences.getString(
                 CameraSettings.KEY_MODE_MENU, getString(R.string.pref_camera_mode_default));
         if ( !mCaptureMode.equals(mode) ) {
@@ -2224,22 +2379,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mParameters.setAntibanding(antibanding);
             mAntibanding = antibanding;
         }
-
-        // Set a preview size that is closest to the viewfinder height and has
-        // the right aspect ratio.
-        List<Size> sizes = mParameters.getSupportedPreviewSizes();
-        Size optimalSize = Util.getOptimalPreviewSize(this, sizes,
-                (double) size.width / size.height);
-        Size original = mParameters.getPreviewSize();
-        if (!original.equals(optimalSize)) {
-            mParameters.setPreviewSize(optimalSize.width, optimalSize.height);
-
-            // Zoom related settings will be changed for different preview
-            // sizes, so set and read the parameters to get latest values
-            mCameraDevice.setParameters(mParameters);
-            mParameters = mCameraDevice.getParameters();
-        }
-        Log.v(TAG, "Preview size is " + optimalSize.width + "x" + optimalSize.height);
 
         // Since change scene mode may change supported values,
         // Set scene mode first,
@@ -2340,6 +2479,35 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             }
         }
 
+        String bracketRange =  mPreferences.getString(
+                CameraSettings.KEY_BRACKET_RANGE,
+                getString(R.string.pref_camera_bracketrange_default));
+
+        if ( mTempBracketingEnabled ) {
+            mParameters.set(PARM_TEMPORAL_BRACKETING_RANGE_POS, Integer.parseInt(bracketRange) );
+            mParameters.set(PARM_TEMPORAL_BRACKETING_RANGE_NEG, Integer.parseInt(bracketRange) );
+            mBracketRange = bracketRange;
+            mBurstImages = Integer.parseInt(mBracketRange) * 2 + 1;
+        }
+
+        int burst = Integer.parseInt(mPreferences.getString(
+                CameraSettings.KEY_BURST,
+                getString(R.string.pref_camera_burst_default)));
+
+        if (( burst != mBurstImages ) &&
+                ( mode.equals(mHighPerformance) ) ) {
+              mBurstImages = burst;
+              mCurrBurstImages = mBurstImages -1;
+              mParameters.set(PARM_BURST, mBurstImages);
+              if ( 0 < mBurstImages ) {
+                  mBurstRunning = true;
+              }
+        }
+
+        if (mIndicatorControlContainer != null) {
+            mIndicatorControlContainer.requestLayout();
+        }
+
         return restartNeeded;
     }
 
@@ -2348,7 +2516,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     // locking because the preference can be changed from GLThread as well.
     private void setCameraParameters(int updateSet) {
         boolean restartPreview = false;
-
         if ((updateSet & UPDATE_PARAM_INITIALIZE) != 0) {
             updateCameraParametersInitialize();
         }
@@ -2366,7 +2533,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         }
 
         mCameraDevice.setParameters(mParameters);
-
         if ( ( restartPreview ) && ( mCameraState != PREVIEW_STOPPED ) ) {
             // This will only restart the preview
             // without trying to apply any new
@@ -2406,26 +2572,31 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mTempBracketingEnabled = false;
             params.remove(PARM_EXPOSURE_BRACKETING_RANGE);
             params.set(CameraSettings.KEY_TEMPORAL_BRACKETING, FALSE);
+            params.remove(PARM_ZOOM_BRACKETING_RANGE);
         } else if ( mode.equals(mHighQuality) ) {
             params.set(CameraSettings.KEY_MODE, mHighQuality);
             params.set(PARM_IPP, PARM_IPP_LDCNSF);
             mTempBracketingEnabled = false;
             params.remove(PARM_EXPOSURE_BRACKETING_RANGE);
             params.set(CameraSettings.KEY_TEMPORAL_BRACKETING, FALSE);
+            params.remove(PARM_ZOOM_BRACKETING_RANGE);
         } else if ( mode.equals(mHighQualityZsl) ) {
             params.set(CameraSettings.KEY_MODE, mHighQualityZsl);
             params.set(PARM_IPP, PARM_IPP_LDCNSF);
             mTempBracketingEnabled = false;
             params.remove(PARM_EXPOSURE_BRACKETING_RANGE);
             params.set(CameraSettings.KEY_TEMPORAL_BRACKETING, FALSE);
+            params.remove(PARM_ZOOM_BRACKETING_RANGE);
         } else if ( mode.equals(mTemporalBracketing) ) {
             params.set(CameraSettings.KEY_MODE, mTemporalBracketing);
             params.set(PARM_IPP, PARM_IPP_NONE);
             params.set(PARM_GBCE, PARM_GBCE_OFF);
+            params.remove(PARM_ZOOM_BRACKETING_RANGE);
 
             //Enable Temporal Bracketing
             mTempBracketingEnabled = true;
             params.remove(PARM_EXPOSURE_BRACKETING_RANGE);
+            params.remove(PARM_ZOOM_BRACKETING_RANGE);
 
         } else if ( mode.equals(mExposureBracketing) ) {
 
@@ -2433,8 +2604,26 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             //Disable GBCE by default
             params.set(PARM_GBCE, PARM_GBCE_OFF);
             params.set(PARM_IPP, PARM_IPP_NONE);
+            params.set(PARM_BURST, EXPOSURE_BRACKETING_COUNT);
             params.set(PARM_EXPOSURE_BRACKETING_RANGE, EXPOSURE_BRACKETING_RANGE_VALUE);
             mBurstImages = EXPOSURE_BRACKETING_COUNT;
+
+            //Disable Temporal Brackerting
+            mTempBracketingEnabled = false;
+            params.set(CameraSettings.KEY_TEMPORAL_BRACKETING, FALSE);
+            params.remove(PARM_ZOOM_BRACKETING_RANGE);
+
+        } else if ( mode.equals(mZoomBracketing) ) {
+
+            params.set(CameraSettings.KEY_MODE, mZoomBracketing);
+            //Disable GBCE by default
+            params.set(PARM_GBCE, PARM_GBCE_OFF);
+            params.set(PARM_IPP, PARM_IPP_NONE);
+            params.set(PARM_BURST, ZOOM_BRACKETING_COUNT);
+            params.set(PARM_ZOOM_BRACKETING_RANGE,
+                    getString(R.string.pref_camera_zoom_bracketing_rangevalues));
+            mBurstImages = ZOOM_BRACKETING_COUNT;
+            params.remove(PARM_EXPOSURE_BRACKETING_RANGE);
 
             //Disable Temporal Brackerting
             mTempBracketingEnabled = false;
@@ -2445,6 +2634,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             params.set(CameraSettings.KEY_MODE, mHighQuality);
             params.set(PARM_IPP, PARM_IPP_LDCNSF);
             params.remove(PARM_EXPOSURE_BRACKETING_RANGE);
+            params.remove(PARM_ZOOM_BRACKETING_RANGE);
         }
 
         if ( null != mFocusManager ) {
@@ -2596,6 +2786,15 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     public void onUserInteraction() {
         super.onUserInteraction();
         keepScreenOnAwhile();
+    }
+
+    private void resetBurst() {
+        mParameters.set(PARM_BURST, 0);
+        mCameraDevice.setParameters(mParameters);
+        Editor editor = mPreferences.edit();
+        editor.putString(CameraSettings.KEY_BURST, "0");
+        editor.apply();
+        mIndicatorControlContainer.reloadPreferences();
     }
 
     private void resetScreenOn() {
