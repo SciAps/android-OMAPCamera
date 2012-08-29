@@ -1712,7 +1712,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         // Do this after starting preview because it depends on camera
         // parameters.
         initializeIndicatorControl();
-        mCameraSound = new MediaActionSound();
 
         // Make sure preview is started.
         try {
@@ -2249,6 +2248,10 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         }
         // Dismiss open menu if exists.
         PopupManager.getInstance(this).notifyShowPopup(null);
+
+        mCameraSound = new MediaActionSound();
+        // Not required, but reduces latency when playback is requested later.
+        mCameraSound.load(MediaActionSound.FOCUS_COMPLETE);
     }
 
     @Override
