@@ -120,6 +120,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mBrightness = null;
     private String mSaturation = null;
     private String mSharpness = null;
+    private String mISO = null;
 
     private static final String PARM_CONTRAST = "contrast";
     private static final String PARM_BRIGHTNESS = "brightness";
@@ -130,6 +131,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final String PARM_ZOOM_BRACKETING_RANGE = "zoom-bracketing-range";
     private static final String PARM_IPP = "ipp";
     private static final String PARM_BURST = "burst-capture";
+    private static final String PARM_ISO = "iso";
     private static final String PARM_IPP_LDCNSF = "ldc-nsf";
     private static final String PARM_IPP_NONE = "off";
     private static final String PARM_GBCE = "gbce";
@@ -140,6 +142,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final int EXPOSURE_BRACKETING_COUNT = 3;
     private static final int ZOOM_BRACKETING_COUNT = 10;
     private static final int CAMERA_RELEASE_DELAY = 3000;
+    public static final String PARM_SUPPORTED_ISO_MODES = "iso-mode-values";
 
     private boolean mTempBracketingEnabled = false;
     private boolean mTempBracketingStarted = false;
@@ -1510,6 +1513,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_FOCUS_MODE,
                 CameraSettings.KEY_MODE_MENU,
                 CameraSettings.KEY_BURST,
+                CameraSettings.KEY_ISO,
                 CameraSettings.KEY_BRACKET_RANGE,
                 CameraSettings.KEY_CONTRAST,
                 CameraSettings.KEY_BRIGHTNESS,
@@ -2332,6 +2336,15 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             CameraSettings.setCameraPictureSize(pictureSize, supported, mParameters);
         }
         Size size = mParameters.getPictureSize();
+
+        // ISO
+        String iso = mPreferences.getString(
+                    CameraSettings.KEY_ISO, getString(R.string.pref_camera_iso_default));
+
+        if ( !iso.equals(mISO) ) {
+            mParameters.set(PARM_ISO, iso);
+            mISO = iso;
+        }
 
         // Set Contrast
         String contrast = mPreferences.getString(

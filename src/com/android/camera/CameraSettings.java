@@ -29,6 +29,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 
 
@@ -67,6 +68,7 @@ public class CameraSettings {
     public static final String KEY_CAP_MODE_VALUES = "mode-values";
     public static final String KEY_BRACKET_RANGE = "pref_camera_bracketrange_key";
     public static final String KEY_BURST = "pref_camera_burst_key";
+    public static final String KEY_ISO = "pref_camera_iso_key";
 
     public static final String EXPOSURE_DEFAULT_VALUE = "0";
 
@@ -188,6 +190,7 @@ public class CameraSettings {
         ListPreference previewSize = group.findPreference(KEY_PREVIEW_SIZE);
         ListPreference antibanding = group.findPreference(KEY_ANTIBANDING);
         ListPreference mode = group.findPreference(KEY_MODE_MENU);
+        ListPreference iso = group.findPreference(KEY_ISO);
 
         ArrayList<CharSequence[]> allPictureEntries = new ArrayList<CharSequence[]>();
         ArrayList<CharSequence[]> allPictureEntryValues = new ArrayList<CharSequence[]>();
@@ -205,7 +208,10 @@ public class CameraSettings {
         if (videoQuality != null) {
             filterUnsupportedOptions(group, videoQuality, getSupportedVideoQuality());
         }
-
+        if ( iso  != null) {
+            filterUnsupportedOptions(group, iso,
+                    parseToList(mParameters.get(Camera.PARM_SUPPORTED_ISO_MODES)));
+        }
         if (focusMode != null) {
             filterUnsupportedOptions(group,
                     focusMode, mParameters.getSupportedFocusModes());
@@ -317,6 +323,19 @@ public class CameraSettings {
             }
         }
         return false;
+    }
+
+    public List<String> parseToList(String str) {
+        if (null == str)
+            return null;
+
+        StringTokenizer tokenizer = new StringTokenizer(str, ",");
+        ArrayList<String> substrings = new ArrayList<String>();
+
+        while (tokenizer.hasMoreElements())
+            substrings.add(tokenizer.nextToken());
+
+        return substrings;
     }
 
     private void filterUnsupportedOptions(PreferenceGroup group,
