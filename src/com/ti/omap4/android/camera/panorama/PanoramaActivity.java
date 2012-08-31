@@ -407,7 +407,7 @@ public class PanoramaActivity extends ActivityBase implements
                   " becuase the mode is not supported.");
         }
 
-        parameters.setRecordingHint(false);
+        parameters.setRecordingHint(true);
 
         mHorizontalViewAngle = parameters.getHorizontalViewAngle();
         mVerticalViewAngle =  parameters.getVerticalViewAngle();
@@ -1087,6 +1087,10 @@ public class PanoramaActivity extends ActivityBase implements
         mCameraDevice.setDisplayOrientation(0);
 
         setPreviewTexture(mSurfaceTexture);
+
+        Parameters parameters = mCameraDevice.getParameters();
+        parameters.setRecordingHint(true);
+        configureCamera(parameters);
 
         try {
             Log.v(TAG, "startPreview");
