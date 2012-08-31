@@ -412,19 +412,6 @@ public class CameraSettings {
             // So, just upgrade to version 1 directly
             version = 1;
         }
-        if (version == 1) {
-            // Change jpeg quality {65,75,85} to {normal,fine,superfine}
-            String quality = pref.getString(KEY_JPEG_QUALITY, "85");
-            if (quality.equals("65")) {
-                quality = "normal";
-            } else if (quality.equals("75")) {
-                quality = "fine";
-            } else {
-                quality = "superfine";
-            }
-            editor.putString(KEY_JPEG_QUALITY, quality);
-            version = 2;
-        }
         if (version == 2) {
             editor.putString(KEY_RECORD_LOCATION,
                     pref.getBoolean(KEY_RECORD_LOCATION, false)

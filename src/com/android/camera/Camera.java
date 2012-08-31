@@ -121,6 +121,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mSaturation = null;
     private String mSharpness = null;
     private String mISO = null;
+    private int mJpegQuality = CameraProfile.QUALITY_HIGH;
 
     private static final String PARM_CONTRAST = "contrast";
     private static final String PARM_BRIGHTNESS = "brightness";
@@ -1519,6 +1520,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_BRIGHTNESS,
                 CameraSettings.KEY_SHARPNESS,
                 CameraSettings.KEY_SATURATION,
+                CameraSettings.KEY_JPEG_QUALITY,
                 CameraSettings.KEY_ANTIBANDING,
                 CameraSettings.KEY_PREVIEW_SIZE,
                 CameraSettings.KEY_PICTURE_SIZE};
@@ -2346,6 +2348,22 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mISO = iso;
         }
 
+        // Set JPEG quality.
+        String quality = mPreferences.getString(CameraSettings.KEY_JPEG_QUALITY,
+                                                 getString(R.string.pref_camera_jpegquality_default));
+        int jpegQuality = CameraProfile.QUALITY_HIGH;
+        try {
+            jpegQuality = Integer.parseInt(quality);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
+
+        if ( mJpegQuality != jpegQuality ) {
+            mJpegQuality = jpegQuality;
+            jpegQuality = CameraProfile.getJpegEncodingQualityParameter(mCameraId, mJpegQuality);
+            mParameters.setJpegQuality(jpegQuality);
+        }
+
         // Set Contrast
         String contrast = mPreferences.getString(
                 CameraSettings.KEY_CONTRAST,
@@ -2414,11 +2432,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 mSceneMode = Parameters.SCENE_MODE_AUTO;
             }
         }
-
-        // Set JPEG quality.
-        int jpegQuality = CameraProfile.getJpegEncodingQualityParameter(mCameraId,
-                CameraProfile.QUALITY_HIGH);
-        mParameters.setJpegQuality(jpegQuality);
 
         // For the following settings, we need to check if the settings are
         // still supported by latest driver, if not, ignore the settings.
