@@ -1411,6 +1411,12 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 mExposureBracketing = "";
             }
 
+            mZoomBracketing = captureMode.findEntryValueByEntry(getString(R.string.pref_camera_mode_entry_zoom_bracketing));
+            if (mZoomBracketing == null) {
+                mZoomBracketing = "";
+            }
+
+
             mHighPerformance = captureMode.findEntryValueByEntry(getString(R.string.pref_camera_mode_entry_hs));
             if (mHighPerformance == null) {
                 mHighPerformance = "";
