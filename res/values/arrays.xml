@@ -369,6 +369,12 @@
         <item>@string/pref_camera_whitebalance_entry_daylight</item>
         <item>@string/pref_camera_whitebalance_entry_fluorescent</item>
         <item>@string/pref_camera_whitebalance_entry_cloudy</item>
+        <item>@string/pref_camera_whitebalance_entry_tungsten</item>
+        <item>@string/pref_camera_whitebalance_entry_shade</item>
+        <item>@string/pref_camera_whitebalance_entry_horizon</item>
+        <item>@string/pref_camera_whitebalance_entry_sunset</item>
+        <item>@string/pref_camera_whitebalance_entry_twilight</item>
+        <item>@string/pref_camera_whitebalance_entry_warm</item>
     </string-array>
 
     <string-array name="pref_camera_whitebalance_entryvalues" translatable="false">
@@ -377,6 +383,12 @@
         <item>daylight</item>
         <item>fluorescent</item>
         <item>cloudy-daylight</item>
+        <item>tungsten</item>
+        <item>shade</item>
+        <item>horizon</item>
+        <item>sunset</item>
+        <item>twilight</item>
+        <item>warm-fluorescent</item>
     </string-array>
 
     <array name="whitebalance_icons" translatable="false">
@@ -385,6 +397,13 @@
         <item>@drawable/ic_white_balance_sunlight_holo_light</item>
         <item>@drawable/ic_white_balance_fluorescent_holo_light</item>
         <item>@drawable/ic_white_balance_cloudy_holo_light</item>
+        <item>@drawable/ic_white_balance_cloudy_holo_light</item>
+        <item>@drawable/ic_white_balance_cloudy_holo_light</item>
+        <item>@drawable/ic_white_balance_cloudy_holo_light</item>
+        <item>@drawable/ic_white_balance_cloudy_holo_light</item>
+        <item>@drawable/ic_white_balance_cloudy_holo_light</item>
+        <item>@drawable/ic_white_balance_cloudy_holo_light</item>
+        <item>@drawable/ic_white_balance_cloudy_holo_light</item>
     </array>
 
     <array name="whitebalance_largeicons" translatable="false">
@@ -392,6 +411,13 @@
         <item>@drawable/ic_white_balance_incandescent_holo_light</item>
         <item>@drawable/ic_white_balance_sunlight_holo_light</item>
         <item>@drawable/ic_white_balance_fluorescent_holo_light</item>
+        <item>@drawable/ic_white_balance_cloudy_holo_light</item>
+        <item>@drawable/ic_white_balance_cloudy_holo_light</item>
+        <item>@drawable/ic_white_balance_cloudy_holo_light</item>
+        <item>@drawable/ic_white_balance_cloudy_holo_light</item>
+        <item>@drawable/ic_white_balance_cloudy_holo_light</item>
+        <item>@drawable/ic_white_balance_cloudy_holo_light</item>
+        <item>@drawable/ic_white_balance_cloudy_holo_light</item>
         <item>@drawable/ic_white_balance_cloudy_holo_light</item>
     </array>
 
