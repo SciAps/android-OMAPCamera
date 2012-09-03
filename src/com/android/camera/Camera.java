@@ -121,6 +121,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mSaturation = null;
     private String mSharpness = null;
     private String mISO = null;
+    private String mColorEffect = null;
     private int mJpegQuality = CameraProfile.QUALITY_HIGH;
 
     private static final String PARM_CONTRAST = "contrast";
@@ -1521,6 +1522,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_SHARPNESS,
                 CameraSettings.KEY_SATURATION,
                 CameraSettings.KEY_JPEG_QUALITY,
+                CameraSettings.KEY_COLOR_EFFECT,
                 CameraSettings.KEY_ANTIBANDING,
                 CameraSettings.KEY_PREVIEW_SIZE,
                 CameraSettings.KEY_PICTURE_SIZE};
@@ -2399,6 +2401,17 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         if ( !sharpness.equals(mSharpness) ) {
             mParameters.set(PARM_SHARPNESS, Integer.parseInt(sharpness) );
             mSharpness = sharpness;
+        }
+
+        // Color Effects
+        String colorEffect = mPreferences.getString(
+                CameraSettings.KEY_COLOR_EFFECT,
+                getString(R.string.pref_camera_coloreffect_default));
+
+        if (isSupported(colorEffect, mParameters.getSupportedColorEffects()) &&
+             !colorEffect.equals(mColorEffect) ) {
+            mParameters.setColorEffect(colorEffect);
+            mColorEffect = colorEffect;
         }
 
         //Antibanding

@@ -33,6 +33,7 @@ import java.util.StringTokenizer;
 
 
 
+
 /**
  *  Provides utilities and keys for Camera settings.
  */
@@ -69,6 +70,7 @@ public class CameraSettings {
     public static final String KEY_BRACKET_RANGE = "pref_camera_bracketrange_key";
     public static final String KEY_BURST = "pref_camera_burst_key";
     public static final String KEY_ISO = "pref_camera_iso_key";
+    public static final String KEY_COLOR_EFFECT = "pref_camera_coloreffect_key";
 
     public static final String EXPOSURE_DEFAULT_VALUE = "0";
 
@@ -191,6 +193,7 @@ public class CameraSettings {
         ListPreference antibanding = group.findPreference(KEY_ANTIBANDING);
         ListPreference mode = group.findPreference(KEY_MODE_MENU);
         ListPreference iso = group.findPreference(KEY_ISO);
+        ListPreference colorEffect = group.findPreference(KEY_COLOR_EFFECT);
 
         ArrayList<CharSequence[]> allPictureEntries = new ArrayList<CharSequence[]>();
         ArrayList<CharSequence[]> allPictureEntryValues = new ArrayList<CharSequence[]>();
@@ -216,7 +219,10 @@ public class CameraSettings {
             filterUnsupportedOptions(group,
                     focusMode, mParameters.getSupportedFocusModes());
         }
-
+        if (colorEffect != null) {
+            filterUnsupportedOptions(group,
+                    colorEffect, mParameters.getSupportedColorEffects());
+        }
         if (antibanding != null) {
             filterUnsupportedOptions(group,
                     antibanding, mParameters.getSupportedAntibanding());
