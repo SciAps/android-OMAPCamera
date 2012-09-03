@@ -247,6 +247,10 @@
                 late for the translation. Since we show the same label as the
                 second item, we just use the second one instead.
         -->
+        <item>@string/pref_camera_picturesize_entry_4416x3312</item>
+        <item>@string/pref_camera_picturesize_entry_4032x3024</item>
+        <item>@string/pref_camera_picturesize_entry_3648x2736</item>
+        <item>@string/pref_camera_picturesize_entry_3264x2448</item>
         <item>@string/pref_camera_picturesize_entry_2592x1936</item>
         <item>@string/pref_camera_picturesize_entry_2592x1936</item>
         <item>@string/pref_camera_picturesize_entry_2592x1936</item>
@@ -262,6 +266,10 @@
          size to the first one in the list that is also supported by the
          driver -->
     <string-array name="pref_camera_picturesize_entryvalues" translatable="false">
+        <item>4416x3312</item>
+        <item>4032x3024</item>
+        <item>3648x2736</item>
+        <item>3264x2448</item>
         <item>2592x1944</item>
         <item>2592x1936</item>
         <item>2560x1920</item>
