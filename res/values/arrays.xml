@@ -440,16 +440,52 @@
     <string-array name="pref_camera_scenemode_entries" translatable="false">
         <item>@string/pref_camera_scenemode_entry_auto</item>
         <item>@string/pref_camera_scenemode_entry_action</item>
+        <item>@string/pref_camera_scenemode_entry_portrait</item>
+        <item>@string/pref_camera_scenemode_entry_landscape</item>
         <item>@string/pref_camera_scenemode_entry_night</item>
+        <item>@string/pref_camera_scenemode_entry_night_portrait</item>
+        <item>@string/pref_camera_scenemode_entry_theatre</item>
+        <item>@string/pref_camera_scenemode_entry_beach</item>
+        <item>@string/pref_camera_scenemode_entry_snow</item>
         <item>@string/pref_camera_scenemode_entry_sunset</item>
+        <item>@string/pref_camera_scenemode_entry_steadyphoto</item>
+        <item>@string/pref_camera_scenemode_entry_fireworks</item>
+        <item>@string/pref_camera_scenemode_entry_closeup</item>
+        <item>@string/pref_camera_scenemode_entry_underwater</item>
+        <item>@string/pref_camera_scenemode_entry_mood</item>
+        <item>@string/pref_camera_scenemode_entry_document</item>
+        <item>@string/pref_camera_scenemode_entry_barcode</item>
+        <item>@string/pref_camera_scenemode_entry_supernight</item>
+        <item>@string/pref_camera_scenemode_entry_cine</item>
+        <item>@string/pref_camera_scenemode_entry_oldfilm</item>
+        <item>@string/pref_camera_scenemode_entry_sports</item>
+        <item>@string/pref_camera_scenemode_entry_candlelight</item>
         <item>@string/pref_camera_scenemode_entry_party</item>
     </string-array>
 
     <string-array name="pref_camera_scenemode_entryvalues" translatable="false">
         <item>auto</item>
         <item>action</item>
+        <item>portrait</item>
+        <item>landscape</item>
         <item>night</item>
+        <item>night-portrait</item>
+        <item>theatre</item>
+        <item>beach</item>
+        <item>snow</item>
         <item>sunset</item>
+        <item>steadyphoto</item>
+        <item>fireworks</item>
+        <item>closeup</item>
+        <item>underwater</item>
+        <item>mood</item>
+        <item>document</item>
+        <item>barcode</item>
+        <item>super-night</item>
+        <item>cine</item>
+        <item>old-film</item>
+        <item>sports</item>
+        <item>candlelight</item>
         <item>party</item>
     </string-array>
 

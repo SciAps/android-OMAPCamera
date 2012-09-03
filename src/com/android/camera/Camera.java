@@ -491,6 +491,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             Editor editor = mPreferences.edit();
             editor.putString(CameraSettings.KEY_EXPOSURE, "0");
             editor.apply();
+            if (mIndicatorControlContainer != null) {
+                mIndicatorControlContainer.reloadPreferences();
+            }
         }
     }
 
@@ -1455,13 +1458,14 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     }
 
     private void overrideCameraSettings(final String flashMode,
-            final String whiteBalance, final String focusMode) {
+            final String whiteBalance, final String focusMode, final String exposure) {
         if (mIndicatorControlContainer != null) {
             mIndicatorControlContainer.enableFilter(true);
             mIndicatorControlContainer.overrideSettings(
                     CameraSettings.KEY_FLASH_MODE, flashMode,
                     CameraSettings.KEY_WHITE_BALANCE, whiteBalance,
-                    CameraSettings.KEY_FOCUS_MODE, focusMode);
+                    CameraSettings.KEY_FOCUS_MODE, focusMode,
+                    CameraSettings.KEY_EXPOSURE, exposure);
             mIndicatorControlContainer.enableFilter(false);
         }
     }
@@ -1488,9 +1492,10 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         // focus mode, instead, we read it from driver
         if (!Parameters.SCENE_MODE_AUTO.equals(mSceneMode)) {
             overrideCameraSettings(mParameters.getFlashMode(),
-                    mParameters.getWhiteBalance(), mParameters.getFocusMode());
+                    mParameters.getWhiteBalance(), mParameters.getFocusMode(),
+                    getString(R.string.pref_exposure_default));
         } else {
-            overrideCameraSettings(null, null, null);
+            overrideCameraSettings(null, null, null, null);
         }
 
         if ( !mCaptureMode.equals(mHighPerformance) ) {
@@ -2455,16 +2460,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         // For the following settings, we need to check if the settings are
         // still supported by latest driver, if not, ignore the settings.
 
-        // Set exposure compensation
-        int value = CameraSettings.readExposure(mPreferences);
-        int max = mParameters.getMaxExposureCompensation();
-        int min = mParameters.getMinExposureCompensation();
-        if (value >= min && value <= max) {
-            mParameters.setExposureCompensation(value);
-        } else {
-            Log.w(TAG, "invalid exposure range: " + value);
-        }
-
         String[] previewDefaults = getResources().getStringArray(R.array.pref_camera_previewsize_default_array);
         String defaultPreviewSize = "";
         String[] previewSizes2D = getResources().getStringArray(R.array.pref_camera_previewsize_entryvalues);
@@ -2510,10 +2505,62 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             }
 
             // Set focus mode.
+            String focusMode = mFocusManager.getFocusMode();
             mFocusManager.overrideFocusMode(null);
-            mParameters.setFocusMode(mFocusManager.getFocusMode());
+            mParameters.setFocusMode(focusMode);
         } else {
+            resetExposureCompensation();
+
             mFocusManager.overrideFocusMode(mParameters.getFocusMode());
+            // Set Color Effects to None.
+            Editor editor = mPreferences.edit();
+            editor.putString(CameraSettings.KEY_COLOR_EFFECT, Parameters.EFFECT_NONE);
+            editor.commit();
+            mParameters.setColorEffect(Parameters.EFFECT_NONE);
+
+            // Set ISO to auto
+            editor.putString(CameraSettings.KEY_ISO, "auto");
+            editor.commit();
+            mParameters.set(PARM_ISO, getString(R.string.pref_camera_iso_default));
+
+            // Set Contrast to Normal
+            editor.putString(CameraSettings.KEY_CONTRAST, getString(R.string.pref_camera_contrast_default));
+            editor.commit();
+            mParameters.set(PARM_CONTRAST, getString(R.string.pref_camera_contrast_default));
+
+            // Set brightness to Normal
+            editor.putString(CameraSettings.KEY_BRIGHTNESS, getString(R.string.pref_camera_brightness_default));
+            editor.commit();
+            mParameters.set(PARM_BRIGHTNESS, getString(R.string.pref_camera_brightness_default));
+
+            // Set Saturation to Normal
+            editor.putString(CameraSettings.KEY_SATURATION, getString(R.string.pref_camera_saturation_default));
+            editor.commit();
+            mParameters.set(PARM_SATURATION, getString(R.string.pref_camera_saturation_default));
+
+            // Set Sharpness to Normal
+            editor.putString(CameraSettings.KEY_SHARPNESS, getString(R.string.pref_camera_sharpness_default));
+            editor.commit();
+            mParameters.set(PARM_SHARPNESS, getString(R.string.pref_camera_sharpness_default));
+
+            // Set antibanding to Normal
+            editor.putString(CameraSettings.KEY_ANTIBANDING, getString(R.string.pref_camera_antibanding_default));
+            editor.commit();
+            mParameters.setAntibanding(getString(R.string.pref_camera_antibanding_default));
+
+            if (mIndicatorControlContainer != null) {
+                mIndicatorControlContainer.reloadPreferences();
+            }
+        }
+
+        // Set exposure compensation
+        int value = CameraSettings.readExposure(mPreferences);
+        int max = mParameters.getMaxExposureCompensation();
+        int min = mParameters.getMinExposureCompensation();
+        if (value >= min && value <= max) {
+            mParameters.setExposureCompensation(value);
+        } else {
+            Log.w(TAG, "invalid exposure range: " + value);
         }
 
         if (mContinousFocusSupported) {
