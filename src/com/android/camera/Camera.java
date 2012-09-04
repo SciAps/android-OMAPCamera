@@ -145,6 +145,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final int ZOOM_BRACKETING_COUNT = 10;
     private static final int CAMERA_RELEASE_DELAY = 3000;
     public static final String PARM_SUPPORTED_ISO_MODES = "iso-mode-values";
+    public static final String PARM_SUPPORTED_GBCE = "gbce-supported";
+    public static final String PARM_SUPPORTED_GLBCE = "glbce-supported";
 
     private boolean mTempBracketingEnabled = false;
     private boolean mTempBracketingStarted = false;
@@ -171,6 +173,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mHighQualityZsl;
     private String mZoomBracketing;
     private String mBracketRange;
+    private String mGBCEOff;
+    private String mGBCE = "off";
 
     private boolean mPausing;
 
@@ -1402,6 +1406,14 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mIsImageCaptureIntent = isImageCaptureIntent();
         createCameraScreenNail(!mIsImageCaptureIntent);
 
+        ListPreference gbce = group.findPreference(CameraSettings.KEY_GBCE);
+        if (gbce != null) {
+            mGBCEOff = gbce.findEntryValueByEntry(getString(R.string.pref_camera_gbce_entry_off));
+            if (mGBCEOff == null) {
+                mGBCEOff = "";
+            }
+        }
+
         ListPreference captureMode = group.findPreference(CameraSettings.KEY_MODE_MENU);
         if (captureMode != null) {
             mTemporalBracketing = captureMode.findEntryValueByEntry(getString(R.string.pref_camera_mode_entry_temporal_bracketing));
@@ -1470,6 +1482,19 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         }
     }
 
+    private void overrideCameraGBCE(final String gbce) {
+        if (gbce != null) {
+            Editor editor = mPreferences.edit();
+            editor.putString(CameraSettings.KEY_GBCE, gbce);
+            editor.apply();
+            mParameters.set(PARM_GBCE, gbce);
+            mCameraDevice.setParameters(mParameters);
+            if (mIndicatorControlContainer != null) {
+                mIndicatorControlContainer.reloadPreferences();
+            }
+        }
+    }
+
     private void overrideCameraBurst(final String burst) {
         if (burst != null) {
             Editor editor = mPreferences.edit();
@@ -1496,6 +1521,13 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                     getString(R.string.pref_exposure_default));
         } else {
             overrideCameraSettings(null, null, null, null);
+        }
+
+        // GBCE/GLBCE is only available when in HQ mode
+        if ( !mCaptureMode.equals(mHighQuality) ) {
+            overrideCameraGBCE(mGBCEOff);
+        } else {
+            overrideCameraGBCE(null);
         }
 
         if ( !mCaptureMode.equals(mHighPerformance) ) {
@@ -1526,6 +1558,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_FOCUS_MODE,
                 CameraSettings.KEY_MODE_MENU,
                 CameraSettings.KEY_BURST,
+                CameraSettings.KEY_GBCE,
                 CameraSettings.KEY_ISO,
                 CameraSettings.KEY_BRACKET_RANGE,
                 CameraSettings.KEY_CONTRAST,
@@ -2561,6 +2594,21 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mParameters.setExposureCompensation(value);
         } else {
             Log.w(TAG, "invalid exposure range: " + value);
+        }
+
+        // GBCE/GLBCE
+        String gbce = mPreferences.getString(
+                CameraSettings.KEY_GBCE, PARM_GBCE_OFF);
+
+        if ( PARM_GLBCE.equals(gbce) ) {
+            mParameters.set(PARM_GBCE, FALSE);
+            mParameters.set(PARM_GLBCE, TRUE);
+        } else if ( PARM_GBCE.equals(gbce) ) {
+            mParameters.set(PARM_GBCE, TRUE);
+            mParameters.set(PARM_GLBCE, FALSE);
+        } else {
+            mParameters.set(PARM_GBCE, FALSE);
+            mParameters.set(PARM_GLBCE, FALSE);
         }
 
         if (mContinousFocusSupported) {

@@ -71,6 +71,7 @@ public class CameraSettings {
     public static final String KEY_BURST = "pref_camera_burst_key";
     public static final String KEY_ISO = "pref_camera_iso_key";
     public static final String KEY_COLOR_EFFECT = "pref_camera_coloreffect_key";
+    public static final String KEY_GBCE = "pref_camera_gbce_key";
 
     public static final String EXPOSURE_DEFAULT_VALUE = "0";
 
@@ -194,6 +195,7 @@ public class CameraSettings {
         ListPreference mode = group.findPreference(KEY_MODE_MENU);
         ListPreference iso = group.findPreference(KEY_ISO);
         ListPreference colorEffect = group.findPreference(KEY_COLOR_EFFECT);
+        ListPreference contrastEnhancement = group.findPreference(KEY_GBCE);
 
         ArrayList<CharSequence[]> allPictureEntries = new ArrayList<CharSequence[]>();
         ArrayList<CharSequence[]> allPictureEntryValues = new ArrayList<CharSequence[]>();
@@ -265,6 +267,34 @@ public class CameraSettings {
             initVideoEffect(group, videoEffect);
             resetIfInvalid(videoEffect);
         }
+
+        if ( contrastEnhancement != null ) {
+            filterContrastEnhancement(group, contrastEnhancement);
+        }
+    }
+
+    private void filterContrastEnhancement(PreferenceGroup group, ListPreference pref) {
+        String gbceSupported = mParameters.get(Camera.PARM_SUPPORTED_GBCE);
+        String glbceSupported = mParameters.get(Camera.PARM_SUPPORTED_GLBCE);
+        String offEntry = mContext.getString(R.string.pref_camera_gbce_entry_off);
+        String gbceEntry = mContext.getString(R.string.pref_camera_gbce_entry_gbce);
+        String glbceEntry = mContext.getString(R.string.pref_camera_gbce_entry_glbce);
+        List<String> supported = new ArrayList<String>();
+
+        // Off is there by default
+        supported.add(pref.findEntryValueByEntry(offEntry));
+
+        if ( ( null == gbceSupported ) ||
+             ( Camera.TRUE.equals(gbceSupported)) ) {
+            supported.add(pref.findEntryValueByEntry(gbceEntry));
+        }
+
+        if ( ( null == glbceSupported ) ||
+             ( Camera.TRUE.equals(glbceSupported)) ) {
+            supported.add(pref.findEntryValueByEntry(glbceEntry));
+           }
+
+        filterUnsupportedOptions(group, pref, supported);
     }
 
     private void buildExposureCompensation(
