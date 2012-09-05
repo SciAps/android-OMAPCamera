@@ -92,6 +92,36 @@
         <item>glbce</item>
     </string-array>
 
+    <!-- Camera Preferences Exposure modes dialog box entries -->
+    <string-array name="pref_camera_exposuremode_entries" translatable="false">
+        <item>@string/pref_camera_exposuremode_entry_auto</item>
+        <item>@string/pref_camera_exposuremode_entry_macro</item>
+        <item>@string/pref_camera_exposuremode_entry_portrait</item>
+        <item>@string/pref_camera_exposuremode_entry_snow</item>
+        <item>@string/pref_camera_exposuremode_entry_sports</item>
+        <item>@string/pref_camera_exposuremode_entry_night</item>
+        <item>@string/pref_camera_exposuremode_entry_spotlight</item>
+        <item>@string/pref_camera_exposuremode_entry_backlighting</item>
+        <item>@string/pref_camera_exposuremode_entry_beach</item>
+        <item>@string/pref_camera_exposuremode_entry_aperture</item>
+        <item>@string/pref_camera_exposuremode_entry_smallaperture</item>
+        <item>@string/pref_camera_exposuremode_entry_manual</item>
+     </string-array>
+     <string-array name="pref_camera_exposuremode_entryvalues" translatable="false">
+        <item>auto</item>
+        <item>macro</item>
+        <item>portrait</item>
+        <item>snow</item>
+        <item>sports</item>
+        <item>night</item>
+        <item>spotlight</item>
+        <item>backlighting</item>
+        <item>beach</item>
+        <item>aperture</item>
+        <item>small-aperture</item>
+        <item>manual</item>
+     </string-array>
+
     <!-- Camera Preferences JPEG Quality dialog box entries -->
     <string-array name="pref_camera_jpegquality_entries" translatable="false">
         <item>@string/pref_camera_jpegquality_entry_low</item>

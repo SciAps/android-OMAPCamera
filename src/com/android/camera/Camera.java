@@ -67,6 +67,10 @@ import com.android.camera.ui.RotateLayout;
 import com.android.camera.ui.RotateTextToast;
 import com.android.camera.ui.TwoStateImageView;
 import com.android.camera.ui.ZoomControl;
+import com.android.camera.CameraSettings;
+import com.android.camera.ui.ManualGainExposureSettings;
+import com.android.camera.R;
+
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -104,7 +108,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final int CAMERA_DISABLED = 13;
     private static final int MODE_RESTART = 14;
     private static final int RESTART_PREVIEW = 15;
-    public static final int RELEASE_CAMERA = 16;
+    public static final int MANUAL_GAIN_EXPOSURE_CHANGED = 16;
+    public static final int RELEASE_CAMERA = 17;
 
     // The subset of parameters we need to update in setCameraParameters().
     private static final int UPDATE_PARAM_INITIALIZE = 1;
@@ -121,6 +126,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mSaturation = null;
     private String mSharpness = null;
     private String mISO = null;
+    private String mExposureMode = null;
     private String mColorEffect = null;
     private int mJpegQuality = CameraProfile.QUALITY_HIGH;
 
@@ -134,6 +140,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final String PARM_IPP = "ipp";
     private static final String PARM_BURST = "burst-capture";
     private static final String PARM_ISO = "iso";
+    private static final String PARM_EXPOSURE_MODE = "exposure";
     private static final String PARM_IPP_LDCNSF = "ldc-nsf";
     private static final String PARM_IPP_NONE = "off";
     private static final String PARM_GBCE = "gbce";
@@ -147,6 +154,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     public static final String PARM_SUPPORTED_ISO_MODES = "iso-mode-values";
     public static final String PARM_SUPPORTED_GBCE = "gbce-supported";
     public static final String PARM_SUPPORTED_GLBCE = "glbce-supported";
+    public static final String PARM_SUPPORTED_EXPOSURE_MODES = "exposure-mode-values";
 
     private boolean mTempBracketingEnabled = false;
     private boolean mTempBracketingStarted = false;
@@ -175,6 +183,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mBracketRange;
     private String mGBCEOff;
     private String mGBCE = "off";
+    private String mManualExposure;
 
     private boolean mPausing;
 
@@ -309,6 +318,14 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private long mOnResumeTime;
     private long mStorageSpace;
     private byte[] mJpegImageData;
+    private boolean isExposureInit = false;
+    private boolean isManualExposure = false;
+    private Integer mManualExposureLeft = new Integer (0);
+    private Integer mManualExposureRight = new Integer (0);
+    private Integer mManualGainISOLeft = new Integer (0);
+    private Integer mManualGainISORight = new Integer (0);
+    private Integer mManualExposureControl = new Integer(0);
+    private Integer mManualGainISO = new Integer(0);
 
     // These latency time are for the CameraLatency test.
     public long mAutoFocusTime;
@@ -427,6 +444,21 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                     break;
                 }
 
+                case MANUAL_GAIN_EXPOSURE_CHANGED: {
+                    Bundle data;
+                    data = msg.getData();
+                    mManualExposureControl = data.getInt("EXPOSURE");
+                    if (mManualExposureControl < 1) {
+                        mManualExposureControl = 1;
+                    }
+                    mManualGainISO = data.getInt("ISO");
+                    mParameters.set(CameraSettings.KEY_MANUAL_EXPOSURE, mManualExposureControl.intValue());
+                    mParameters.set(CameraSettings.KEY_MANUAL_GAIN_ISO, mManualGainISO.intValue());
+                    if (mCameraDevice != null) {
+                        mCameraDevice.setParameters(mParameters);
+                    }
+                    break;
+                }
                 case SWITCH_CAMERA: {
                     switchCamera();
                     break;
@@ -1414,6 +1446,14 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             }
         }
 
+        ListPreference exposure = group.findPreference(CameraSettings.KEY_EXPOSURE_MODE_MENU);
+        if (exposure != null) {
+            mManualExposure = exposure.findEntryValueByEntry(getString(R.string.pref_camera_exposuremode_entry_manual));
+            if (mManualExposure == null) {
+                mManualExposure = "";
+            }
+        }
+
         ListPreference captureMode = group.findPreference(CameraSettings.KEY_MODE_MENU);
         if (captureMode != null) {
             mTemporalBracketing = captureMode.findEntryValueByEntry(getString(R.string.pref_camera_mode_entry_temporal_bracketing));
@@ -1565,6 +1605,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_BRIGHTNESS,
                 CameraSettings.KEY_SHARPNESS,
                 CameraSettings.KEY_SATURATION,
+                CameraSettings.KEY_EXPOSURE_MODE_MENU,
                 CameraSettings.KEY_JPEG_QUALITY,
                 CameraSettings.KEY_COLOR_EFFECT,
                 CameraSettings.KEY_ANTIBANDING,
@@ -1835,6 +1876,10 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
         if ( null == mContrast || mPausing ) {
             mContrast = getString(R.string.pref_camera_contrast_default);
+        }
+
+        if ( null == mExposureMode || mPausing ) {
+            mExposureMode = getString(R.string.pref_camera_exposuremode_default);
         }
 
         if ( null == mBrightness || mPausing ) {
@@ -2468,6 +2513,41 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mAntibanding = antibanding;
         }
 
+     // Exposure mode
+        String exposureMode = mPreferences.getString(
+                    CameraSettings.KEY_EXPOSURE_MODE_MENU, getString(R.string.pref_camera_exposuremode_default));
+
+        if (exposureMode != null && !exposureMode.equals(mExposureMode)) { // 3d DualCamera Mode
+            mParameters.set(PARM_EXPOSURE_MODE, exposureMode);
+            mExposureMode = exposureMode;
+            int expMin = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_MIN));
+            int isoMin = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_MIN));
+            if (!isExposureInit) {
+                isExposureInit = true;
+            } else if (exposureMode.equals(mManualExposure) && isManualExposure) { // ManualExposure Mode
+                isManualExposure = false;
+                ManualGainExposureSettings manualGainExposureDialog = null;
+                int expMax = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_MAX));
+                int expStep = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_STEP));
+                int isoMax = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_MAX));
+                int isoStep = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_STEP));
+                int expValue = Integer.parseInt(mParameters.get(CameraSettings.KEY_MANUAL_EXPOSURE));
+                int isoValue = Integer.parseInt(mParameters.get(CameraSettings.KEY_MANUAL_GAIN_ISO));
+
+                manualGainExposureDialog = new ManualGainExposureSettings(this, mHandler,
+                        expValue, isoValue,expMin, expMax,
+                        isoMin, isoMax,expStep,isoStep);
+                Editor edit = mPreferences.edit();
+                edit.putString(CameraSettings.KEY_EXPOSURE_MODE_MENU, exposureMode);
+                edit.commit();
+                manualGainExposureDialog.show();
+            } else {
+                isManualExposure = true;
+                mParameters.set(CameraSettings.KEY_MANUAL_EXPOSURE, expMin);
+                mParameters.set(CameraSettings.KEY_MANUAL_GAIN_ISO, isoMin);
+            }
+        }
+
         // Since change scene mode may change supported values,
         // Set scene mode first,
         mSceneMode = mPreferences.getString(
@@ -2555,6 +2635,12 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             editor.putString(CameraSettings.KEY_ISO, "auto");
             editor.commit();
             mParameters.set(PARM_ISO, getString(R.string.pref_camera_iso_default));
+
+         // Set Exposure mode to auto
+            editor.putString(CameraSettings.KEY_EXPOSURE_MODE_MENU,
+                    getString(R.string.pref_camera_exposuremode_default));
+            editor.commit();
+            mParameters.set(PARM_EXPOSURE_MODE, getString(R.string.pref_camera_exposuremode_default));
 
             // Set Contrast to Normal
             editor.putString(CameraSettings.KEY_CONTRAST, getString(R.string.pref_camera_contrast_default));

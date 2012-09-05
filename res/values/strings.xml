@@ -206,6 +206,22 @@
     <string name="pref_camera_iso_entry_400">400</string>
     <string name="pref_camera_iso_entry_800">800</string>
     
+    <!-- Settings Exposure modes title -->
+    <string name="pref_camera_exposuremode_title">Exposure Mode</string>
+    <string name="pref_camera_exposuremode_default">auto</string>
+    <string name="pref_camera_exposuremode_entry_auto">Auto</string>
+    <string name="pref_camera_exposuremode_entry_macro">Macro</string>
+    <string name="pref_camera_exposuremode_entry_portrait">Portrait</string>
+    <string name="pref_camera_exposuremode_entry_snow">Snow</string>
+    <string name="pref_camera_exposuremode_entry_sports">Sports</string>
+    <string name="pref_camera_exposuremode_entry_night">Night</string>
+    <string name="pref_camera_exposuremode_entry_spotlight">Spotlight</string>
+    <string name="pref_camera_exposuremode_entry_backlighting">Backlighting</string>
+    <string name="pref_camera_exposuremode_entry_beach">Beach</string>
+    <string name="pref_camera_exposuremode_entry_aperture">Aperture</string>
+    <string name="pref_camera_exposuremode_entry_smallaperture">Small aperture</string>
+    <string name="pref_camera_exposuremode_entry_manual">Manual</string>
+
     <!-- Settings contrast mode title -->
     <string name="pref_camera_contrast_title">Contrast</string>
     <string name="pref_camera_contrast_default">100</string>
@@ -393,6 +409,12 @@
     <string name="pref_exposure_title">Exposure</string>
     <string name="pref_exposure_default" translatable="false">0</string>
 
+    <!-- Manual exposure and gain settings in preference -->
+    <string name="settings_manual_2d_exposure_caption"> Manual Exposure [ms]: </string>
+    <string name="settings_manual_2d_gain_caption">Manual ISO: </string>
+
+    <!-- Dialog "OK" button. Dismisses dialog. -->
+    <string name="settings_manual_gain_exposure_button_ok">OK</string>
     <!-- Dialog "OK" button. Dismisses dialog. -->
     <string name="dialog_ok">OK</string>
 

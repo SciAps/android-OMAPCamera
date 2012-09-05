@@ -59,6 +59,7 @@ public class CameraSettings {
     public static final String KEY_CAMERA_FIRST_USE_HINT_SHOWN = "pref_camera_first_use_hint_shown_key";
     public static final String KEY_VIDEO_FIRST_USE_HINT_SHOWN = "pref_video_first_use_hint_shown_key";
     public static final String KEY_ANTIBANDING = "pref_camera_antibanding_key";
+    public static final String KEY_EXPOSURE_MODE_MENU = "pref_camera_exposuremode_key";
     public static final String KEY_CONTRAST = "pref_camera_contrast_key";
     public static final String KEY_BRIGHTNESS = "pref_camera_brightness_key";
     public static final String KEY_SATURATION = "pref_camera_saturation_key";
@@ -72,6 +73,19 @@ public class CameraSettings {
     public static final String KEY_ISO = "pref_camera_iso_key";
     public static final String KEY_COLOR_EFFECT = "pref_camera_coloreffect_key";
     public static final String KEY_GBCE = "pref_camera_gbce_key";
+
+    public static final String KEY_EXPOSURE_MODE = "exposure";
+    // Exposure modes
+    public static final String KEY_SUPPORTED_MANUAL_EXPOSURE_MIN = "supported-manual-exposure-min";
+    public static final String KEY_SUPPORTED_MANUAL_EXPOSURE_MAX = "supported-manual-exposure-max";
+    public static final String KEY_SUPPORTED_MANUAL_EXPOSURE_STEP = "supported-manual-exposure-step";
+    public static final String KEY_SUPPORTED_MANUAL_GAIN_ISO_MIN = "supported-manual-gain-iso-min";
+    public static final String KEY_SUPPORTED_MANUAL_GAIN_ISO_MAX = "supported-manual-gain-iso-max";
+    public static final String KEY_SUPPORTED_MANUAL_GAIN_ISO_STEP = "supported-manual-gain-iso-step";
+    public static final String KEY_MANUAL_EXPOSURE = "manual-exposure";
+    public static final String KEY_MANUAL_EXPOSURE_RIGHT = "manual-exposure-right";
+    public static final String KEY_MANUAL_GAIN_ISO = "manual-gain-iso";
+    public static final String KEY_MANUAL_GAIN_ISO_RIGHT = "manual-gain-iso-right";
 
     public static final String EXPOSURE_DEFAULT_VALUE = "0";
 
@@ -196,6 +210,7 @@ public class CameraSettings {
         ListPreference iso = group.findPreference(KEY_ISO);
         ListPreference colorEffect = group.findPreference(KEY_COLOR_EFFECT);
         ListPreference contrastEnhancement = group.findPreference(KEY_GBCE);
+        ListPreference exposureMode = group.findPreference(KEY_EXPOSURE_MODE_MENU);
 
         ArrayList<CharSequence[]> allPictureEntries = new ArrayList<CharSequence[]>();
         ArrayList<CharSequence[]> allPictureEntryValues = new ArrayList<CharSequence[]>();
@@ -216,6 +231,10 @@ public class CameraSettings {
         if ( iso  != null) {
             filterUnsupportedOptions(group, iso,
                     parseToList(mParameters.get(Camera.PARM_SUPPORTED_ISO_MODES)));
+        }
+        if ( exposureMode  != null) {
+            filterUnsupportedOptions(group, exposureMode,
+                    parseToList(mParameters.get(Camera.PARM_SUPPORTED_EXPOSURE_MODES)));
         }
         if (focusMode != null) {
             filterUnsupportedOptions(group,
