@@ -2190,6 +2190,13 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
         initDefaults();
 
+        // Set capture mode to empty value after resuming the app,
+        // so updateCameraParametersPreference can set it correcly
+        if (mFirstTimeInitialized)
+        {
+            mCaptureMode = "";
+        }
+
         mPausing = false;
 
         mJpegPictureCallbackTime = 0;
