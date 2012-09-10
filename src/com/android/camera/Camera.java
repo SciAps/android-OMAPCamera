@@ -52,6 +52,7 @@ import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.GestureDetector;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -196,6 +197,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private int mZoomValue;  // The current zoom value.
     private int mZoomMax;
     private ZoomControl mZoomControl;
+    private GestureDetector mGestureDetector;
 
     private Parameters mInitialParams;
     private boolean mFocusAreaSupported;
@@ -644,6 +646,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mZoomControl.setZoomMax(mZoomMax);
         mZoomControl.setZoomIndex(mParameters.getZoom());
         mZoomControl.setOnZoomChangeListener(new ZoomChangeListener());
+        mGestureDetector = new GestureDetector(this, new ZoomGestureListener());
     }
 
     @Override
@@ -674,10 +677,60 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         }
     }
 
+    private class ZoomGestureListener extends
+        GestureDetector.SimpleOnGestureListener {
+
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            // Do not trigger double tap zoom if popup window is opened.
+            if (mIndicatorControlContainer.getActiveSettingPopup() != null) return false;
+
+            // Perform zoom only when preview is started and snapshot is not in
+            // progress.
+            if (mPausing || !isCameraIdle() || mCameraState == PREVIEW_STOPPED) {
+                return false;
+            }
+
+            if (mZoomValue < mZoomMax) {
+                // Zoom in to the maximum.
+                mZoomValue = mZoomMax;
+            } else {
+                mZoomValue = 0;
+            }
+
+            setCameraParametersWhenIdle(UPDATE_PARAM_ZOOM);
+
+            mZoomControl.setZoomIndex(mZoomValue);
+
+            return true;
+        }
+
+        @Override
+        public void onLongPress(MotionEvent e) {
+            if (mPaused || mCameraDevice == null || !mFirstTimeInitialized
+                    || mCameraState == SNAPSHOT_IN_PROGRESS
+                    || mCameraState == SWITCHING_CAMERA
+                    || mCameraState == PREVIEW_STOPPED) {
+                return;
+            }
+
+            // Do not trigger touch focus if popup window is opened.
+            if (collapseCameraControls()) return;
+
+            // Check if metering area or focus area is supported.
+            if (!mFocusAreaSupported && !mMeteringAreaSupported) return;
+
+            mFocusManager.onSingleTapUp((int) e.getX(), (int) e.getY());
+        }
+
+    }
+
     @Override
     public boolean dispatchTouchEvent(MotionEvent m) {
         if (mCameraState == SWITCHING_CAMERA) return true;
-
+        if ( mGestureDetector != null && mGestureDetector.onTouchEvent(m) ) {
+               return true;
+        }
         // Check if the popup window should be dismissed first.
         if (m.getAction() == MotionEvent.ACTION_DOWN) {
             float x = m.getX();
@@ -2160,14 +2213,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 || mCameraState == PREVIEW_STOPPED) {
             return;
         }
-
-        // Do not trigger touch focus if popup window is opened.
-        if (collapseCameraControls()) return;
-
-        // Check if metering area or focus area is supported.
-        if (!mFocusAreaSupported && !mMeteringAreaSupported) return;
-
-        mFocusManager.onSingleTapUp(x, y);
     }
 
     @Override
