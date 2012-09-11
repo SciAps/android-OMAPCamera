@@ -64,8 +64,8 @@ public class FocusManager {
 
     public enum TempBracketingStates { OFF, ACTIVE, RUNNING}
     private static final int RESET_TOUCH_FOCUS = 0;
-    private static final int RESET_TOUCH_FOCUS_DELAY = 3000;
 
+    private static final int RESET_TOUCH_FOCUS_DELAY = 3000;
     private int mState = STATE_IDLE;
     private static final int STATE_IDLE = 0; // Focus is not active.
     private static final int STATE_FOCUSING = 1; // Focus is in progress.
@@ -78,6 +78,7 @@ public class FocusManager {
     private boolean mFocusAreaSupported;
     private boolean mLockAeAwbNeeded;
     private boolean mAeAwbLock;
+    private boolean mInLongPress;
     private Matrix mMatrix;
 
     private TempBracketingStates mTempBracketingState = TempBracketingStates.OFF;
@@ -231,6 +232,22 @@ public class FocusManager {
         if (mLockAeAwbNeeded && mAeAwbLock && (mState != STATE_FOCUSING_SNAP_ON_FINISH)) {
             mAeAwbLock = false;
             mListener.setFocusParameters();
+        }
+    }
+
+    public void shutterLongPressed() {
+        if (Parameters.FOCUS_MODE_CONTINUOUS_PICTURE.equals(mFocusMode)
+                && isSupported(Parameters.FOCUS_MODE_AUTO, mParameters.getSupportedFocusModes())) {
+            if (mState == STATE_IDLE || mState == STATE_FOCUSING_SNAP_ON_FINISH) {
+                Log.e(TAG, "Invalid focus state=" + mState);
+            }
+            mInLongPress = true;
+            // Cancel any outstanding Auto focus requests. The auto focus mode
+            // will be changed from CAF to auto in cancelAutoFocus.
+            onShutterUp();
+            // Call Autofocus
+            onShutterDown();
+            mInLongPress = false;
         }
     }
 
@@ -420,7 +437,12 @@ public class FocusManager {
         if (mOverrideFocusMode != null) return mOverrideFocusMode;
         List<String> supportedFocusModes = mParameters.getSupportedFocusModes();
 
-        if (mFocusAreaSupported && mFocusArea != null) {
+
+        if (mInLongPress) {
+            // Users long-press the shutter button in CAF. Change it to auto
+            // mode, so it will do a full scan.
+            mFocusMode = Parameters.FOCUS_MODE_AUTO;
+        } else if (mFocusAreaSupported && mFocusArea != null) {
             // Always use autofocus in tap-to-focus.
             mFocusMode = Parameters.FOCUS_MODE_AUTO;
         } else {
@@ -455,6 +477,13 @@ public class FocusManager {
 
     public List<Area> getMeteringAreas() {
         return mMeteringArea;
+    }
+
+    public void drawFocusRectangle() {
+        /// Show only focus indicator or face indicator.
+        boolean faceExists = (mFaceView != null && mFaceView.faceExists());
+        FocusIndicator focusIndicator = (faceExists) ? mFaceView : mFocusIndicatorRotateLayout;
+        focusIndicator.showSuccess(false);
     }
 
     public void updateFocusUI() {

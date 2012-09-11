@@ -72,7 +72,6 @@ import com.android.camera.CameraSettings;
 import com.android.camera.ui.ManualGainExposureSettings;
 import com.android.camera.R;
 
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -88,7 +87,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         ModePicker.OnModeChangeListener, FaceDetectionListener,
         CameraPreference.OnPreferenceChangedListener, LocationManager.Listener,
         PreviewFrameLayout.OnSizeChangedListener,
-        ShutterButton.OnShutterButtonListener {
+        ShutterButton.OnShutterButtonListener,
+        ShutterButton.OnShutterButtonLongPressListener {
 
     private static final String TAG = "camera";
 
@@ -567,6 +567,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         // Initialize shutter button.
         mShutterButton = (ShutterButton) findViewById(R.id.shutter_button);
         mShutterButton.setOnShutterButtonListener(this);
+        mShutterButton.setOnShutterButtonLongPressListener(this);
         mShutterButton.setVisibility(View.VISIBLE);
 
         mImageSaver = new ImageSaver();
@@ -691,6 +692,13 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 return false;
             }
 
+            float x = e.getX();
+            float y = e.getY();
+            // Dismiss the event if it is out of preview area.
+            if (!Util.pointInView(x, y, mPreviewFrameLayout)) {
+                return false;
+            }
+
             if (mZoomValue < mZoomMax) {
                 // Zoom in to the maximum.
                 mZoomValue = mZoomMax;
@@ -714,8 +722,22 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 return;
             }
 
+            float x = e.getX();
+            float y = e.getY();
+            // Dismiss the event if it is out of preview area.
+            if (!Util.pointInView(x, y, mPreviewFrameLayout)) {
+                return;
+            }
+
             // Do not trigger touch focus if popup window is opened.
             if (collapseCameraControls()) return;
+
+            if (!isSupported(Parameters.FOCUS_MODE_AUTO,mInitialParams.getSupportedFocusModes()) &&
+                    mCaptureMode.equals(mTemporalBracketing)) {
+                startTemporalBracketing();
+                mFocusManager.setTempBracketingState(FocusManager.TempBracketingStates.RUNNING);
+                mFocusManager.drawFocusRectangle();
+            }
 
             // Check if metering area or focus area is supported.
             if (!mFocusAreaSupported && !mMeteringAreaSupported) return;
@@ -1112,6 +1134,15 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mAutoFocusTime = System.currentTimeMillis() - mFocusStartTime;
             Log.v(TAG, "mAutoFocusTime = " + mAutoFocusTime + "ms");
             setCameraState(IDLE);
+
+            // If focus completes and the snapshot is not started, enable the
+            // controls.
+            if (mFocusManager.isFocusCompleted() && (!mTempBracketingEnabled)) {
+                enableCameraControls(true);
+            } else if ( mTempBracketingEnabled ) {
+                startTemporalBracketing();
+            }
+
             mFocusManager.onAutoFocus(focused);
         }
     }
@@ -1910,6 +1941,22 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mFocusManager.doSnap();
     }
 
+    @Override
+    public void onShutterButtonLongPressed() {
+        if (mPausing || mCameraState == SNAPSHOT_IN_PROGRESS
+                || mCameraDevice == null ) return;
+
+        Log.v(TAG, "onShutterButtonLongPressed");
+        mFocusManager.shutterLongPressed();
+
+        if (!isSupported(Parameters.FOCUS_MODE_AUTO,mInitialParams.getSupportedFocusModes()) &&
+                mCaptureMode.equals(mTemporalBracketing)) {
+            startTemporalBracketing();
+            mFocusManager.setTempBracketingState(FocusManager.TempBracketingStates.RUNNING);
+            mFocusManager.drawFocusRectangle();
+        }
+    }
+
     private void installIntentFilter() {
         // install an intent filter to receive SD card related events.
         IntentFilter intentFilter =
@@ -2149,7 +2196,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         // from initializeFirstTime()
         mShutterButton = (ShutterButton) findViewById(R.id.shutter_button);
         mShutterButton.setOnShutterButtonListener(this);
+        mShutterButton.setOnShutterButtonLongPressListener(this);
         mShutterButton.setVisibility(View.VISIBLE);
+
         initializeZoom();
         initOnScreenIndicator();
         updateOnScreenIndicators();
@@ -2353,6 +2402,12 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         if (mSnapshotOnIdle) {
             mHandler.post(mDoSnapRunnable);
         }
+    }
+
+    private void startTemporalBracketing() {
+        mParameters.set(CameraSettings.KEY_TEMPORAL_BRACKETING, TRUE);
+        mCameraDevice.setParameters(mParameters);
+        mTempBracketingStarted = true;
     }
 
     private void stopTemporalBracketing() {
