@@ -73,6 +73,7 @@ public class CameraSettings {
     public static final String KEY_ISO = "pref_camera_iso_key";
     public static final String KEY_COLOR_EFFECT = "pref_camera_coloreffect_key";
     public static final String KEY_GBCE = "pref_camera_gbce_key";
+    public static final String KEY_PREVIEW_FRAMERATE = "pref_camera_previewframerate_key";
 
     public static final String KEY_EXPOSURE_MODE = "exposure";
     // Exposure modes
@@ -151,9 +152,41 @@ public class CameraSettings {
         Log.e(TAG, "No supported picture size found");
     }
 
+    public static void initialFrameRate(Context context, Parameters parameters) {
+        List<Integer> supported = parameters.getSupportedPreviewFrameRates();
+        for (String candidate : context.getResources().getStringArray(R.array.pref_camera_previewframerate_entryvalues)) {
+            if (setCameraFrameRate(candidate, supported, parameters)) {
+                SharedPreferences.Editor editor = ComboPreferences
+                        .get(context).edit();
+                editor.putString(KEY_PREVIEW_FRAMERATE, candidate);
+                editor.apply();
+                return;
+            }
+        }
+    }
+
     public static void removePreferenceFromScreen(
             PreferenceGroup group, String key) {
         removePreference(group, key);
+    }
+
+    public static boolean setCameraFrameRate(String candidate,List<Integer> supported, Parameters parameters) {
+        int intCandidate = Integer.parseInt(candidate);
+        if (supported.indexOf(intCandidate) >= 0) {
+            List<int[]> supportedRanges = parameters.getSupportedPreviewFpsRange();
+            boolean isRangeSupported = false;
+            for (int[] arr : supportedRanges) {
+                if (((intCandidate * 1000) == arr[0]) && ((intCandidate * 1000) == arr[1])) {
+                    isRangeSupported = true;
+                    break;
+                }
+            }
+            if (isRangeSupported) {
+                parameters.setPreviewFpsRange(intCandidate * 1000, intCandidate * 1000);
+                return true;
+            }
+        }
+        return false;
     }
 
     public static boolean setCameraPictureSize(
@@ -211,6 +244,7 @@ public class CameraSettings {
         ListPreference colorEffect = group.findPreference(KEY_COLOR_EFFECT);
         ListPreference contrastEnhancement = group.findPreference(KEY_GBCE);
         ListPreference exposureMode = group.findPreference(KEY_EXPOSURE_MODE_MENU);
+        ListPreference previewFramerate = group.findPreference(KEY_PREVIEW_FRAMERATE);
 
         ArrayList<CharSequence[]> allPictureEntries = new ArrayList<CharSequence[]>();
         ArrayList<CharSequence[]> allPictureEntryValues = new ArrayList<CharSequence[]>();
@@ -223,6 +257,10 @@ public class CameraSettings {
             }
         }
 
+        if (previewFramerate != null) {
+            filterUnsupportedOptionsInt(group,
+                    previewFramerate, mParameters.getSupportedPreviewFrameRates());
+        }
         // Since the screen could be loaded from different resources, we need
         // to check if the preference is available here
         if (videoQuality != null) {
@@ -412,6 +450,24 @@ public class CameraSettings {
         resetIfInvalid(pref);
     }
 
+    private void filterUnsupportedOptionsInt(PreferenceGroup group,
+            ListPreference pref, List<Integer> supported) {
+        // Remove the preference if the parameter is not supported or there is
+        // only one options for the settings.
+        if (supported == null || supported.size() <= 1) {
+            removePreference(group, pref.getKey());
+            return;
+        }
+
+        pref.filterUnsupportedInt(supported);
+
+        // Set the value to the first entry if it is invalid.
+        String value = pref.getValue();
+        if (pref.findIndexOfValue(value) == NOT_FOUND) {
+            pref.setValueIndex(0);
+        }
+    }
+
     private void resetIfInvalid(ListPreference pref) {
         // Set the value to the first entry if it is invalid.
         String value = pref.getValue();
@@ -422,8 +478,10 @@ public class CameraSettings {
 
     public static List<String> sizeListToStringList(List<Size> sizes) {
         ArrayList<String> list = new ArrayList<String>();
-        for (Size size : sizes) {
-            list.add(String.format("%dx%d", size.width, size.height));
+        if (sizes != null) {
+            for (Size size : sizes) {
+                list.add(String.format("%dx%d", size.width, size.height));
+            }
         }
         return list;
     }

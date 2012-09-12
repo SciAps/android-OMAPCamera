@@ -26,6 +26,7 @@ import android.util.TypedValue;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Arrays.fill;
 
 /**
  * A type of <code>CameraPreference</code> whose number of possible values
@@ -35,10 +36,12 @@ public class ListPreference extends CameraPreference {
     private static final String TAG = "ListPreference";
     private final String mKey;
     private String mValue;
-    private final CharSequence[] mDefaultValues;
+    private String mDefaultValue;
+    private CharSequence[] mDefaultValues;
 
     private CharSequence[] mEntries;
     private CharSequence[] mEntryValues;
+    private boolean[] mEntryEnabledFlags;
     private boolean mLoaded = false;
 
     public ListPreference(Context context, AttributeSet attrs) {
@@ -67,9 +70,23 @@ public class ListPreference extends CameraPreference {
         setEntries(a.getTextArray(R.styleable.ListPreference_entries));
         setEntryValues(a.getTextArray(
                 R.styleable.ListPreference_entryValues));
+        mEntryEnabledFlags = new boolean[mEntryValues.length];
+        fill(mEntryEnabledFlags, true);
+
         a.recycle();
     }
 
+    public void enableAllItems() {
+        fill(mEntryEnabledFlags, true);
+    }
+
+    public void enableItem(int key, boolean enable) {
+        mEntryEnabledFlags[key] = enable;
+    }
+
+    public boolean isItemEnabled(int key) {
+        return mEntryEnabledFlags[key];
+    }
     private void clearAllEntries(){
         mEntries = null;
         mEntryValues = null;
@@ -128,6 +145,8 @@ public class ListPreference extends CameraPreference {
 
     public void setEntryValues(CharSequence values[]) {
         mEntryValues = values == null ? new CharSequence[0] : values;
+        mEntryEnabledFlags = new boolean[mEntryValues.length];
+        fill(mEntryEnabledFlags, true);
     }
 
     public String getValue() {
@@ -136,6 +155,17 @@ public class ListPreference extends CameraPreference {
                     findSupportedDefaultValue());
             mLoaded = true;
         }
+        if (findIndexOfValue(mValue)<0) {
+            mValue = mEntryValues[0].toString();
+        }
+
+        // These two keys haven't default value in xml
+        if (mKey.equals(CameraSettings.KEY_PICTURE_SIZE)) {
+            if (findIndexOfValue(mDefaultValue)<0) {
+                mDefaultValue = mEntryValues[0].toString();
+            }
+        }
+        if (mDefaultValue == null) mDefaultValue = mValue;
         return mValue;
     }
 
@@ -161,6 +191,19 @@ public class ListPreference extends CameraPreference {
 
     public void setValueIndex(int index) {
         setValue(mEntryValues[index].toString());
+    }
+
+    public void setDefaultValue(String value) {
+        if (findIndexOfValue(value) < 0) {
+            Log.v(TAG, "Unsupported default value: " + value);
+            mDefaultValue = getValue();
+        } else {
+            mDefaultValue = value;
+        }
+    }
+
+    public String getDefaultValue(){
+        return mDefaultValue;
     }
 
     public int findIndexOfValue(String value) {
@@ -213,5 +256,19 @@ public class ListPreference extends CameraPreference {
         for (int i = 0; i < mEntryValues.length; i++) {
             Log.v(TAG, "entryValues[" + i + "]=" + mEntryValues[i]);
         }
+    }
+
+    public void filterUnsupportedInt(List<Integer> supported) {
+        ArrayList<CharSequence> entries = new ArrayList<CharSequence>();
+        ArrayList<CharSequence> entryValues = new ArrayList<CharSequence>();
+        for (int i = 0, len = mEntryValues.length; i < len; i++) {
+            if (supported.indexOf(Integer.parseInt(mEntryValues[i].toString())) >= 0) {
+                entries.add(mEntries[i]);
+                entryValues.add(mEntryValues[i]);
+            }
+        }
+        int size = entries.size();
+        mEntries = entries.toArray(new CharSequence[size]);
+        mEntryValues = entryValues.toArray(new CharSequence[size]);
     }
 }

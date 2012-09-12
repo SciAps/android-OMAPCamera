@@ -130,6 +130,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private String mExposureMode = null;
     private String mColorEffect = null;
     private int mJpegQuality = CameraProfile.QUALITY_HIGH;
+    private String mLastPreviewFramerate;
 
     private static final String PARM_CONTRAST = "contrast";
     private static final String PARM_BRIGHTNESS = "brightness";
@@ -1690,6 +1691,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_SHARPNESS,
                 CameraSettings.KEY_SATURATION,
                 CameraSettings.KEY_EXPOSURE_MODE_MENU,
+                CameraSettings.KEY_PREVIEW_FRAMERATE,
                 CameraSettings.KEY_JPEG_QUALITY,
                 CameraSettings.KEY_COLOR_EFFECT,
                 CameraSettings.KEY_ANTIBANDING,
@@ -1992,6 +1994,18 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
         if ( null == mSharpness || mPausing ) {
             mSharpness = getString(R.string.pref_camera_sharpness_default);
+        }
+
+        if ( null == mISO || mPausing ) {
+            mISO = getString(R.string.pref_camera_iso_default);
+        }
+
+        if ( null == mColorEffect || mPausing ) {
+            mColorEffect = getString(R.string.pref_camera_coloreffect_default);
+        }
+
+        if (mCaptureMode.equals(mTemporalBracketing) && mPausing) {
+            mCaptureMode = getString(R.string.pref_camera_mode_default);
         }
     }
 
@@ -2442,10 +2456,12 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private void updateCameraParametersInitialize() {
         // Reset preview frame rate to the maximum because it may be lowered by
         // video camera application.
-        List<Integer> frameRates = mParameters.getSupportedPreviewFrameRates();
+        List<int[]> frameRates = mParameters.getSupportedPreviewFpsRange();
         if (frameRates != null) {
-            Integer max = Collections.max(frameRates);
-            mParameters.setPreviewFrameRate(max);
+            int last = frameRates.size() - 1;
+            int min = (frameRates.get(last))[mParameters.PREVIEW_FPS_MIN_INDEX];
+            int max = (frameRates.get(last))[mParameters.PREVIEW_FPS_MAX_INDEX];
+            mParameters.setPreviewFpsRange(min,max);
         }
 
         mParameters.setRecordingHint(false);
@@ -2478,6 +2494,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
     private boolean updateCameraParametersPreference() {
         boolean restartNeeded = false;
+        boolean captureModeUpdated = false;
 
         if (mAeLockSupported) {
             mParameters.setAutoExposureLock(mFocusManager.getAeAwbLock());
@@ -2501,6 +2518,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_MODE_MENU, getString(R.string.pref_camera_mode_default));
         if ( !mCaptureMode.equals(mode) ) {
             restartNeeded = true;
+            captureModeUpdated = true;
             mCaptureMode = mode;
             setCaptureMode(mode, mParameters);
             // Capture mode can be applied only
@@ -2516,7 +2534,21 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                                                          mCameraId,
                                                          CameraHolder.instance().getCameraInfo());
             mPreferenceGroup = settings.getPreferenceGroup(R.xml.camera_preferences);
+
         }
+
+        // Set Preview Framerate
+        String framerate =  mPreferences.getString(
+                CameraSettings.KEY_PREVIEW_FRAMERATE, null);
+        if ( ( framerate == null ) || captureModeUpdated ) {
+            CameraSettings.initialFrameRate(this, mParameters);
+            restartNeeded = true;
+        } else if (!framerate.equals(mLastPreviewFramerate) ) {
+            mParameters.setPreviewFpsRange(Integer.parseInt(framerate) * 1000,
+                    Integer.parseInt(framerate) * 1000);
+            mLastPreviewFramerate = framerate;
+            restartNeeded = true;
+         }
 
         // Set picture size.
         String pictureSize = mPreferences.getString(

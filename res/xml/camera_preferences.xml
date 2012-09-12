@@ -155,4 +155,9 @@
             camera:title="@string/pref_camera_gbce_title"
             camera:entries="@array/pref_camera_gbce_entries"
             camera:entryValues="@array/pref_camera_gbce_entryvalues" />
+    <ListPreference
+            camera:key="pref_camera_previewframerate_key"
+            camera:title="@string/pref_camera_previewframerate_title"
+            camera:entries="@array/pref_camera_previewframerate_entries"
+            camera:entryValues="@array/pref_camera_previewframerate_entryvalues" />
 </PreferenceGroup>
