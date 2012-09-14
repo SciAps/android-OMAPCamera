@@ -16,10 +16,12 @@
 
 package com.android.camera.ui;
 
+import java.util.ArrayList;
 import android.content.Context;
 import android.util.AttributeSet;
 
 import com.android.camera.PreferenceGroup;
+import com.android.camera.ListPreference;
 
 public abstract class IndicatorControlContainer extends IndicatorControl
         implements OnIndicatorEventListener {
@@ -41,4 +43,7 @@ public abstract class IndicatorControlContainer extends IndicatorControl
 
     public void stopTimeLapseAnimation() {
     }
+
+    public void replace(String key, ListPreference pref, ArrayList<CharSequence[]> allEntries, ArrayList<CharSequence[]> allEntryValues){ }
+
 }

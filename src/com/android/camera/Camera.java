@@ -2492,6 +2492,47 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         return null;
     }
 
+    private ListPreference getSupportedListPreference( String supportedKey, String menuKey){
+        List<String> supported = new ArrayList<String>();
+        ListPreference menu = mPreferenceGroup.findPreference(menuKey);
+        if (menu == null) return null;
+        if (supportedKey != null) {
+            String supp = mParameters.get(supportedKey);
+                if (supp !=null && !supp.equals("")) {
+                    for (String item : supp.split(",")) {
+                        supported.add(item);
+                    }
+                }
+        }
+        CameraSettings.filterUnsupportedOptions(mPreferenceGroup, menu, supported);
+        return menu;
+    }
+
+    private ListPreference getSupportedListPreference(List<Integer> supportedIntegers, String menuKey){
+        List<String> supported = new ArrayList<String>();
+        ListPreference menu = mPreferenceGroup.findPreference(menuKey);
+        if ( ( menu != null ) && !supportedIntegers.isEmpty() ) {
+            for (Integer item : supportedIntegers) {
+                supported.add(item.toString());
+            }
+            CameraSettings.filterUnsupportedOptions(mPreferenceGroup, menu, supported);
+        }
+
+        return menu;
+    }
+
+    private void updateListPreference(ListPreference listPreference, String menuItem) {
+        if ((listPreference == null) || (menuItem == null) || (mIndicatorControlContainer == null)) return;
+        ArrayList<CharSequence[]> allEntries = new ArrayList<CharSequence[]>();
+        ArrayList<CharSequence[]> allEntryValues = new ArrayList<CharSequence[]>();
+        allEntries.add(listPreference.getEntries());
+        allEntryValues.add(listPreference.getEntryValues());
+        mIndicatorControlContainer.replace(menuItem,
+                                           listPreference,
+                                           allEntries,
+                                           allEntryValues);
+    }
+
     private boolean updateCameraParametersPreference() {
         boolean restartNeeded = false;
         boolean captureModeUpdated = false;
@@ -2535,6 +2576,19 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                                                          CameraHolder.instance().getCameraInfo());
             mPreferenceGroup = settings.getPreferenceGroup(R.xml.camera_preferences);
 
+            // Update picture size UI with the new sizes
+            List<String> supported = new ArrayList<String>();
+            supported = CameraSettings.sizeListToStringList(mParameters.getSupportedPictureSizes());
+            ListPreference sizePreference = getSupportedListPreference(supported.toString(),
+                                                                       CameraSettings.KEY_PICTURE_SIZE);
+
+            updateListPreference(sizePreference, CameraSettings.KEY_PICTURE_SIZE);
+
+            // Update framerate UI with the new entries
+            ListPreference fpsPreference = getSupportedListPreference(mParameters.getSupportedPreviewFrameRates(),
+                                                                      CameraSettings.KEY_PREVIEW_FRAMERATE);
+
+            updateListPreference(fpsPreference, CameraSettings.KEY_PREVIEW_FRAMERATE);
         }
 
         // Set Preview Framerate

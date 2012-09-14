@@ -27,6 +27,7 @@ import com.android.camera.IconListPreference;
 import com.android.camera.ListPreference;
 import com.android.camera.PreferenceGroup;
 import com.android.camera.R;
+import com.android.camera.ui.AbstractIndicatorButton;
 
 import java.util.ArrayList;
 
@@ -242,6 +243,16 @@ public abstract class IndicatorControl extends RelativeLayout implements
             View v = getChildAt(i);
             if (v instanceof TwoStateImageView) {
                 ((TwoStateImageView) v).enableFilter(enabled);
+            }
+        }
+    }
+
+    public void replace(String key, ListPreference pref, ArrayList<CharSequence[]> allEntries,
+            ArrayList<CharSequence[]> allEntryValues){
+        for (AbstractIndicatorButton btn : mIndicators) {
+            if (btn.findPref(key)) {
+                btn.replace(key, pref, allEntries, allEntryValues);
+                return;
             }
         }
     }

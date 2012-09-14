@@ -431,25 +431,6 @@ public class CameraSettings {
         return substrings;
     }
 
-    private void filterUnsupportedOptions(PreferenceGroup group,
-            ListPreference pref, List<String> supported) {
-
-        // Remove the preference if the parameter is not supported or there is
-        // only one options for the settings.
-        if (supported == null || supported.size() <= 1) {
-            removePreference(group, pref.getKey());
-            return;
-        }
-
-        pref.filterUnsupported(supported);
-        if (pref.getEntries().length <= 1) {
-            removePreference(group, pref.getKey());
-            return;
-        }
-
-        resetIfInvalid(pref);
-    }
-
     private void filterUnsupportedOptionsInt(PreferenceGroup group,
             ListPreference pref, List<Integer> supported) {
         // Remove the preference if the parameter is not supported or there is
@@ -468,7 +449,7 @@ public class CameraSettings {
         }
     }
 
-    private void resetIfInvalid(ListPreference pref) {
+    private static void resetIfInvalid(ListPreference pref) {
         // Set the value to the first entry if it is invalid.
         String value = pref.getValue();
         if (pref.findIndexOfValue(value) == NOT_FOUND) {
@@ -658,6 +639,25 @@ public class CameraSettings {
         // initial picture size is that of the back camera.
         initialCameraPictureSize(context, parameters);
         writePreferredCameraId(preferences, currentCameraId);
+    }
+
+    public static void filterUnsupportedOptions(PreferenceGroup group,
+            ListPreference pref, List<String> supported) {
+
+        // Remove the preference if the parameter is not supported or there is
+        // only one options for the settings.
+        if (supported == null || supported.size() <= 1) {
+            removePreference(group, pref.getKey());
+            return;
+        }
+
+        pref.filterUnsupported(supported);
+        if (pref.getEntries().length <= 1) {
+            removePreference(group, pref.getKey());
+            return;
+        }
+
+        resetIfInvalid(pref);
     }
 
     private ArrayList<String> getSupportedVideoQuality() {
