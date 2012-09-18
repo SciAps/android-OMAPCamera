@@ -2217,6 +2217,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             s3dView = new S3DViewWrapper(preview.getHolder());
             CameraInfo info = CameraHolder.instance().getCameraInfo()[mCameraId];
             boolean mirror = (info.facing == CameraInfo.CAMERA_FACING_FRONT);
+            if(mFaceView == null) {
+                mFaceView = (FaceView) findViewById(R.id.face_view);
+            }
             mFocusManager.initialize(mFocusAreaIndicator, mPreviewFrame, mFaceView, this,
                     mirror, mDisplayOrientation);
             mNeedToRecreateSurfaceView = false;
