@@ -57,12 +57,6 @@ public class IndicatorControlBar extends IndicatorControl implements
             boolean zoomSupported, boolean CPcamSlidersSupported) {
         setPreferenceGroup(group);
 
-        // Add CameraPicker control.
-        initializeCameraPicker();
-        if (mCameraPicker != null) {
-            mCameraPicker.setBackgroundResource(R.drawable.bg_pressed);
-        }
-
         // Add the ZoomControl if supported.
         if (zoomSupported) {
             mZoomControl = (ZoomControlBar) findViewById(R.id.zoom_control);
@@ -75,6 +69,14 @@ public class IndicatorControlBar extends IndicatorControl implements
             mExposureControl = (CPcamExposureControlBar) findViewById(R.id.exposure_control);
             mExposureControl.setVisibility(View.INVISIBLE);
             mSecondLevelIcon.setVisibility(View.INVISIBLE);
+        }
+        else
+        {
+            // Add CameraPicker control if not in CPCam mode.
+            initializeCameraPicker();
+            if (mCameraPicker != null) {
+                mCameraPicker.setBackgroundResource(R.drawable.bg_pressed);
+            }
         }
 
         requestLayout();

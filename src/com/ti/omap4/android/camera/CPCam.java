@@ -17,7 +17,6 @@
 package com.ti.omap4.android.camera;
 
 import com.ti.omap4.android.camera.CPCamFocusManager.QueuedShotStates;
-import com.ti.omap4.android.camera.ui.CameraPicker;
 import com.ti.omap4.android.camera.ui.FaceView;
 import com.ti.omap4.android.camera.ui.FaceViewData;
 import com.ti.omap4.android.camera.ui.IndicatorControlContainer;
@@ -1374,7 +1373,6 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         if (mIndicatorControlContainer == null) return;
         loadCameraPreferences();
 
-        CameraPicker.setImageResourceId(R.drawable.ic_switch_photo_facing_holo_light);
         mIndicatorControlContainer.initialize(this, mPreferenceGroup,
                 false, true, null, null);
 
