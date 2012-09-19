@@ -1701,10 +1701,6 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
             Log.e(TAG, "Error trying to setBufferSource!");
         }
 
-        if (mCameraSavedState == QUEUED_SHOT_IN_PROGRESS) synchronized (mCameraStateLock) {
-            setUpQueuedShot();
-        }
-
     }
 
     @Override
@@ -1944,6 +1940,9 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         mTouchManager.initialize(preview.getHeight() / 3, preview.getHeight() / 3,
                preview, this, mirror, displayOrientation);
 
+        if (mCameraSavedState == QUEUED_SHOT_IN_PROGRESS) synchronized (mCameraStateLock) {
+               setUpQueuedShot();
+        }
     }
 
     public void surfaceCreated(SurfaceHolder holder) {
