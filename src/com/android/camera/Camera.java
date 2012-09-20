@@ -200,6 +200,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private ZoomControl mZoomControl;
     private GestureDetector mGestureDetector;
 
+    private Parameters mParameters;
     private Parameters mInitialParams;
     private boolean mFocusAreaSupported;
     private boolean mMeteringAreaSupported;
@@ -450,13 +451,31 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 case MANUAL_GAIN_EXPOSURE_CHANGED: {
                     Bundle data;
                     data = msg.getData();
-                    mManualExposureControl = data.getInt("EXPOSURE");
-                    if (mManualExposureControl < 1) {
-                        mManualExposureControl = 1;
+                    if (mCameraId < 2) {
+                        mManualExposureControl = data.getInt("EXPOSURE");
+                        if (mManualExposureControl < 1) {
+                            mManualExposureControl = 1;
+                        }
+                        mManualGainISO = data.getInt("ISO");
+                        mParameters.set(CameraSettings.KEY_MANUAL_EXPOSURE, mManualExposureControl.intValue());
+                        mParameters.set(CameraSettings.KEY_MANUAL_GAIN_ISO, mManualGainISO.intValue());
+                    } else {
+                        mManualExposureRight = data.getInt("EXPOSURE_RIGHT");
+                        if (mManualExposureRight < 1) {
+                            mManualExposureRight = 1;
+                        }
+                        mManualExposureLeft = data.getInt("EXPOSURE_LEFT");
+                        if (mManualExposureLeft < 1) {
+                            mManualExposureLeft = 1;
+                        }
+                        mManualGainISORight = data.getInt("ISO_RIGHT");
+                        mManualGainISOLeft = data.getInt("ISO_LEFT");
+
+                        mParameters.set(CameraSettings.KEY_MANUAL_EXPOSURE_RIGHT, mManualExposureRight.intValue());
+                        mParameters.set(CameraSettings.KEY_MANUAL_EXPOSURE, mManualExposureLeft.intValue());
+                        mParameters.set(CameraSettings.KEY_MANUAL_GAIN_ISO, mManualGainISOLeft.intValue());
+                        mParameters.set(CameraSettings.KEY_MANUAL_GAIN_ISO_RIGHT, mManualGainISORight.intValue());
                     }
-                    mManualGainISO = data.getInt("ISO");
-                    mParameters.set(CameraSettings.KEY_MANUAL_EXPOSURE, mManualExposureControl.intValue());
-                    mParameters.set(CameraSettings.KEY_MANUAL_GAIN_ISO, mManualGainISO.intValue());
                     if (mCameraDevice != null) {
                         mCameraDevice.setParameters(mParameters);
                     }
@@ -2703,34 +2722,62 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         String exposureMode = mPreferences.getString(
                     CameraSettings.KEY_EXPOSURE_MODE_MENU, getString(R.string.pref_camera_exposuremode_default));
 
-        if (exposureMode != null && !exposureMode.equals(mExposureMode)) { // 3d DualCamera Mode
+        if (exposureMode != null && !exposureMode.equals(mExposureMode)) {
+            // 3d DualCamera Mode
             mParameters.set(PARM_EXPOSURE_MODE, exposureMode);
             mExposureMode = exposureMode;
-            int expMin = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_MIN));
-            int isoMin = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_MIN));
-            if (!isExposureInit) {
-                isExposureInit = true;
-            } else if (exposureMode.equals(mManualExposure) && isManualExposure) { // ManualExposure Mode
+            if (!isExposureInit) isExposureInit = true;
+            else if (exposureMode.equals(mManualExposure) && isManualExposure) { // ManualExposure Mode
                 isManualExposure = false;
                 ManualGainExposureSettings manualGainExposureDialog = null;
-                int expMax = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_MAX));
-                int expStep = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_STEP));
-                int isoMax = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_MAX));
-                int isoStep = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_STEP));
-                int expValue = Integer.parseInt(mParameters.get(CameraSettings.KEY_MANUAL_EXPOSURE));
-                int isoValue = Integer.parseInt(mParameters.get(CameraSettings.KEY_MANUAL_GAIN_ISO));
+                if (mCameraId < 2) {
+                    int expMin = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_MIN));
+                    int expMax = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_MAX));
+                    int expStep = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_STEP));
+                    int isoMin = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_MIN));
+                    int isoMax = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_MAX));
+                    int isoStep = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_STEP));
+                    int expValue = Integer.parseInt(mParameters.get(CameraSettings.KEY_MANUAL_EXPOSURE));
+                    int isoValue = Integer.parseInt(mParameters.get(CameraSettings.KEY_MANUAL_GAIN_ISO));
 
-                manualGainExposureDialog = new ManualGainExposureSettings(this, mHandler,
-                        expValue, isoValue,expMin, expMax,
-                        isoMin, isoMax,expStep,isoStep);
-                Editor edit = mPreferences.edit();
-                edit.putString(CameraSettings.KEY_EXPOSURE_MODE_MENU, exposureMode);
-                edit.commit();
+                    manualGainExposureDialog = new ManualGainExposureSettings(this, mHandler,
+                            expValue, isoValue,expMin, expMax,
+                            isoMin, isoMax,expStep,isoStep);
+                    Editor edit = mPreferences.edit();
+                    edit.putString(CameraSettings.KEY_EXPOSURE_MODE_MENU, exposureMode);
+                    edit.commit();
+                    manualGainExposureDialog.show();
+                } else {
+                    int expMin = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_MIN));
+                    int expMax = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_MAX));
+                    int expStep = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_EXPOSURE_STEP));
+                    int isoMin = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_MIN));
+                    int isoMax = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_MAX));
+                    int isoStep = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_GAIN_ISO_STEP));
+                    int expRightValue = Integer.parseInt(mParameters.get(CameraSettings.KEY_MANUAL_EXPOSURE_RIGHT));
+                    int expLeftValue = Integer.parseInt(mParameters.get(CameraSettings.KEY_MANUAL_EXPOSURE));
+                    int isoRightValue = Integer.parseInt(mParameters.get(CameraSettings.KEY_MANUAL_GAIN_ISO_RIGHT));
+                    int isoLeftValue = Integer.parseInt(mParameters.get(CameraSettings.KEY_MANUAL_GAIN_ISO));
+
+                    manualGainExposureDialog = new ManualGainExposureSettings(this, mHandler,
+                            expRightValue, expLeftValue, isoRightValue, isoLeftValue,
+                            expMin, expMax, isoMin, isoMax,expStep,isoStep);
+                    Editor edit = mPreferences.edit();
+                    edit.putString(CameraSettings.KEY_EXPOSURE_MODE_MENU, exposureMode);
+                    edit.commit();
+                }
                 manualGainExposureDialog.show();
             } else {
                 isManualExposure = true;
-                mParameters.set(CameraSettings.KEY_MANUAL_EXPOSURE, expMin);
-                mParameters.set(CameraSettings.KEY_MANUAL_GAIN_ISO, isoMin);
+                if (mCameraId < 2) {
+                    mParameters.set(CameraSettings.KEY_MANUAL_EXPOSURE, 0);
+                    mParameters.set(CameraSettings.KEY_MANUAL_GAIN_ISO, 0);
+                } else {
+                    mParameters.set(CameraSettings.KEY_MANUAL_EXPOSURE, 0);
+                    mParameters.set(CameraSettings.KEY_MANUAL_EXPOSURE_RIGHT, 0);
+                    mParameters.set(CameraSettings.KEY_MANUAL_GAIN_ISO, 0);
+                    mParameters.set(CameraSettings.KEY_MANUAL_GAIN_ISO_RIGHT, 0);
+                }
             }
         }
 
@@ -2927,6 +2974,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     // the subsets actually need updating. The PREFERENCE set needs extra
     // locking because the preference can be changed from GLThread as well.
     private void setCameraParameters(int updateSet) {
+        mParameters = mCameraDevice.getParameters();
+
         boolean restartPreview = false;
         if ((updateSet & UPDATE_PARAM_INITIALIZE) != 0) {
             updateCameraParametersInitialize();

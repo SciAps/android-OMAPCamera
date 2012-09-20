@@ -133,7 +133,6 @@
     <!-- Settings screen, Picture size title -->
     <string name="pref_camera_picturesize_title">Picture size</string>
 
-
     <!-- Settings screen, dialog choice for 14 megapixels picture size [CHAR LIMIT=15] -->
     <string name="pref_camera_picturesize_entry_4416x3312">14M pixels</string>
     <!-- Settings screen, dialog choice for 12 megapixels picture size [CHAR LIMIT=15] -->
@@ -216,7 +215,7 @@
     <string name="pref_camera_iso_entry_200">200</string>
     <string name="pref_camera_iso_entry_400">400</string>
     <string name="pref_camera_iso_entry_800">800</string>
-    
+
     <!-- Settings Exposure modes title -->
     <string name="pref_camera_exposuremode_title">Exposure Mode</string>
     <string name="pref_camera_exposuremode_default">auto</string>
@@ -420,7 +419,14 @@
     <string name="pref_exposure_title">Exposure</string>
     <string name="pref_exposure_default" translatable="false">0</string>
 
-    <!-- Manual exposure and gain settings in preference -->
+    <!-- Manual Exposure Settings Dialog -->
+    <string name="settings_manual_3d_exposure_left_caption">Left Manual Exposure [ms]: </string>
+    <string name="settings_manual_3d_exposure_right_caption">Right Manual Exposure [ms]: </string>
+
+    <string name="settings_manual_3d_gain_left_caption">Left ISO: </string>
+    <string name="settings_manual_3d_gain_right_caption">Right ISO: </string>
+    <string name="settings_manual_3d_gain_exposure_button_ok">Ok</string>
+
     <string name="settings_manual_2d_exposure_caption"> Manual Exposure [ms]: </string>
     <string name="settings_manual_2d_gain_caption">Manual ISO: </string>
 
