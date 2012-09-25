@@ -419,6 +419,23 @@
     <string name="pref_exposure_title">Exposure</string>
     <string name="pref_exposure_default" translatable="false">0</string>
 
+    <!-- Default AutoConvergence mode setting.-->
+    <string name="pref_camera_autoconvergence_default" translatable="false">frame</string>
+
+    <!-- Settings screen, AutoConvergence mode title -->
+    <string name="pref_camera_autoconvergence_title">Auto Convergence Mode</string>
+
+    <!-- Settings screen, AutoConvergence mode dialog radio button choices -->
+    <string name="pref_camera_autoconvergence_entry_mode_frame">Frame Mode</string>
+    <string name="pref_camera_autoconvergence_entry_mode_center">Center Mode</string>
+    <string name="pref_camera_autoconvergence_entry_mode_touch">Touch Mode</string>
+    <string name="pref_camera_autoconvergence_entry_mode_manual">Manual Mode</string>
+    <string name="pref_camera_autoconvergence_entry_mode_disable">Disable</string>
+
+    <!-- Manual Convergence Settings Dialog -->
+    <string name="settings_manual_convergence_caption">Manual Convergence: </string>
+    <string name="settings_manual_convergence_button_ok">Ok</string>
+
     <!-- Manual Exposure Settings Dialog -->
     <string name="settings_manual_3d_exposure_left_caption">Left Manual Exposure [ms]: </string>
     <string name="settings_manual_3d_exposure_right_caption">Right Manual Exposure [ms]: </string>

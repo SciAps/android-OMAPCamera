@@ -75,6 +75,14 @@ public class CameraSettings {
     public static final String KEY_GBCE = "pref_camera_gbce_key";
     public static final String KEY_PREVIEW_FRAMERATE = "pref_camera_previewframerate_key";
 
+    public static final String KEY_AUTO_CONVERGENCE = "pref_camera_autoconvergence_key";
+    public static final String KEY_AUTOCONVERGENCE_MODE = "auto-convergence-mode";
+    public static final String KEY_AUTOCONVERGENCE_MODE_VALUES = "auto-convergence-mode-values";
+    public static final String KEY_MANUAL_CONVERGENCE = "manual-convergence";
+    public static final String KEY_SUPPORTED_MANUAL_CONVERGENCE_MIN = "supported-manual-convergence-min";
+    public static final String KEY_SUPPORTED_MANUAL_CONVERGENCE_MAX = "supported-manual-convergence-max";
+    public static final String KEY_SUPPORTED_MANUAL_CONVERGENCE_STEP = "supported-manual-convergence-step";
+
     public static final String KEY_EXPOSURE_MODE = "exposure";
     // Exposure modes
     public static final String KEY_SUPPORTED_MANUAL_EXPOSURE_MIN = "supported-manual-exposure-min";
@@ -231,6 +239,7 @@ public class CameraSettings {
         ListPreference sceneMode = group.findPreference(KEY_SCENE_MODE);
         ListPreference flashMode = group.findPreference(KEY_FLASH_MODE);
         ListPreference focusMode = group.findPreference(KEY_FOCUS_MODE);
+        ListPreference autoConvergence = group.findPreference(KEY_AUTO_CONVERGENCE);
         ListPreference exposure = group.findPreference(KEY_EXPOSURE);
         IconListPreference cameraIdPref =
                 (IconListPreference) group.findPreference(KEY_CAMERA_ID);
@@ -323,6 +332,18 @@ public class CameraSettings {
         if (videoEffect != null) {
             initVideoEffect(group, videoEffect);
             resetIfInvalid(videoEffect);
+        }
+
+        if (autoConvergence != null) {
+            ArrayList<String> suppConvergence = new ArrayList<String>();
+            String convergence = mParameters.get(CameraSettings.KEY_AUTOCONVERGENCE_MODE_VALUES);
+            if (convergence != null && !convergence.equals("")) {
+                for(String item : convergence.split(",")){
+                    suppConvergence.add(item);
+                }
+            }
+            filterUnsupportedOptions(group,
+                    autoConvergence, suppConvergence);
         }
 
         if ( contrastEnhancement != null ) {

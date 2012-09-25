@@ -50,6 +50,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.GestureDetector;
@@ -69,6 +70,7 @@ import com.android.camera.ui.RotateTextToast;
 import com.android.camera.ui.TwoStateImageView;
 import com.android.camera.ui.ZoomControl;
 import com.android.camera.CameraSettings;
+import com.android.camera.ui.ManualConvergenceSettings;
 import com.android.camera.ui.ManualGainExposureSettings;
 import com.android.camera.R;
 
@@ -88,6 +90,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         CameraPreference.OnPreferenceChangedListener, LocationManager.Listener,
         PreviewFrameLayout.OnSizeChangedListener,
         ShutterButton.OnShutterButtonListener,
+        TouchManager.Listener,
         ShutterButton.OnShutterButtonLongPressListener {
 
     private static final String TAG = "camera";
@@ -111,6 +114,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final int RESTART_PREVIEW = 15;
     public static final int MANUAL_GAIN_EXPOSURE_CHANGED = 16;
     public static final int RELEASE_CAMERA = 17;
+    public static final int MANUAL_CONVERGENCE_CHANGED = 18;
 
     // The subset of parameters we need to update in setCameraParameters().
     private static final int UPDATE_PARAM_INITIALIZE = 1;
@@ -176,6 +180,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     public static final String TRUE = "true";
     public static final String FALSE = "false";
 
+    private String mTouchConvergence;
+    private String mManualConvergence;
     private String mTemporalBracketing;
     private String mExposureBracketing;
     private String mHighPerformance;
@@ -322,6 +328,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private long mOnResumeTime;
     private long mStorageSpace;
     private byte[] mJpegImageData;
+    private String mAutoConvergence = null;
     private boolean isExposureInit = false;
     private boolean isManualExposure = false;
     private Integer mManualExposureLeft = new Integer (0);
@@ -331,6 +338,10 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private Integer mManualExposureControl = new Integer(0);
     private Integer mManualGainISO = new Integer(0);
 
+    private Integer mManualConvergenceValue = new Integer(0);
+    private boolean isManualConvergence = false;
+    private boolean isConvergenceInit = false;
+
     // These latency time are for the CameraLatency test.
     public long mAutoFocusTime;
     public long mShutterLag;
@@ -339,6 +350,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     public long mJpegCallbackFinishTime;
     public long mCaptureStartTime;
 
+    private TouchManager mTouchManager;
     // This handles everything about focus.
     private FocusManager mFocusManager;
     private String mSceneMode;
@@ -448,6 +460,15 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                     break;
                 }
 
+                case MANUAL_CONVERGENCE_CHANGED: {
+                    mManualConvergenceValue = (Integer) msg.obj;
+                    mParameters.set(CameraSettings.KEY_MANUAL_CONVERGENCE, mManualConvergenceValue.intValue());
+                    if (mCameraDevice != null) {
+                        mCameraDevice.setParameters(mParameters);
+                    }
+                    break;
+                }
+
                 case MANUAL_GAIN_EXPOSURE_CHANGED: {
                     Bundle data;
                     data = msg.getData();
@@ -532,6 +553,8 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         setPreviewFrameLayoutAspectRatio();
         mFocusManager.setPreviewSize(mPreviewFrameLayout.getWidth(),
                 mPreviewFrameLayout.getHeight());
+        mTouchManager.setPreviewSize(mPreviewFrameLayout.getWidth(),
+                mPreviewFrameLayout.getHeight());
         if (mIndicatorControlContainer == null) {
             initializeIndicatorControl();
         }
@@ -589,6 +612,11 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mShutterButton.setOnShutterButtonListener(this);
         mShutterButton.setOnShutterButtonLongPressListener(this);
         mShutterButton.setVisibility(View.VISIBLE);
+        CameraInfo info = CameraHolder.instance().getCameraInfo()[mCameraId];
+        boolean mirror = (info.facing == CameraInfo.CAMERA_FACING_FRONT);
+        int displayRotation = Util.getDisplayRotation(this);
+        int displayOrientation = Util.getDisplayOrientation(displayRotation, mCameraId);
+        mTouchManager.initialize(this, mirror, displayOrientation);
 
         mImageSaver = new ImageSaver();
         mImageNamer = new ImageNamer();
@@ -759,8 +787,34 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 mFocusManager.drawFocusRectangle();
             }
 
+            final String focusMode = mFocusManager.getFocusMode();
+            boolean cafActive = false;
+            if (focusMode.equals(Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) ||
+                    (focusMode.equals(Parameters.FOCUS_MODE_AUTO) &&
+                    mFocusManager.getFocusAreas() != null)) {
+                cafActive = true;
+            }
+
+            // Check if metering area is supported and touch convergence is selected
+            if (mMeteringAreaSupported && !cafActive &&
+                    mAutoConvergence.equals(mTouchConvergence)) {
+            //    if (mS3dViewEnabled || is2DMode()) {
+                    mTouchManager.onTouch(e);
+/*
+                } else {
+                    mTouchManager.onTouch(e, mPreviewLayout);
+                }
+*/
+                return;
+            }
+
             // Check if metering area or focus area is supported.
             if (!mFocusAreaSupported && !mMeteringAreaSupported) return;
+
+            // Do touch AF only in continuous AF mode.
+            if (!cafActive) {
+                return;
+            }
 
             mFocusManager.onSingleTapUp((int) e.getX(), (int) e.getY());
         }
@@ -1503,6 +1557,13 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     }
 
     @Override
+    public void setTouchParameters() {
+        mParameters = mCameraDevice.getParameters();
+        mParameters.setMeteringAreas(mTouchManager.getMeteringAreas());
+        mCameraDevice.setParameters(mParameters);
+    }
+
+    @Override
     public void playSound(int soundId) {
         mCameraSound.play(soundId);
     }
@@ -1550,6 +1611,18 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             }
         }
 
+        ListPreference autoConvergencePreference = group.findPreference(CameraSettings.KEY_AUTO_CONVERGENCE);
+        if (autoConvergencePreference != null) {
+            mTouchConvergence = autoConvergencePreference.findEntryValueByEntry(getString(R.string.pref_camera_autoconvergence_entry_mode_touch));
+            if (mTouchConvergence == null) {
+                mTouchConvergence = "";
+            }
+            mManualConvergence = autoConvergencePreference.findEntryValueByEntry(getString(R.string.pref_camera_autoconvergence_entry_mode_manual));
+            if (mManualConvergence == null) {
+                mManualConvergence = "";
+            }
+        }
+
         ListPreference exposure = group.findPreference(CameraSettings.KEY_EXPOSURE_MODE_MENU);
         if (exposure != null) {
             mManualExposure = exposure.findEntryValueByEntry(getString(R.string.pref_camera_exposuremode_entry_manual));
@@ -1591,7 +1664,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 mHighQualityZsl = "";
             }
         }
-
+        mTouchManager = new TouchManager();
         mPreferences.setLocalId(this, mCameraId);
         CameraSettings.upgradeLocalPreferences(mPreferences.getLocal());
         mFocusAreaIndicator = (RotateLayout) findViewById(
@@ -1699,6 +1772,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_SCENE_MODE};
         final String[] OTHER_SETTING_KEYS = {
                 CameraSettings.KEY_RECORD_LOCATION,
+                CameraSettings.KEY_AUTO_CONVERGENCE,
                 CameraSettings.KEY_FOCUS_MODE,
                 CameraSettings.KEY_MODE_MENU,
                 CameraSettings.KEY_BURST,
@@ -1991,6 +2065,10 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     }
 
     private void initDefaults() {
+        if ( null == mAutoConvergence || mPausing ) {
+            mAutoConvergence = getString(R.string.pref_camera_autoconvergence_default);
+        }
+
         if ( null == mAntibanding || mPausing ) {
             mAntibanding = getString(R.string.pref_camera_antibanding_default);
         }
@@ -2571,6 +2649,32 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         if (mMeteringAreaSupported) {
             // Use the same area for focus and metering.
             mParameters.setMeteringAreas(mFocusManager.getMeteringAreas());
+        }
+
+        // Auto Convergence
+        String autoConvergence = mPreferences.getString(
+                CameraSettings.KEY_AUTO_CONVERGENCE,
+                getString(R.string.pref_camera_autoconvergence_default));
+
+        if (!autoConvergence.equals(mAutoConvergence)) {
+            mParameters.set(CameraSettings.KEY_AUTOCONVERGENCE_MODE, autoConvergence);
+            mAutoConvergence = autoConvergence;
+            if (!isConvergenceInit) isConvergenceInit = true;
+            else if (autoConvergence.equals(mManualConvergence) && isManualConvergence) {
+                int convergenceMin = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_CONVERGENCE_MIN));
+                int convergenceMax = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_CONVERGENCE_MAX));
+                int convergenceStep = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_CONVERGENCE_STEP));
+                int convergenceValue = Integer.parseInt(mParameters.get(CameraSettings.KEY_MANUAL_CONVERGENCE));
+                ManualConvergenceSettings manualConvergenceDialog = new ManualConvergenceSettings(this, mHandler,
+                        convergenceValue, convergenceMin, convergenceMax, convergenceStep);
+                Editor edit = mPreferences.edit();
+                edit.putString(CameraSettings.KEY_AUTO_CONVERGENCE, autoConvergence);
+                edit.commit();
+                manualConvergenceDialog.show();
+                isManualConvergence = false;
+            } else {
+                isManualConvergence = true;
+            }
         }
 
         // Capture mode
@@ -3340,6 +3444,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     @Override
     public void onSizeChanged(int width, int height) {
         if (mFocusManager != null) mFocusManager.setPreviewSize(width, height);
+        if (mTouchManager != null) mTouchManager.setPreviewSize(width, height);
     }
 
     void setPreviewFrameLayoutAspectRatio() {
