@@ -147,6 +147,8 @@ public class VideoCamera extends ActivityBase
     private boolean mIsVideoCaptureIntent;
     private boolean mQuickCapture;
 
+    private String mCaptureMode = new String();
+
     private long mStorageSpace;
 
     private MediaRecorder mMediaRecorder;
@@ -443,7 +445,8 @@ public class VideoCamera extends ActivityBase
                     CameraSettings.KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL,
                     CameraSettings.KEY_VIDEO_QUALITY};
         final String[] OTHER_SETTING_KEYS = {
-                    CameraSettings.KEY_RECORD_LOCATION};
+                    CameraSettings.KEY_RECORD_LOCATION,
+                    CameraSettings.KEY_VIDEO_MODE};
 
         CameraPicker.setImageResourceId(R.drawable.ic_switch_video_facing_holo_light);
         mIndicatorControlContainer.initialize(this, mPreferenceGroup,
@@ -1854,6 +1857,16 @@ public class VideoCamera extends ActivityBase
         int jpegQuality = CameraProfile.getJpegEncodingQualityParameter(mCameraId,
                 CameraProfile.QUALITY_HIGH);
         mParameters.setJpegQuality(jpegQuality);
+
+        if ( mCaptureMode.isEmpty() ) {
+            String mode = mPreferences.getString(CameraSettings.KEY_VIDEO_MODE, null);
+            if ( null != mode ) {
+                mCaptureMode = mode;
+                mParameters.set(CameraSettings.KEY_MODE, mCaptureMode);
+            }
+        } else {
+            mParameters.set(CameraSettings.KEY_MODE, mCaptureMode);
+        }
 
         mCameraDevice.setParameters(mParameters);
         // Keep preview size up to date.

@@ -34,6 +34,7 @@ import java.util.StringTokenizer;
 
 
 
+
 /**
  *  Provides utilities and keys for Camera settings.
  */
@@ -101,6 +102,8 @@ public class CameraSettings {
     public static final int CURRENT_VERSION = 5;
     public static final int CURRENT_LOCAL_VERSION = 2;
 
+    // Video settings
+    public static final String KEY_VIDEO_MODE = "pref_camera_video_mode_key";
     public static final int DEFAULT_VIDEO_DURATION = 0; // no limit
 
     private static final String TAG = "CameraSettings";
@@ -254,6 +257,7 @@ public class CameraSettings {
         ListPreference contrastEnhancement = group.findPreference(KEY_GBCE);
         ListPreference exposureMode = group.findPreference(KEY_EXPOSURE_MODE_MENU);
         ListPreference previewFramerate = group.findPreference(KEY_PREVIEW_FRAMERATE);
+        ListPreference videoMode = group.findPreference(KEY_VIDEO_MODE);
 
         ArrayList<CharSequence[]> allPictureEntries = new ArrayList<CharSequence[]>();
         ArrayList<CharSequence[]> allPictureEntryValues = new ArrayList<CharSequence[]>();
@@ -314,6 +318,16 @@ public class CameraSettings {
         if (videoFlashMode != null) {
             filterUnsupportedOptions(group,
                     videoFlashMode, mParameters.getSupportedFlashModes());
+        }
+        if(videoMode != null){
+            ArrayList<String> suppMode = new ArrayList<String>();
+            String modeValues = mParameters.get(KEY_CAP_MODE_VALUES);
+            if(modeValues != null && !modeValues.equals("")){
+                for(String item : modeValues.split(",")){
+                    suppMode.add(item);
+                }
+            }
+            filterUnsupportedOptions(group, videoMode, suppMode);
         }
         if (exposure != null) buildExposureCompensation(group, exposure);
         if (cameraIdPref != null) buildCameraId(group, cameraIdPref);
