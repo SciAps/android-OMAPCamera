@@ -416,6 +416,12 @@ public class VideoCamera extends ActivityBase
                 settings.getPreferenceGroup(R.xml.video_preferences));
     }
 
+    private boolean isRecordingTimerEnabled() {
+        final String timer = mPreferences.getString(CameraSettings.KEY_VIDEO_TIMER,
+                getString(R.string.pref_camera_video_timer_default));
+        return Boolean.parseBoolean(timer);
+    }
+
     private boolean collapseCameraControls() {
         if ((mIndicatorControlContainer != null)
                 && mIndicatorControlContainer.dismissSettingPopup()) {
@@ -447,7 +453,8 @@ public class VideoCamera extends ActivityBase
         final String[] OTHER_SETTING_KEYS = {
                     CameraSettings.KEY_RECORD_LOCATION,
                     CameraSettings.KEY_VIDEO_MODE,
-                    CameraSettings.KEY_VIDEO_FORMAT};
+                    CameraSettings.KEY_VIDEO_FORMAT,
+                    CameraSettings.KEY_VIDEO_TIMER};
 
         CameraPicker.setImageResourceId(R.drawable.ic_switch_video_facing_holo_light);
         mIndicatorControlContainer.initialize(this, mPreferenceGroup,
@@ -1522,8 +1529,10 @@ public class VideoCamera extends ActivityBase
             mIndicatorControlContainer.dismissSecondLevelIndicator();
             if (mThumbnailView != null) mThumbnailView.setEnabled(false);
             mShutterButton.setBackgroundResource(R.drawable.btn_shutter_video_recording);
-            mRecordingTimeView.setText("");
-            mRecordingTimeView.setVisibility(View.VISIBLE);
+            if ( isRecordingTimerEnabled() ) {
+                mRecordingTimeView.setText("");
+                mRecordingTimeView.setVisibility(View.VISIBLE);
+            }
             if (mReviewControl != null) mReviewControl.setVisibility(View.GONE);
             if (mCaptureTimeLapse) {
                 mIndicatorControlContainer.startTimeLapseAnimation(
@@ -1533,7 +1542,9 @@ public class VideoCamera extends ActivityBase
         } else {
             if (mThumbnailView != null) mThumbnailView.setEnabled(true);
             mShutterButton.setBackgroundResource(R.drawable.btn_shutter_video);
-            mRecordingTimeView.setVisibility(View.GONE);
+            if ( isRecordingTimerEnabled() ) {
+                mRecordingTimeView.setVisibility(View.GONE);
+            }
             if (mReviewControl != null) mReviewControl.setVisibility(View.VISIBLE);
             if (mCaptureTimeLapse) {
                 mIndicatorControlContainer.stopTimeLapseAnimation();

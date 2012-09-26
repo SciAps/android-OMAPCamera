@@ -109,6 +109,7 @@ public class CameraSettings {
     public static final String KEY_VIDEO_FORMAT = "pref_camera_video_format_key";
     public static final String KEY_SUPPORTED_PREVIEW_SUBSAMPLED_SIZES = "supported-preview-subsampled-size-values";
     public static final int DEFAULT_VIDEO_FORMAT_VALUE = 8; // 720p
+    public static final String KEY_VIDEO_TIMER = "pref_camera_video_timer_key";
     public static final int DEFAULT_VIDEO_DURATION = 0; // no limit
 
     private static final String TAG = "CameraSettings";

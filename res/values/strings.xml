@@ -151,6 +151,12 @@
     <!-- Settings screen, Video format dialog title -->
     <string name="pref_camera_video_format_dialogtitle">Video format</string>
 
+    <!-- Video recording timer -->
+    <string name="pref_camera_video_timer_default" translatable="false">true</string>
+    <string name="pref_camera_video_timer_title">Recording timer</string>
+    <string name="pref_camera_video_timer_entry_on">ON</string>
+    <string name="pref_camera_video_timer_entry_off">OFF</string>
+
     <!-- Settings screen, Picture size title -->
     <string name="pref_camera_picturesize_title">Picture size</string>
 
