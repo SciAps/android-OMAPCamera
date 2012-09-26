@@ -130,6 +130,27 @@
     <!-- Settings screen, Camcorder setting category title -->
     <string name="pref_camcorder_settings_category">Camcorder settings</string>
 
+	<!-- Default video format setting. A numerical value. -->
+    <string name="pref_camera_video_format_default" translatable="false">8</string>
+
+    <!-- Settings screen, Video format title -->
+    <string name="pref_camera_video_format_title">Video Format</string>
+
+    <!-- Settings screen, Video format dialog radio button choices -->
+    <string name="pref_camera_video_format_entry_0_sqcif">SQCIF 128x96</string>
+    <string name="pref_camera_video_format_entry_1_qcif">QCIF 176x144</string>
+    <string name="pref_camera_video_format_entry_2_cif">CIF 352x288</string>
+    <string name="pref_camera_video_format_entry_3_qvga">QVGA 320x240</string>
+    <string name="pref_camera_video_format_entry_4_vga">VGA 640x480</string>
+    <string name="pref_camera_video_format_entry_5_ntsc">DVD-Video NTSC 720x480</string>
+    <string name="pref_camera_video_format_entry_6_pal">DVD-Video PAL 720x576</string>
+    <string name="pref_camera_video_format_entry_7_wvga">WVGA 800x480</string>
+    <string name="pref_camera_video_format_entry_8_720p">1280x720</string>
+    <string name="pref_camera_video_format_entry_9_1080p">1920x1080</string>
+
+    <!-- Settings screen, Video format dialog title -->
+    <string name="pref_camera_video_format_dialogtitle">Video format</string>
+
     <!-- Settings screen, Picture size title -->
     <string name="pref_camera_picturesize_title">Picture size</string>
 

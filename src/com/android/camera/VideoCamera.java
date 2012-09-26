@@ -442,11 +442,12 @@ public class VideoCamera extends ActivityBase
                     CameraSettings.KEY_VIDEOCAMERA_FLASH_MODE,
                     CameraSettings.KEY_WHITE_BALANCE,
                     CameraSettings.KEY_VIDEO_EFFECT,
-                    CameraSettings.KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL,
-                    CameraSettings.KEY_VIDEO_QUALITY};
+                    CameraSettings.KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL};
+                    //CameraSettings.KEY_VIDEO_QUALITY}; //Disabling redundant Video Qualily Menu
         final String[] OTHER_SETTING_KEYS = {
                     CameraSettings.KEY_RECORD_LOCATION,
-                    CameraSettings.KEY_VIDEO_MODE};
+                    CameraSettings.KEY_VIDEO_MODE,
+                    CameraSettings.KEY_VIDEO_FORMAT};
 
         CameraPicker.setImageResourceId(R.drawable.ic_switch_video_facing_holo_light);
         mIndicatorControlContainer.initialize(this, mPreferenceGroup,
@@ -642,8 +643,7 @@ public class VideoCamera extends ActivityBase
         // We need to convert it to int manually.
         String defaultQuality = CameraSettings.getDefaultVideoQuality(mCameraId,
                 getResources().getString(R.string.pref_video_quality_default));
-        String videoQuality =
-                mPreferences.getString(CameraSettings.KEY_VIDEO_QUALITY,
+        String videoQuality = mPreferences.getString(CameraSettings.KEY_VIDEO_QUALITY,
                         defaultQuality);
         int quality = Integer.valueOf(videoQuality);
 
@@ -658,6 +658,10 @@ public class VideoCamera extends ActivityBase
                 quality = CamcorderProfile.QUALITY_LOW;
             }
         }
+
+        int mVideoFormat = 0;
+        mVideoFormat = getIntPreference(CameraSettings.KEY_VIDEO_FORMAT,
+                            CameraSettings.DEFAULT_VIDEO_FORMAT_VALUE);
 
         // Set video duration limit. The limit is read from the preference,
         // unless it is specified in the intent.
@@ -704,6 +708,8 @@ public class VideoCamera extends ActivityBase
         // TODO: This should be checked instead directly +1000.
         if (mCaptureTimeLapse) quality += 1000;
         mProfile = CamcorderProfile.get(mCameraId, quality);
+
+        updateVideoFormat(mVideoFormat);
         getDesiredPreviewSize();
     }
 
@@ -1785,6 +1791,14 @@ public class VideoCamera extends ActivityBase
         mParameters.setPreviewSize(mDesiredPreviewWidth, mDesiredPreviewHeight);
         mParameters.setPreviewFrameRate(mProfile.videoFrameRate);
 
+      //Set Video Resolution
+
+        String vidFormat = mPreferences.getString(CameraSettings.KEY_VIDEO_FORMAT, (getString(R.string.pref_camera_video_format_default)));
+        int optVideoFormat = Integer.parseInt(vidFormat);
+        updateVideoFormat(optVideoFormat);
+
+        mParameters.setPreviewSize(mProfile.videoFrameWidth, mProfile.videoFrameHeight);
+
         // Set flash mode.
         String flashMode;
         if (mShowCameraAppView) {
@@ -1882,6 +1896,11 @@ public class VideoCamera extends ActivityBase
             height = tmp;
         }
 
+        if (width == 1080) {
+            width = 1088;
+        }
+
+     // CODEC INPUT : WIDTH should be multiple of 16
         int oldWidth = mCameraScreenNail.getWidth();
         int oldHeight = mCameraScreenNail.getHeight();
 
@@ -2483,6 +2502,55 @@ public class VideoCamera extends ActivityBase
             }
             mVideoFileDescriptor = null;
         }
+    }
+
+    private int getIntPreference(String key, int defaultValue) {
+        String s = mPreferences.getString(key, "");
+         int result = defaultValue;
+         try {
+             result = Integer.parseInt(s);
+         } catch (NumberFormatException e) {
+         }
+         return result;
+     }
+
+    private void updateVideoFormat(int vidQuality) {
+        if (vidQuality == 0) {
+            mProfile.videoFrameWidth = 128;
+            mProfile.videoFrameHeight = 96;
+        } else if (vidQuality == 1) {
+            mProfile.videoFrameWidth  = 176;
+            mProfile.videoFrameHeight = 144;
+        } else if (vidQuality == 2) {
+           mProfile.videoFrameWidth  = 352;
+            mProfile.videoFrameHeight = 288;
+        } else if (vidQuality == 3) {
+            mProfile.videoFrameWidth  = 320;
+           mProfile.videoFrameHeight = 240;
+        } else if (vidQuality == 4) {
+            mProfile.videoFrameWidth  = 640;
+            mProfile.videoFrameHeight = 480;
+        } else if (vidQuality == 5) {
+            mProfile.videoFrameWidth  = 720;
+            mProfile.videoFrameHeight = 480;
+        } else if (vidQuality == 6) {
+            mProfile.videoFrameWidth  = 720;
+            mProfile.videoFrameHeight = 576;
+        } else if (vidQuality == 7) {
+            // WVGA resolution
+            mProfile.videoFrameWidth  = 800;
+            mProfile.videoFrameHeight = 480;
+        } else if (vidQuality == 8) {
+           // 720P resolution
+            mProfile.videoFrameWidth  = 1280;
+            mProfile.videoFrameHeight = 720;
+       } else if (vidQuality == 9) {
+            // 1080P resolution
+            mProfile.videoFrameWidth  = 1920;
+            mProfile.videoFrameHeight = 1080;
+        }
+
+            updateCameraScreenNailSize(mProfile.videoFrameWidth,mProfile.videoFrameHeight);
     }
 
     private void showTapToSnapshotToast() {

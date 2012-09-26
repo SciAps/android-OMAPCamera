@@ -35,6 +35,8 @@ import java.util.StringTokenizer;
 
 
 
+
+
 /**
  *  Provides utilities and keys for Camera settings.
  */
@@ -104,6 +106,9 @@ public class CameraSettings {
 
     // Video settings
     public static final String KEY_VIDEO_MODE = "pref_camera_video_mode_key";
+    public static final String KEY_VIDEO_FORMAT = "pref_camera_video_format_key";
+    public static final String KEY_SUPPORTED_PREVIEW_SUBSAMPLED_SIZES = "supported-preview-subsampled-size-values";
+    public static final int DEFAULT_VIDEO_FORMAT_VALUE = 8; // 720p
     public static final int DEFAULT_VIDEO_DURATION = 0; // no limit
 
     private static final String TAG = "CameraSettings";
@@ -236,6 +241,8 @@ public class CameraSettings {
 
     private void initPreference(PreferenceGroup group) {
         ListPreference videoQuality = group.findPreference(KEY_VIDEO_QUALITY);
+        ListPreference videoFormat = group.findPreference(KEY_VIDEO_FORMAT);
+        ListPreference videoMode = group.findPreference(KEY_VIDEO_MODE);
         ListPreference timeLapseInterval = group.findPreference(KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL);
         ListPreference pictureSize = group.findPreference(KEY_PICTURE_SIZE);
         ListPreference whiteBalance =  group.findPreference(KEY_WHITE_BALANCE);
@@ -257,7 +264,6 @@ public class CameraSettings {
         ListPreference contrastEnhancement = group.findPreference(KEY_GBCE);
         ListPreference exposureMode = group.findPreference(KEY_EXPOSURE_MODE_MENU);
         ListPreference previewFramerate = group.findPreference(KEY_PREVIEW_FRAMERATE);
-        ListPreference videoMode = group.findPreference(KEY_VIDEO_MODE);
 
         ArrayList<CharSequence[]> allPictureEntries = new ArrayList<CharSequence[]>();
         ArrayList<CharSequence[]> allPictureEntryValues = new ArrayList<CharSequence[]>();
@@ -279,6 +285,34 @@ public class CameraSettings {
         if (videoQuality != null) {
             filterUnsupportedOptions(group, videoQuality, getSupportedVideoQuality());
         }
+        if (videoFormat != null) {
+            List<String> supp = new ArrayList<String>();
+            String suppPreview  = mParameters.get(KEY_SUPPORTED_PREVIEW_SUBSAMPLED_SIZES);
+            if (suppPreview != null && !suppPreview.equals("")) {
+                for (String previewItem : suppPreview.split(",")) {
+                    int index = 0;
+                    for (String candidate : mContext.getResources().getStringArray(R.array.pref_camera_video_format_sizevalues)) {
+                        if (previewItem.equals(candidate)) {
+                            supp.add(mContext.getResources().getStringArray(R.array.pref_camera_video_format_entryvalues)[index].toString());
+                        }
+                        index++;
+                    }
+                }
+            } else {
+                List<String> supported = sizeListToStringList(mParameters.getSupportedPreviewSizes());
+                for (String previewItem : supported) {
+                    int index = 0;
+                    for (String candidate : mContext.getResources().getStringArray(R.array.pref_camera_video_format_sizevalues)) {
+                        if (previewItem.equals(candidate)) {
+                            supp.add(mContext.getResources().getStringArray(R.array.pref_camera_video_format_entryvalues)[index].toString());
+                        }
+                        index++;
+                    }
+                }
+            }
+            filterUnsupportedOptions(group, videoFormat, supp);
+        }
+
         if ( iso  != null) {
             filterUnsupportedOptions(group, iso,
                     parseToList(mParameters.get(Camera.PARM_SUPPORTED_ISO_MODES)));
