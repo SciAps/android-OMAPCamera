@@ -1501,13 +1501,13 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private void setCameraState(int state) {
         mCameraState = state;
         switch (state) {
-            case PREVIEW_STOPPED:
             case SNAPSHOT_IN_PROGRESS:
             case FOCUSING:
             case SWITCHING_CAMERA:
                 enableCameraControls(false);
                 break;
             case IDLE:
+            case PREVIEW_STOPPED:
                 enableCameraControls(true);
                 break;
         }
@@ -2116,10 +2116,21 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
         initDefaults();
 
+        // Set capture mode to empty value after resuming the app,
+        // so updateCameraParametersPreference can set it correcly
+        if (mFirstTimeInitialized)
+        {
+            mCaptureMode = "";
+        }
+
         mPausing = false;
 
         mJpegPictureCallbackTime = 0;
         mZoomValue = 0;
+
+        if(mFaceView == null) {
+            mFaceView = (FaceView) findViewById(R.id.face_view);
+        }
 
         // Start the preview if it is not started.
         if (mCameraState == PREVIEW_STOPPED && mCameraStartUpThread == null) {
@@ -2633,6 +2644,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private boolean updateCameraParametersPreference() {
         boolean restartNeeded = false;
         boolean captureModeUpdated = false;
+        boolean controlUpdateNeeded = false;
 
         if (mAeLockSupported) {
             mParameters.setAutoExposureLock(mFocusManager.getAeAwbLock());
@@ -2924,6 +2936,10 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mPreviewSize = previewSize;
         }
 
+        if (setPreviewFrameLayoutAspectRatio()) {
+            controlUpdateNeeded = true;
+        }
+
         if (Parameters.SCENE_MODE_AUTO.equals(mSceneMode)) {
             // Set flash mode.
             String flashMode = mPreferences.getString(
@@ -3067,7 +3083,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
               }
         }
 
-        if (mIndicatorControlContainer != null) {
+        if ((mIndicatorControlContainer != null) && (controlUpdateNeeded)) {
             mIndicatorControlContainer.requestLayout();
         }
 
@@ -3447,9 +3463,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         if (mTouchManager != null) mTouchManager.setPreviewSize(width, height);
     }
 
-    void setPreviewFrameLayoutAspectRatio() {
+    boolean setPreviewFrameLayoutAspectRatio() {
         // Set the preview frame aspect ratio according to the picture size.
         Size size = mParameters.getPictureSize();
-        mPreviewFrameLayout.setAspectRatio((double) size.width / size.height);
+        return mPreviewFrameLayout.setAspectRatio((double) size.width / size.height);
     }
 }
