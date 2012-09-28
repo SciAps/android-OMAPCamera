@@ -46,8 +46,6 @@ public class CameraSettings {
     public static final String KEY_VERSION = "pref_version_key";
     public static final String KEY_LOCAL_VERSION = "pref_local_version_key";
     public static final String KEY_RECORD_LOCATION = RecordLocationPreference.KEY;
-    public static final String KEY_VIDEO_QUALITY = "pref_video_quality_key";
-    public static final String KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL = "pref_video_time_lapse_frame_interval_key";
     public static final String KEY_PICTURE_SIZE = "pref_camera_picturesize_key";
     public static final String KEY_PREVIEW_SIZE = "pref_camera_previewsize_key";
     public static final String KEY_JPEG_QUALITY = "pref_camera_jpegquality_key";
@@ -57,10 +55,8 @@ public class CameraSettings {
     public static final String KEY_WHITE_BALANCE = "pref_camera_whitebalance_key";
     public static final String KEY_SCENE_MODE = "pref_camera_scenemode_key";
     public static final String KEY_EXPOSURE = "pref_camera_exposure_key";
-    public static final String KEY_VIDEO_EFFECT = "pref_video_effect_key";
     public static final String KEY_CAMERA_ID = "pref_camera_id_key";
     public static final String KEY_CAMERA_FIRST_USE_HINT_SHOWN = "pref_camera_first_use_hint_shown_key";
-    public static final String KEY_VIDEO_FIRST_USE_HINT_SHOWN = "pref_video_first_use_hint_shown_key";
     public static final String KEY_ANTIBANDING = "pref_camera_antibanding_key";
     public static final String KEY_EXPOSURE_MODE_MENU = "pref_camera_exposuremode_key";
     public static final String KEY_CONTRAST = "pref_camera_contrast_key";
@@ -104,14 +100,21 @@ public class CameraSettings {
     public static final int CURRENT_VERSION = 5;
     public static final int CURRENT_LOCAL_VERSION = 2;
 
-    // Video settings
+    // Audio and Video settings
     public static final String KEY_VIDEO_MODE = "pref_camera_video_mode_key";
     public static final String KEY_VIDEO_FORMAT = "pref_camera_video_format_key";
-    public static final String KEY_SUPPORTED_PREVIEW_SUBSAMPLED_SIZES = "supported-preview-subsampled-size-values";
+    public static final String KEY_AUDIO_ENCODER = "pref_camera_audioencoder_key";
+    public static final String KEY_VIDEO_QUALITY = "pref_video_quality_key";
+    public static final String KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL = "pref_video_time_lapse_frame_interval_key";
+    public static final String KEY_VIDEO_FIRST_USE_HINT_SHOWN = "pref_video_first_use_hint_shown_key";
+    public static final String KEY_VIDEO_EFFECT = "pref_video_effect_key";
+
     public static final int DEFAULT_VIDEO_FORMAT_VALUE = 8; // 720p
+    public static final int DEFAULT_AUDIO_ENCODER_VALUE = 3; // AAC
     public static final String KEY_VIDEO_TIMER = "pref_camera_video_timer_key";
     public static final int DEFAULT_VIDEO_DURATION = 0; // no limit
 
+    public static final String KEY_SUPPORTED_PREVIEW_SUBSAMPLED_SIZES = "supported-preview-subsampled-size-values";
     private static final String TAG = "CameraSettings";
 
     private final Context mContext;

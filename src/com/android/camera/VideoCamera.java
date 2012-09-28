@@ -454,7 +454,8 @@ public class VideoCamera extends ActivityBase
                     CameraSettings.KEY_RECORD_LOCATION,
                     CameraSettings.KEY_VIDEO_MODE,
                     CameraSettings.KEY_VIDEO_FORMAT,
-                    CameraSettings.KEY_VIDEO_TIMER};
+                    CameraSettings.KEY_VIDEO_TIMER,
+                    CameraSettings.KEY_AUDIO_ENCODER};
 
         CameraPicker.setImageResourceId(R.drawable.ic_switch_video_facing_holo_light);
         mIndicatorControlContainer.initialize(this, mPreferenceGroup,
@@ -653,6 +654,7 @@ public class VideoCamera extends ActivityBase
         String videoQuality = mPreferences.getString(CameraSettings.KEY_VIDEO_QUALITY,
                         defaultQuality);
         int quality = Integer.valueOf(videoQuality);
+        int mAudioEncoder = 0;
 
         // Set video quality.
         Intent intent = getIntent();
@@ -716,6 +718,8 @@ public class VideoCamera extends ActivityBase
         if (mCaptureTimeLapse) quality += 1000;
         mProfile = CamcorderProfile.get(mCameraId, quality);
 
+        mAudioEncoder = getIntPreference(CameraSettings.KEY_AUDIO_ENCODER,CameraSettings.DEFAULT_AUDIO_ENCODER_VALUE);
+        mProfile.audioCodec = mAudioEncoder;
         updateVideoFormat(mVideoFormat);
         getDesiredPreviewSize();
     }
@@ -1848,6 +1852,10 @@ public class VideoCamera extends ActivityBase
         if (mParameters.isZoomSupported()) {
             mParameters.setZoom(mZoomValue);
         }
+
+        // Set Audio encoder
+        String audioEncoder = mPreferences.getString(CameraSettings.KEY_AUDIO_ENCODER, (getString(R.string.pref_camera_audioencoder_default)));
+        mProfile.audioCodec = Integer.parseInt(audioEncoder);
 
         // Set continuous autofocus.
         List<String> supportedFocus = mParameters.getSupportedFocusModes();
