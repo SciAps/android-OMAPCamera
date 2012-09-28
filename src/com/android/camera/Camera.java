@@ -2515,7 +2515,10 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             throw new RuntimeException("startPreview failed", ex);
         }
 
-        setCameraState(IDLE);
+        //Set Camera State to IDLE, but do not enabelCameraControls, because
+        //it is in another thread.
+        mCameraState = IDLE;
+
         mFocusManager.onPreviewStarted();
         if ( mTempBracketingEnabled ) {
             mFocusManager.setTempBracketingState(FocusManager.TempBracketingStates.ACTIVE);
