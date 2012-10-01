@@ -40,6 +40,7 @@ import java.util.StringTokenizer;
 
 
 
+
 /**
  *  Provides utilities and keys for Camera settings.
  */
@@ -61,6 +62,8 @@ public class CameraSettings {
     public static final String KEY_CAMERA_ID = "pref_camera_id_key";
     public static final String KEY_CAMERA_FIRST_USE_HINT_SHOWN = "pref_camera_first_use_hint_shown_key";
     public static final String KEY_ANTIBANDING = "pref_camera_antibanding_key";
+    public static final String KEY_VSTAB = "pref_camera_vstab_key";
+    public static final String KEY_VNF = "pref_camera_vnf_key";
     public static final String KEY_EXPOSURE_MODE_MENU = "pref_camera_exposuremode_key";
     public static final String KEY_CONTRAST = "pref_camera_contrast_key";
     public static final String KEY_BRIGHTNESS = "pref_camera_brightness_key";
@@ -295,6 +298,8 @@ public class CameraSettings {
         ListPreference videoEffect = group.findPreference(KEY_VIDEO_EFFECT);
         ListPreference previewSize = group.findPreference(KEY_PREVIEW_SIZE);
         ListPreference antibanding = group.findPreference(KEY_ANTIBANDING);
+        ListPreference vstab = group.findPreference(KEY_VSTAB);
+        ListPreference vnf = group.findPreference(KEY_VNF);
         ListPreference mode = group.findPreference(KEY_MODE_MENU);
         ListPreference iso = group.findPreference(KEY_ISO);
         ListPreference colorEffect = group.findPreference(KEY_COLOR_EFFECT);
@@ -400,6 +405,16 @@ public class CameraSettings {
             }
             filterUnsupportedOptions(group, videoMode, suppMode);
         }
+
+        // Since the screen could be loaded from different resources, we need
+        // to check if the preference is available here
+        if ( vstab != null ) {
+            filterVSTAB(group, vstab);
+        }
+        if ( vnf != null ) {
+            filterVNF(group, vnf);
+        }
+
         if (exposure != null) buildExposureCompensation(group, exposure);
         if (cameraIdPref != null) buildCameraId(group, cameraIdPref);
         if(mode !=null){
@@ -515,6 +530,34 @@ public class CameraSettings {
             }
         }
         return false;
+    }
+
+    private void filterVNF(PreferenceGroup group, ListPreference pref) {
+        String vnfSupported = mParameters.get(VideoCamera.PARM_VNF_SUPPORTED);
+        String enable =  mContext.getString(R.string.pref_camera_vnf_entry_on);
+        String disable = mContext.getString(R.string.pref_camera_vnf_entry_off);
+        List<String> supported = new ArrayList<String>();
+
+        if ( "true".equals(vnfSupported) ) {
+            supported.add(pref.findEntryValueByEntry(enable));
+            supported.add(pref.findEntryValueByEntry(disable));
+        }
+
+        filterUnsupportedOptions(group, pref, supported);
+    }
+
+    private void filterVSTAB(PreferenceGroup group, ListPreference pref) {
+        boolean vstabSupported = mParameters.isVideoStabilizationSupported();
+        String enable =  mContext.getString(R.string.pref_camera_vstab_entry_on);
+        String disable = mContext.getString(R.string.pref_camera_vstab_entry_off);
+        List<String> supported = new ArrayList<String>();
+
+        if ( vstabSupported ) {
+            supported.add(pref.findEntryValueByEntry(enable));
+            supported.add(pref.findEntryValueByEntry(disable));
+        }
+
+        filterUnsupportedOptions(group, pref, supported);
     }
 
     public List<String> parseToList(String str) {

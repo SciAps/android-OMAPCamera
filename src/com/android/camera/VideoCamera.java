@@ -151,6 +151,13 @@ public class VideoCamera extends ActivityBase
 
     private long mStorageSpace;
 
+    private static final String PARM_VNF = "vnf";
+    public static final String PARM_VNF_SUPPORTED = "vnf-supported";
+    private String mVSTABEnable = "";
+    private String mVSTABDisable = "";
+    private String mVNFEnable = "";
+    private String mVNFDisable = "";
+
     private MediaRecorder mMediaRecorder;
     private EffectsRecorder mEffectsRecorder;
     private boolean mEffectsDisplayResult;
@@ -406,6 +413,17 @@ public class VideoCamera extends ActivityBase
         resizeForPreviewAspectRatio();
 
         initializeIndicatorControl();
+        ListPreference vstab = mPreferenceGroup.findPreference(CameraSettings.KEY_VSTAB);
+        if ( vstab != null ) {
+            mVSTABEnable = vstab.findEntryValueByEntry(getString(R.string.pref_camera_vstab_entry_on));
+            mVSTABDisable = vstab.findEntryValueByEntry(getString(R.string.pref_camera_vstab_entry_off));
+        }
+
+        ListPreference vnf = mPreferenceGroup.findPreference(CameraSettings.KEY_VNF);
+        if ( vnf != null ) {
+            mVNFEnable = vnf.findEntryValueByEntry(getString(R.string.pref_camera_vnf_entry_on));
+            mVNFDisable = vnf.findEntryValueByEntry(getString(R.string.pref_camera_vnf_entry_off));
+        }
     }
 
     private void loadCameraPreferences() {
@@ -457,7 +475,9 @@ public class VideoCamera extends ActivityBase
                     CameraSettings.KEY_VIDEO_TIMER,
                     CameraSettings.KEY_AUDIO_ENCODER,
                     CameraSettings.KEY_VIDEO_ENCODER,
-                    CameraSettings.KEY_VIDEO_BITRATE};
+                    CameraSettings.KEY_VIDEO_BITRATE,
+                    CameraSettings.KEY_VSTAB,
+                    CameraSettings.KEY_VNF};
 
         CameraPicker.setImageResourceId(R.drawable.ic_switch_video_facing_holo_light);
         mIndicatorControlContainer.initialize(this, mPreferenceGroup,
@@ -1901,7 +1921,23 @@ public class VideoCamera extends ActivityBase
         String audioEncoder = mPreferences.getString(CameraSettings.KEY_AUDIO_ENCODER, (getString(R.string.pref_camera_audioencoder_default)));
         mProfile.audioCodec = Integer.parseInt(audioEncoder);
 
-     // Set Bitrate
+        // Set Video Stabilization Mode
+        String vstab = mPreferences.getString(CameraSettings.KEY_VSTAB,
+                                              (getString(R.string.pref_camera_vstab_default)));
+        // VSTAB is disabled in Potrait 1080p resolution due to insufficient TILER memory for Tablet Device.
+        // This limitation is due to Required Height of the buffer with VSTAB.
+        if(Util.isTabletUI() && mProfile.videoFrameHeight >= 1920){
+            vstab = mVSTABDisable;
+        }
+        mParameters.setVideoStabilization(Boolean.parseBoolean(vstab));
+        Log.v(TAG,"VSTAB Set to ["+ vstab +"]");
+
+        // Set Video Noise Filtering Mode
+        String vnf = mPreferences.getString(CameraSettings.KEY_VNF,
+                                            (getString(R.string.pref_camera_vnf_default)));
+        mParameters.set(PARM_VNF, vnf);
+        Log.v(TAG,"VNF Set to ["+ vnf +"]");
+        // Set Bitrate
         String bitrate = mPreferences.getString(CameraSettings.KEY_VIDEO_BITRATE, (getString(R.string.pref_camera_videobitrate_default)));
         mProfile.videoBitRate = Integer.parseInt(bitrate);
         Log.i(TAG,"Bitrate is set to "+ mProfile.videoBitRate);
@@ -2243,12 +2279,13 @@ public class VideoCamera extends ActivityBase
             // Check if the current effects selection has changed
             if (updateEffectSelection()) return;
 
+            boolean isPreviewRestartRequired = videoPreferencesChanged(); // Check if VNF / VSTAB has toggled state
             readVideoPreferences();
             showTimeLapseUI(mCaptureTimeLapse);
             // We need to restart the preview if preview size is changed.
             Size size = mParameters.getPreviewSize();
-            if (size.width != mDesiredPreviewWidth
-                    || size.height != mDesiredPreviewHeight) {
+            if ((size.width != mDesiredPreviewWidth
+                    || size.height != mDesiredPreviewHeight) || isPreviewRestartRequired) {
                 if (!effectsActive()) {
                     stopPreview();
                 } else {
@@ -2261,6 +2298,32 @@ public class VideoCamera extends ActivityBase
                 setCameraParameters();
             }
         }
+    }
+
+    private boolean videoPreferencesChanged() {
+        Log.v(TAG, "videoPreferencesChanged +");
+
+        // We need to restart the preview if VSTAB or VNF mode is changed.
+        String vstab = mPreferences.getString(CameraSettings.KEY_VSTAB,
+                                              (getString(R.string.pref_camera_vstab_default)));
+        boolean enableVstab = vstab.equals(mVSTABEnable);
+
+        String vnf = mPreferences.getString(CameraSettings.KEY_VNF,
+                                            (getString(R.string.pref_camera_vnf_default)));
+        boolean enableVnf = vnf.equals(mVNFEnable);
+
+        boolean isVstabEnabled = mParameters.getVideoStabilization();
+        boolean isVnfEnabled = mVNFEnable.equals(mParameters.get(PARM_VNF));
+        boolean isPreviewRestartRequired = false;
+
+        if((isVstabEnabled != enableVstab)||(isVnfEnabled != enableVnf))
+        {
+            isPreviewRestartRequired = true;
+            Log.v(TAG, "videoPreferencesChanged : isPreviewRestartRequired="+isPreviewRestartRequired);
+        }
+
+        Log.v(TAG, "videoPreferencesChanged -");
+        return isPreviewRestartRequired;
     }
 
     @Override

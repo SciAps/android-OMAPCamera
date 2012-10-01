@@ -187,6 +187,28 @@
         <item>5</item>
     </string-array>
 
+	<!-- Camera Preferences 'Video Stabilization' Enabling dialog box entries -->
+    <string-array name="pref_camera_vstab_entries" translatable="false">
+        <item>@string/pref_camera_vstab_entry_on</item>
+        <item>@string/pref_camera_vstab_entry_off</item>
+    </string-array>
+
+    <string-array name="pref_camera_vstab_entryvalues" translatable="false">
+        <item>true</item>
+        <item>false</item>
+    </string-array>
+
+    <!-- Camera Preferences 'Video Noise Filtering' Enabling dialog box entries -->
+    <string-array name="pref_camera_vnf_entries" translatable="false">
+        <item>@string/pref_camera_vnf_entry_on</item>
+        <item>@string/pref_camera_vnf_entry_off</item>
+    </string-array>
+
+    <string-array name="pref_camera_vnf_entryvalues" translatable="false">
+        <item>true</item>
+        <item>false</item>
+    </string-array>
+
     <!-- Camera Preferences Exposure modes dialog box entries -->
     <string-array name="pref_camera_exposuremode_entries" translatable="false">
         <item>@string/pref_camera_exposuremode_entry_auto</item>
