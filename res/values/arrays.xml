@@ -807,6 +807,16 @@
             <item>manual</item>
     </string-array>
 
+	<!-- Video File Container Setting -->
+    <string-array name="pref_video_record_container_entries" translatable="false">
+       <item>@string/pref_video_record_container_mp4</item>
+       <item>@string/pref_video_record_container_3gp</item>
+    </string-array>
+    <string-array name="pref_video_record_container_entryvalues" translatable="false">
+       <item>mp4</item>
+       <item>3gp</item>
+    </string-array>
+
     <!-- Default focus mode setting.-->
     <string-array name="pref_camera_focusmode_default_array" translatable="false">
         <item>continuous-picture</item>

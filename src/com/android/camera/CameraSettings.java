@@ -103,6 +103,9 @@ public class CameraSettings {
 
     public static final String EXPOSURE_DEFAULT_VALUE = "0";
 
+    public static final String KEY_SUPPORTED_PREVIEW_FRAMERATES_EXT = "preview-fps-ext-values";
+    public static final String KEY_SUPPORTED_PREVIEW_FRAMERATE_RANGES_EXT = "preview-fps-range-ext-values";
+
     public static final int CURRENT_VERSION = 5;
     public static final int CURRENT_LOCAL_VERSION = 2;
 
@@ -113,6 +116,8 @@ public class CameraSettings {
     public static final String KEY_VIDEO_QUALITY = "pref_video_quality_key";
     public static final String KEY_VIDEO_ENCODER = "pref_camera_videoencoder_key";
     public static final String KEY_VIDEO_BITRATE = "pref_camera_videobitrate_key";
+    public static final String KEY_VIDEO_FRAMERATE_RANGE = "pref_camera_videoframerate_range_key";
+    public static final String KEY_VIDEO_FILE_CONTAINER = "pref_camera_video_record_container_key";
     public static final String KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL = "pref_video_time_lapse_frame_interval_key";
     public static final String KEY_VIDEO_FIRST_USE_HINT_SHOWN = "pref_video_first_use_hint_shown_key";
     public static final String KEY_VIDEO_EFFECT = "pref_video_effect_key";
@@ -120,6 +125,7 @@ public class CameraSettings {
     public static final int DEFAULT_VIDEO_FORMAT_VALUE = 8; // 720p
     public static final int DEFAULT_AUDIO_ENCODER_VALUE = 3; // AAC
     public static final int DEFAULT_VIDEO_ENCODER_VALUE = 2; // H264
+    public static final int DEFAULT_VIDEO_FRAMERATE_VALUE = 30;
     public static final int DEFAULT_VIDEO_BITRATE_VALUE = 12000000;
     public static final String KEY_VIDEO_TIMER = "pref_camera_video_timer_key";
     public static final int DEFAULT_VIDEO_DURATION = 0; // no limit
@@ -245,6 +251,53 @@ public class CameraSettings {
         return false;
     }
 
+    public static boolean getSupportedFramerateRange(int[] range, final List<int[]> supportedFpsRanges) {
+
+        if (supportedFpsRanges.isEmpty()) {
+            return false;
+        }
+
+        int currentBest = Integer.MAX_VALUE;
+        int bestMatch = range[Parameters.PREVIEW_FPS_MAX_INDEX];
+        List<int[]> matchedResults = new ArrayList<int[]>();
+        matchedResults.add(range);
+
+        //Find fpsRange with minimum difference in maximum fps value
+        for (int[] fpsRange: supportedFpsRanges) {
+            final int diff = Math.abs(fpsRange[Parameters.PREVIEW_FPS_MAX_INDEX] - range[Parameters.PREVIEW_FPS_MAX_INDEX]);
+            if (diff < currentBest) {
+                currentBest = diff;
+                bestMatch = fpsRange[Parameters.PREVIEW_FPS_MAX_INDEX];
+                matchedResults.clear();
+                matchedResults.add(fpsRange);
+            }
+            else if (diff == currentBest) {
+                matchedResults.add(fpsRange);
+            }
+        }
+
+        if (matchedResults.size() == 1) {
+            range[Parameters.PREVIEW_FPS_MIN_INDEX] = matchedResults.get(0)[Parameters.PREVIEW_FPS_MIN_INDEX];
+            range[Parameters.PREVIEW_FPS_MAX_INDEX] = matchedResults.get(0)[Parameters.PREVIEW_FPS_MAX_INDEX];
+            return true;
+        }
+
+        //If we got more than one result - find range with minimum difference in
+        //minimum fps value
+        currentBest = Integer.MAX_VALUE;
+        int[] bestMatchRange = {range[Parameters.PREVIEW_FPS_MIN_INDEX], bestMatch};
+        for (int[] fpsRange: matchedResults) {
+            final int diff = Math.abs(fpsRange[Parameters.PREVIEW_FPS_MIN_INDEX] - range[Parameters.PREVIEW_FPS_MIN_INDEX]);
+            if (diff < currentBest) {
+                currentBest = diff;
+                bestMatchRange[Parameters.PREVIEW_FPS_MIN_INDEX] = fpsRange[Parameters.PREVIEW_FPS_MIN_INDEX];
+            }
+        }
+        range[Parameters.PREVIEW_FPS_MIN_INDEX] = bestMatchRange[Parameters.PREVIEW_FPS_MIN_INDEX];
+        range[Parameters.PREVIEW_FPS_MAX_INDEX] = bestMatchRange[Parameters.PREVIEW_FPS_MAX_INDEX];
+        return true;
+    }
+
     public static boolean setCameraPictureSize(
             String candidate, List<String> supported, Parameters parameters) {
         int index = candidate.indexOf('x');
@@ -322,6 +375,9 @@ public class CameraSettings {
             filterUnsupportedOptionsInt(group,
                     previewFramerate, mParameters.getSupportedPreviewFrameRates());
         }
+
+        List<Integer> fpsList = getSupportedFramerates(mParameters);
+
         // Since the screen could be loaded from different resources, we need
         // to check if the preference is available here
         if (videoQuality != null) {
@@ -560,19 +616,6 @@ public class CameraSettings {
         filterUnsupportedOptions(group, pref, supported);
     }
 
-    public List<String> parseToList(String str) {
-        if (null == str)
-            return null;
-
-        StringTokenizer tokenizer = new StringTokenizer(str, ",");
-        ArrayList<String> substrings = new ArrayList<String>();
-
-        while (tokenizer.hasMoreElements())
-            substrings.add(tokenizer.nextToken());
-
-        return substrings;
-    }
-
     private void filterUnsupportedOptionsInt(PreferenceGroup group,
             ListPreference pref, List<Integer> supported) {
         // Remove the preference if the parameter is not supported or there is
@@ -781,6 +824,42 @@ public class CameraSettings {
         // initial picture size is that of the back camera.
         initialCameraPictureSize(context, parameters);
         writePreferredCameraId(preferences, currentCameraId);
+    }
+
+    private static List<Integer> getSupportedFramerates(Parameters params) {
+        final List<Integer> extendedFrameRates = parseToIntList(
+                params.get(KEY_SUPPORTED_PREVIEW_FRAMERATES_EXT));
+        return extendedFrameRates == null || extendedFrameRates.isEmpty() ?
+                params.getSupportedPreviewFrameRates() : // fallback to regular frame rates
+                extendedFrameRates;
+    }
+
+    private static List<Integer> parseToIntList(String str) {
+        if ( str == null ) {
+            return null;
+        }
+
+        StringTokenizer tokenizer = new StringTokenizer(str, ",");
+        ArrayList<Integer> intList = new ArrayList<Integer>();
+
+        while (tokenizer.hasMoreElements()) {
+            intList.add(Integer.parseInt(tokenizer.nextToken()));
+        }
+
+        return intList;
+    }
+
+    public List<String> parseToList(String str) {
+        if (null == str)
+            return null;
+
+        StringTokenizer tokenizer = new StringTokenizer(str, ",");
+        ArrayList<String> substrings = new ArrayList<String>();
+
+        while (tokenizer.hasMoreElements())
+            substrings.add(tokenizer.nextToken());
+
+        return substrings;
     }
 
     public static void filterUnsupportedOptions(PreferenceGroup group,

@@ -55,6 +55,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -144,6 +145,54 @@ public class Util {
             }
         }
         return b;
+    }
+
+    public static ArrayList<int[]> parseRange(String str) {
+        if ( ( str == null ) ||
+             ( str.charAt(0) != '(' ) ||
+             ( str.charAt(str.length() - 1) != ')') ) {
+            return null;
+        }
+
+        String token = "),(";
+        int start = 1;
+        int end = 1;
+        ArrayList<int[]> rangeList = new ArrayList<int[]>();
+        do {
+            int[] range = new int[2];
+            end = str.indexOf(token, start);
+            if (end == -1) {
+                end = str.length() - 1;
+            }
+            if ( !parsePair(str.substring(start, end), range) ) {
+                break;
+            }
+
+            rangeList.add(range);
+            start = end + token.length();
+        } while (end != str.length() - 1);
+
+        return rangeList;
+    }
+
+    private static boolean parsePair(String str, int[] pair) {
+        if (str == null) {
+            return false;
+        }
+
+        StringTokenizer tokenizer = new StringTokenizer(str, ",");
+        if ( !tokenizer.hasMoreElements() ) {
+            return false;
+        }
+
+        int i = 0;
+        do {
+            String token = tokenizer.nextToken();
+            pair[i] = Integer.parseInt(token);
+            i++;
+        } while (tokenizer.hasMoreElements() && ( i < pair.length ) );
+
+        return i == pair.length;
     }
 
     /*
