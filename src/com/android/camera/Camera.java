@@ -335,6 +335,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private long mStorageSpace;
     private byte[] mJpegImageData;
     private String mAutoConvergence = null;
+    private String mPictureFormat = null;
     private boolean isExposureInit = false;
     private boolean isManualExposure = false;
     private Integer mManualExposureLeft = new Integer (0);
@@ -1782,6 +1783,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         final String[] OTHER_SETTING_KEYS = {
                 CameraSettings.KEY_CAPTURE_LAYOUT,
                 CameraSettings.KEY_PREVIEW_LAYOUT,
+                CameraSettings.KEY_PICTURE_FORMAT_MENU,
                 CameraSettings.KEY_RECORD_LOCATION,
                 CameraSettings.KEY_AUTO_CONVERGENCE,
                 CameraSettings.KEY_FOCUS_MODE,
@@ -2120,6 +2122,10 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         if (mPausing) {
             mPreviewLayout = null;
             mCaptureLayout = getString(R.string.pref_camera_capture_layout_default);
+        }
+
+        if ( null == mPictureFormat ) {
+            mPictureFormat = getString(R.string.pref_camera_picture_format_default);
         }
     }
 
@@ -3284,6 +3290,16 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
         if ((mIndicatorControlContainer != null) && (controlUpdateNeeded)) {
             mIndicatorControlContainer.requestLayout();
+        }
+
+        // Image Capture Pixel Format
+        String pictureFormat = mPreferences.getString(
+                    CameraSettings.KEY_PICTURE_FORMAT_MENU,
+                    getString(R.string.pref_camera_picture_format_default));
+
+        if (!pictureFormat.equals(mPictureFormat)) {
+            mParameters.set(CameraSettings.KEY_PICTURE_FORMAT, pictureFormat);
+            mPictureFormat = pictureFormat;
         }
 
         return restartNeeded;

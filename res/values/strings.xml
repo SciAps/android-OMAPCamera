@@ -566,6 +566,17 @@
     <string name="settings_manual_convergence_caption">Manual Convergence: </string>
     <string name="settings_manual_convergence_button_ok">Ok</string>
 
+    <!--  Picture Format setting -->
+    <string name="pref_camera_picture_format_default" translatable="false">jpeg</string>
+
+    <!-- Settings screen, Picture Format title -->
+    <string name="pref_camera_picture_format_title">Picture Format</string>
+
+    <!-- Settings screen, Picture Format dialog radio button choices -->
+    <string name="pref_camera_picture_format_jpeg">JPEG</string>
+    <string name="pref_camera_picture_format_jps">JPS</string>
+    <string name="pref_camera_picture_format_mpo">MPO</string>
+
     <!-- Manual Exposure Settings Dialog -->
     <string name="settings_manual_3d_exposure_left_caption">Left Manual Exposure [ms]: </string>
     <string name="settings_manual_3d_exposure_right_caption">Right Manual Exposure [ms]: </string>
