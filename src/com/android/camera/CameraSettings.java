@@ -28,7 +28,10 @@ import android.util.FloatMath;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 
@@ -105,12 +108,16 @@ public class CameraSettings {
     public static final String KEY_VIDEO_FORMAT = "pref_camera_video_format_key";
     public static final String KEY_AUDIO_ENCODER = "pref_camera_audioencoder_key";
     public static final String KEY_VIDEO_QUALITY = "pref_video_quality_key";
+    public static final String KEY_VIDEO_ENCODER = "pref_camera_videoencoder_key";
+    public static final String KEY_VIDEO_BITRATE = "pref_camera_videobitrate_key";
     public static final String KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL = "pref_video_time_lapse_frame_interval_key";
     public static final String KEY_VIDEO_FIRST_USE_HINT_SHOWN = "pref_video_first_use_hint_shown_key";
     public static final String KEY_VIDEO_EFFECT = "pref_video_effect_key";
 
     public static final int DEFAULT_VIDEO_FORMAT_VALUE = 8; // 720p
     public static final int DEFAULT_AUDIO_ENCODER_VALUE = 3; // AAC
+    public static final int DEFAULT_VIDEO_ENCODER_VALUE = 2; // H264
+    public static final int DEFAULT_VIDEO_BITRATE_VALUE = 12000000;
     public static final String KEY_VIDEO_TIMER = "pref_camera_video_timer_key";
     public static final int DEFAULT_VIDEO_DURATION = 0; // no limit
 
@@ -122,6 +129,32 @@ public class CameraSettings {
     private final CameraInfo[] mCameraInfo;
     private final int mCameraId;
 
+  //Maximum bitrates for h263 and MPEG4V in bits per second for various video resolutions.
+    public static final int MAX_VIDEO_BITRATE_FOR_128x96 = 384*1024; //SQCIF
+    public static final int MAX_VIDEO_BITRATE_FOR_176x144 = 384*1024; //QCIF
+    public static final int MAX_VIDEO_BITRATE_FOR_352x288 = 2*1024*1024; //CIF
+    public static final int MAX_VIDEO_BITRATE_FOR_320x240 = 2*1024*1024; //QVGA
+    public static final int MAX_VIDEO_BITRATE_FOR_640x480 = 8*1024*1024; //VGA
+    public static final int MAX_VIDEO_BITRATE_FOR_720x480 = 8*1024*1024; //NTSC
+    public static final int MAX_VIDEO_BITRATE_FOR_720x576 = 8*1024*1024; //PAL
+    public static final int MAX_VIDEO_BITRATE_FOR_800x480 = 8*1024*1024; //WVGA
+    public static final int MAX_VIDEO_BITRATE_FOR_1280x720 = 12*1024*1024; //720p
+
+    public static final Map<Integer,Integer> MAX_VIDEO_BITRATES;
+
+    static {
+        Map<Integer,Integer> bitrates = new HashMap<Integer,Integer>();
+        bitrates.put(128*96, MAX_VIDEO_BITRATE_FOR_128x96);
+        bitrates.put(176*144, MAX_VIDEO_BITRATE_FOR_176x144);
+        bitrates.put(352*288, MAX_VIDEO_BITRATE_FOR_352x288);
+        bitrates.put(320*240, MAX_VIDEO_BITRATE_FOR_320x240);
+        bitrates.put(640*480, MAX_VIDEO_BITRATE_FOR_640x480);
+        bitrates.put(720*480, MAX_VIDEO_BITRATE_FOR_720x480);
+        bitrates.put(720*576, MAX_VIDEO_BITRATE_FOR_720x576);
+        bitrates.put(800*480, MAX_VIDEO_BITRATE_FOR_800x480);
+        bitrates.put(1280*720, MAX_VIDEO_BITRATE_FOR_1280x720);
+        MAX_VIDEO_BITRATES = Collections.unmodifiableMap(bitrates);
+    }
     public CameraSettings(Activity activity, Parameters parameters,
                           int cameraId, CameraInfo[] cameraInfo) {
         mContext = activity;

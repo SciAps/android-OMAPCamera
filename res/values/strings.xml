@@ -138,6 +138,52 @@
     <string name="pref_camera_audioencoder_entry_2">AMR-WB</string>
     <string name="pref_camera_audioencoder_entry_3">AAC</string>
 
+	<!-- Settings screen, Video BitRate category title -->
+    <string name="pref_camera_videobitrate_category">Video BitRate</string>
+
+    <!-- Default Video bitRate setting. A numerical value. Do not translate. -->
+    <string name="pref_camera_videobitrate_default">12000000</string>
+
+    <!-- Settings screen, Select Video bitRate title -->
+    <string name="pref_camera_videobitrate_title">Select Video BitRate</string>
+    <!-- Settings screen, Video bitRate dialog radio button choices -->
+    <string name="pref_camera_videobitrate_entry_0">Auto</string>
+    <string name="pref_camera_videobitrate_entry_1">64K</string>
+    <string name="pref_camera_videobitrate_entry_2">128K</string>
+    <string name="pref_camera_videobitrate_entry_3">192K</string>
+    <string name="pref_camera_videobitrate_entry_4">240K</string>
+    <string name="pref_camera_videobitrate_entry_5">320K</string>
+    <string name="pref_camera_videobitrate_entry_6">360K</string>
+    <string name="pref_camera_videobitrate_entry_7">384K</string>
+    <string name="pref_camera_videobitrate_entry_8">420K</string>
+    <string name="pref_camera_videobitrate_entry_9">768K</string>
+    <string name="pref_camera_videobitrate_entry_10">1M</string>
+    <string name="pref_camera_videobitrate_entry_11">1.5M</string>
+    <string name="pref_camera_videobitrate_entry_12">2M</string>
+    <string name="pref_camera_videobitrate_entry_13">4M</string>
+    <string name="pref_camera_videobitrate_entry_14">6M</string>
+    <string name="pref_camera_videobitrate_entry_15">8M</string>
+    <string name="pref_camera_videobitrate_entry_16">10M</string>
+    <string name="pref_camera_videobitrate_entry_17">12M</string>
+    <string name="pref_camera_videobitrate_entry_18">14M</string>
+    <string name="pref_camera_videobitrate_entry_19">16M</string>
+    <string name="pref_camera_videobitrate_entry_20">18M</string>
+    <string name="pref_camera_videobitrate_entry_21">20M</string>
+
+	<!-- Settings screen, Video Encoder category title -->
+    <string name="pref_camera_videoencoder_category">Video Encoder</string>
+
+    <!-- Default Video Encoder setting. A numerical value. Do not translate. -->
+    <string name="pref_camera_videoencoder_default">2</string>
+
+    <!-- Settings screen, Select Video Encoder title -->
+    <string name="pref_camera_videoencoder_title">Select Video Encoder</string>
+
+    <!-- Settings screen, Video Encoder dialog radio button choices -->
+    <string name="pref_camera_videoencoder_entry_1">H263</string>
+    <string name="pref_camera_videoencoder_entry_2">H264</string>
+    <string name="pref_camera_videoencoder_entry_3">MPEG4</string>
+
     <!-- Settings screen, Camera setting category title -->
     <string name="pref_camera_settings_category">Camera settings</string>
 

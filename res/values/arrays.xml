@@ -105,7 +105,69 @@
         <item>3</item>
     </string-array>
 
-    <!-- Camera Preferences Preview framerate dialog box entries -->
+	<!-- Camera Preferences Video Encoder dialog box entries -->
+    <string-array name="pref_camera_videoencoder_entries">
+        <item>@string/pref_camera_videoencoder_entry_1</item>
+        <item>@string/pref_camera_videoencoder_entry_2</item>
+        <item>@string/pref_camera_videoencoder_entry_3</item>
+    </string-array>
+
+    <string-array name="pref_camera_videoencoder_entryvalues">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+    <!-- Camera Preferences Video BitRate dialog box entries -->
+    <string-array name="pref_camera_videobitrate_entries">
+        <item>@string/pref_camera_videobitrate_entry_1</item>
+        <item>@string/pref_camera_videobitrate_entry_2</item>
+        <item>@string/pref_camera_videobitrate_entry_3</item>
+        <item>@string/pref_camera_videobitrate_entry_4</item>
+        <item>@string/pref_camera_videobitrate_entry_5</item>
+        <item>@string/pref_camera_videobitrate_entry_6</item>
+        <item>@string/pref_camera_videobitrate_entry_7</item>
+        <item>@string/pref_camera_videobitrate_entry_8</item>
+        <item>@string/pref_camera_videobitrate_entry_9</item>
+        <item>@string/pref_camera_videobitrate_entry_10</item>
+        <item>@string/pref_camera_videobitrate_entry_11</item>
+        <item>@string/pref_camera_videobitrate_entry_12</item>
+        <item>@string/pref_camera_videobitrate_entry_13</item>
+        <item>@string/pref_camera_videobitrate_entry_14</item>
+        <item>@string/pref_camera_videobitrate_entry_15</item>
+        <item>@string/pref_camera_videobitrate_entry_16</item>
+        <item>@string/pref_camera_videobitrate_entry_17</item>
+        <item>@string/pref_camera_videobitrate_entry_18</item>
+       <item>@string/pref_camera_videobitrate_entry_19</item>
+        <item>@string/pref_camera_videobitrate_entry_20</item>
+        <item>@string/pref_camera_videobitrate_entry_21</item>
+    </string-array>
+
+    <string-array name="pref_camera_videobitrate_entryvalues">
+        <item>64000</item>
+        <item>128000</item>
+        <item>192000</item>
+        <item>240000</item>
+        <item>320000</item>
+        <item>360000</item>
+        <item>384000</item>
+        <item>420000</item>
+        <item>768000</item>
+        <item>1000000</item>
+        <item>1500000</item>
+        <item>2000000</item>
+        <item>4000000</item>
+        <item>6000000</item>
+        <item>8000000</item>
+        <item>10000000</item>
+        <item>12000000</item>
+        <item>14000000</item>
+        <item>16000000</item>
+        <item>18000000</item>
+        <item>20000000</item>
+    </string-array>
+
+	<!-- Camera Preferences Preview framerate dialog box entries -->
     <string-array name="pref_camera_previewframerate_entries">
         <item>@string/pref_camera_previewframerate_entry_thirty</item>
         <item>@string/pref_camera_previewframerate_entry_twentyseven</item>

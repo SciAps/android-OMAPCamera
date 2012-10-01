@@ -455,7 +455,9 @@ public class VideoCamera extends ActivityBase
                     CameraSettings.KEY_VIDEO_MODE,
                     CameraSettings.KEY_VIDEO_FORMAT,
                     CameraSettings.KEY_VIDEO_TIMER,
-                    CameraSettings.KEY_AUDIO_ENCODER};
+                    CameraSettings.KEY_AUDIO_ENCODER,
+                    CameraSettings.KEY_VIDEO_ENCODER,
+                    CameraSettings.KEY_VIDEO_BITRATE};
 
         CameraPicker.setImageResourceId(R.drawable.ic_switch_video_facing_holo_light);
         mIndicatorControlContainer.initialize(this, mPreferenceGroup,
@@ -655,6 +657,8 @@ public class VideoCamera extends ActivityBase
                         defaultQuality);
         int quality = Integer.valueOf(videoQuality);
         int mAudioEncoder = 0;
+        int mVideoEncoder = 0;
+        int mVideoBitrate = 0;
 
         // Set video quality.
         Intent intent = getIntent();
@@ -718,8 +722,12 @@ public class VideoCamera extends ActivityBase
         if (mCaptureTimeLapse) quality += 1000;
         mProfile = CamcorderProfile.get(mCameraId, quality);
 
+        mVideoEncoder = getIntPreference(CameraSettings.KEY_VIDEO_ENCODER,CameraSettings.DEFAULT_VIDEO_ENCODER_VALUE);
+        mVideoBitrate = getIntPreference(CameraSettings.KEY_VIDEO_BITRATE,CameraSettings.DEFAULT_VIDEO_BITRATE_VALUE);
         mAudioEncoder = getIntPreference(CameraSettings.KEY_AUDIO_ENCODER,CameraSettings.DEFAULT_AUDIO_ENCODER_VALUE);
         mProfile.audioCodec = mAudioEncoder;
+        mProfile.videoBitRate = mVideoBitrate;
+        mProfile.videoCodec = mVideoEncoder;
         updateVideoFormat(mVideoFormat);
         getDesiredPreviewSize();
     }
@@ -1801,6 +1809,41 @@ public class VideoCamera extends ActivityBase
         return supported == null ? false : supported.indexOf(value) >= 0;
     }
 
+    private void filterVideoBitrateItems(int resolution) {
+        if (mPreferenceGroup == null) return;
+
+        final Integer MaxBitrate = CameraSettings.MAX_VIDEO_BITRATES.get(resolution);
+        ListPreference pref = mPreferenceGroup.findPreference(CameraSettings.KEY_VIDEO_BITRATE);
+
+        CharSequence[] values = pref.getEntryValues();
+        if (((mProfile.videoCodec == MediaRecorder.VideoEncoder.H263) ||
+                (mProfile.videoCodec == MediaRecorder.VideoEncoder.MPEG_4_SP)) &&
+                (MaxBitrate != null)) {
+            int maxSupportedBitrateValue = 0;
+            for (int i=0; i<values.length; i++) {
+                boolean enabled = (Integer.valueOf(values[i].toString()) <= MaxBitrate);
+                if ((enabled == true)&&(mProfile.videoBitRate > MaxBitrate)) {
+                    //If current videoBitRate value is out of supported range, we must chose biggest supported.
+                    maxSupportedBitrateValue = Math.max(maxSupportedBitrateValue,Integer.valueOf(values[i].toString()));
+                }
+                pref.enableItem(i,enabled);
+            }
+            if(mProfile.videoBitRate > MaxBitrate) {
+                mProfile.videoBitRate = maxSupportedBitrateValue;
+                Editor editor = mPreferences.edit();
+                editor.putString(CameraSettings.KEY_VIDEO_BITRATE, String.valueOf(mProfile.videoBitRate));
+                editor.apply();
+            }
+
+        }
+        else pref.enableAllItems();
+
+        if( mIndicatorControlContainer != null ) {
+            mIndicatorControlContainer.reloadPreferences();
+        }
+
+    }
+
     @SuppressWarnings("deprecation")
     private void setCameraParameters() {
         mParameters.setPreviewSize(mDesiredPreviewWidth, mDesiredPreviewHeight);
@@ -1813,6 +1856,7 @@ public class VideoCamera extends ActivityBase
         updateVideoFormat(optVideoFormat);
 
         mParameters.setPreviewSize(mProfile.videoFrameWidth, mProfile.videoFrameHeight);
+        filterVideoBitrateItems(mProfile.videoFrameWidth*mProfile.videoFrameHeight);
 
         // Set flash mode.
         String flashMode;
@@ -1856,6 +1900,15 @@ public class VideoCamera extends ActivityBase
         // Set Audio encoder
         String audioEncoder = mPreferences.getString(CameraSettings.KEY_AUDIO_ENCODER, (getString(R.string.pref_camera_audioencoder_default)));
         mProfile.audioCodec = Integer.parseInt(audioEncoder);
+
+     // Set Bitrate
+        String bitrate = mPreferences.getString(CameraSettings.KEY_VIDEO_BITRATE, (getString(R.string.pref_camera_videobitrate_default)));
+        mProfile.videoBitRate = Integer.parseInt(bitrate);
+        Log.i(TAG,"Bitrate is set to "+ mProfile.videoBitRate);
+
+        // Set Video Encoder
+        String vidEncoder = mPreferences.getString(CameraSettings.KEY_VIDEO_ENCODER, (getString(R.string.pref_camera_videoencoder_default)));
+        mProfile.videoCodec = Integer.parseInt(vidEncoder);
 
         // Set continuous autofocus.
         List<String> supportedFocus = mParameters.getSupportedFocusModes();
