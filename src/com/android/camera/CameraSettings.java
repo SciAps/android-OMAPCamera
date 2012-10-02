@@ -34,11 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-
-
-
-
-
+import com.android.camera.ListPreference;
 
 
 /**
@@ -100,11 +96,14 @@ public class CameraSettings {
     public static final String KEY_MANUAL_EXPOSURE_RIGHT = "manual-exposure-right";
     public static final String KEY_MANUAL_GAIN_ISO = "manual-gain-iso";
     public static final String KEY_MANUAL_GAIN_ISO_RIGHT = "manual-gain-iso-right";
-
     public static final String EXPOSURE_DEFAULT_VALUE = "0";
-
     public static final String KEY_SUPPORTED_PREVIEW_FRAMERATES_EXT = "preview-fps-ext-values";
     public static final String KEY_SUPPORTED_PREVIEW_FRAMERATE_RANGES_EXT = "preview-fps-range-ext-values";
+
+    //CPCAM shot parameres
+    public static final String KEY_SHOTPARAMS_MANUAL_EXPOSURE_GAIN_POPUP_SLIDERS = "pref_camera_manual_exp_gain_key";
+    public static final String KEY_SHOTPARAMS_BURST = "burst-capture";
+    public static final String KEY_SHOTPARAMS_EXP_GAIN_PAIRS = "exp-gain-pairs";
 
     public static final int CURRENT_VERSION = 5;
     public static final int CURRENT_LOCAL_VERSION = 2;
@@ -359,9 +358,12 @@ public class CameraSettings {
         ListPreference contrastEnhancement = group.findPreference(KEY_GBCE);
         ListPreference exposureMode = group.findPreference(KEY_EXPOSURE_MODE_MENU);
         ListPreference previewFramerate = group.findPreference(KEY_PREVIEW_FRAMERATE);
+        ListPreference cpcam_manual_exp_gain = group.findPreference(KEY_SHOTPARAMS_MANUAL_EXPOSURE_GAIN_POPUP_SLIDERS);
 
         ArrayList<CharSequence[]> allPictureEntries = new ArrayList<CharSequence[]>();
         ArrayList<CharSequence[]> allPictureEntryValues = new ArrayList<CharSequence[]>();
+        ArrayList<CharSequence[]> allPreviewEntries = new ArrayList<CharSequence[]>();
+        ArrayList<CharSequence[]> allPreviewEntryValues = new ArrayList<CharSequence[]>();
 
         if (pictureSize != null) {
             ListPreference pictureSizes = group.findPreference(KEY_PICTURE_SIZE);
@@ -369,6 +371,21 @@ public class CameraSettings {
                 pictureSizes.clearAndSetEntries(allPictureEntries, allPictureEntryValues,
                         pictureSize.getEntries(), pictureSize.getEntryValues());
             }
+        }
+
+        if (previewSize != null) {
+            ListPreference previewSizes = group.findPreference(KEY_PREVIEW_SIZE);
+            if (previewSizes !=null) {
+                previewSizes.clearAndSetEntries(allPreviewEntries, allPreviewEntryValues,
+                        previewSize.getEntries(), previewSize.getEntryValues());
+            }
+        }
+
+        if (cpcam_manual_exp_gain != null) {
+            List<String> supp = new ArrayList<String>();
+            supp.add("on");
+            supp.add("off");
+            filterUnsupportedOptions(group, cpcam_manual_exp_gain, supp);
         }
 
         if (previewFramerate != null) {

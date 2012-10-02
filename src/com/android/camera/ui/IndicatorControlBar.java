@@ -26,7 +26,9 @@ import android.widget.ImageView;
 import com.android.camera.PreferenceGroup;
 import com.android.camera.R;
 import com.android.camera.Util;
-
+import com.android.camera.ui.CPcamExposureControlBar;
+import com.android.camera.ui.CPcamGainControlBar;
+import android.util.Log;
 /**
  * A view that contains the top-level indicator control.
  */
@@ -39,6 +41,8 @@ public class IndicatorControlBar extends IndicatorControl implements
     public static final int ICON_SPACING = Util.dpToPixel(16);
 
     private ImageView mSecondLevelIcon;
+    private CPcamGainControlBar mGainControl;
+    private CPcamExposureControlBar mExposureControl;
 
     public IndicatorControlBar(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -51,13 +55,21 @@ public class IndicatorControlBar extends IndicatorControl implements
     }
 
     public void initialize(Context context, PreferenceGroup group,
-            boolean zoomSupported) {
+            boolean zoomSupported, boolean CPcamSlidersSupported) {
         setPreferenceGroup(group);
 
-        // Add CameraPicker control.
-        initializeCameraPicker();
-        if (mCameraPicker != null) {
-            mCameraPicker.setBackgroundResource(R.drawable.bg_pressed);
+        if (CPcamSlidersSupported) {
+            mGainControl = (CPcamGainControlBar) findViewById(R.id.gain_control);
+            mGainControl.setVisibility(View.INVISIBLE);
+            mExposureControl = (CPcamExposureControlBar) findViewById(R.id.exposure_control);
+            mExposureControl.setVisibility(View.INVISIBLE);
+            mSecondLevelIcon.setVisibility(View.INVISIBLE);
+        } else {
+            // Add CameraPicker control.
+            initializeCameraPicker();
+            if (mCameraPicker != null) {
+                mCameraPicker.setBackgroundResource(R.drawable.bg_pressed);
+            }
         }
 
         initializeZoomControl(zoomSupported);
@@ -65,6 +77,23 @@ public class IndicatorControlBar extends IndicatorControl implements
         // Do not grey out the icons when taking a picture.
         setupFilter(mCurrentMode != MODE_CAMERA);
         requestLayout();
+    }
+
+    public void showCPCamSliders (boolean enabled)
+    {
+        if (enabled) {
+            mGainControl = (CPcamGainControlBar) findViewById(R.id.gain_control);
+            mGainControl.setVisibility(View.VISIBLE);
+            mExposureControl = (CPcamExposureControlBar) findViewById(R.id.exposure_control);
+            mExposureControl.setVisibility(View.VISIBLE);
+            requestLayout();
+        } else {
+            mGainControl = (CPcamGainControlBar) findViewById(R.id.gain_control);
+            mGainControl.setVisibility(View.INVISIBLE);
+            mExposureControl = (CPcamExposureControlBar) findViewById(R.id.exposure_control);
+            mExposureControl.setVisibility(View.INVISIBLE);
+            requestLayout();
+        }
     }
 
     @Override
@@ -90,6 +119,7 @@ public class IndicatorControlBar extends IndicatorControl implements
 
         int width = right - left;
         int height = bottom - top;
+        int paddingLeft = getPaddingLeft();
 
         if (getResources().getConfiguration().orientation
                 == Configuration.ORIENTATION_LANDSCAPE) {
@@ -110,6 +140,13 @@ public class IndicatorControlBar extends IndicatorControl implements
                 mZoomControl.layout(0, padding + size, size,
                         height - padding - size);
             }
+            if (mGainControl != null)  {
+                mGainControl.layout( 0, padding + size, size, height - padding - size);
+            }
+
+            if (mExposureControl != null)  {
+                mExposureControl.layout((size / 3)*2, padding + size, size, height - padding - size);
+            }
 
             mSecondLevelIcon.layout(0, height - padding - size, size,
                     height - padding);
@@ -128,6 +165,14 @@ public class IndicatorControlBar extends IndicatorControl implements
                 mZoomControl.layout(padding + size, 0, width - padding - size, size);
             }
 
+            if (mGainControl != null)  {
+                mGainControl.layout(padding + size, 0, width - padding - size, size);
+            }
+
+            if (mExposureControl != null)  {
+                mExposureControl.layout(padding + size, (size / 3)*2, width - padding - size, size);
+            }
+
             // Layout the camera picker if required.
             if (mCameraPicker != null) {
                 mCameraPicker.layout(width - padding - size, 0, width - padding, size);
@@ -138,9 +183,12 @@ public class IndicatorControlBar extends IndicatorControl implements
     @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
-        if (mCurrentMode == MODE_VIDEO) {
-            mSecondLevelIcon.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
+        if (mGainControl != null || mExposureControl != null) {
+            mSecondLevelIcon.setVisibility(View.INVISIBLE);
         } else {
+            mSecondLevelIcon.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
+        }
+        if (mCurrentMode != MODE_VIDEO) {
             // We also disable the zoom button during snapshot.
             enableZoom(enabled);
         }
@@ -149,5 +197,7 @@ public class IndicatorControlBar extends IndicatorControl implements
 
     public void enableZoom(boolean enabled) {
         if (mZoomControl != null)  mZoomControl.setEnabled(enabled);
+        if (mGainControl != null)  mGainControl.setEnabled(enabled);
+        if (mExposureControl != null)  mExposureControl.setEnabled(enabled);
     }
 }

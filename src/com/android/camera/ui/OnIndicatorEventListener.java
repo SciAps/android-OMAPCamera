@@ -21,5 +21,7 @@ public interface OnIndicatorEventListener {
     public static int EVENT_LEAVE_SECOND_LEVEL_INDICATOR_BAR = 1;
     public static int EVENT_ENTER_ZOOM_CONTROL = 2;
     public static int EVENT_LEAVE_ZOOM_CONTROL = 3;
+    public static int EVENT_LEAVE_EXPOSURE_CONTROL = 3;
+    public static int EVENT_LEAVE_GAIN_CONTROL = 3;
     void onIndicatorEvent(int event);
 }

@@ -13,6 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+<!-- This layout is shared by phone and small size tablet. -->
 <com.android.camera.ui.IndicatorControlBarContainer xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/indicator_control"
         android:layout_height="wrap_content"

@@ -42,7 +42,7 @@ public class FaceView extends View implements FocusIndicator, Rotatable {
     private boolean mPause;
     private Matrix mMatrix = new Matrix();
     private RectF mRect = new RectF();
-    private Face[] mFaces;
+    private FaceViewData[] mFaces;
     private Drawable mFaceIndicator;
     private final Drawable mDrawableFocusing;
     private final Drawable mDrawableFocused;
@@ -56,7 +56,7 @@ public class FaceView extends View implements FocusIndicator, Rotatable {
         mFaceIndicator = mDrawableFocusing;
     }
 
-    public void setFaces(Face[] faces) {
+    public void setFaces(FaceViewData[] faces) {
         if (LOGV) Log.v(TAG, "Num of faces=" + faces.length);
         if (mPause) return;
         mFaces = faces;

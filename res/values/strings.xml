@@ -37,6 +37,9 @@
     <!-- label for the folder that contains Camera videos in the gallery -->
     <string name="gallery_camera_videos_bucket_name">Camera videos</string>
 
+    <!-- label for the icon meaning 'show me all the images that were taken with the cpcam' -->
+    <string name="cpcam_camera_label">CPcamOMAP</string>
+
     <!-- alert to the user to wait for some operation to complete -->
     <string name="wait">Please wait\u2026</string>
 
@@ -535,6 +538,9 @@
     <!-- Toast after trying to select a setting that is not allowed to change in scene mode [CHAR LIMIT=NONE] -->
     <string name="not_selectable_in_scene_mode">Not selectable in scene mode.</string>
 
+    <!--  Picture Format setting -->
+    <string name="pref_camera_picture_format_default" translatable="false">jpeg</string>
+
     <!-- Restore settings item in preference -->
     <string name="pref_restore_title">Camera settings</string>
     <string name="pref_restore_detail">Restore defaults</string>
@@ -575,6 +581,10 @@
     <string name="settings_manual_gain_exposure_button_ok">OK</string>
     <!-- Dialog "OK" button. Dismisses dialog. -->
     <string name="dialog_ok">OK</string>
+
+    <string name="settings_manual_exposure_title_popup">Manual Exposure Settings</string>
+    <string name="manual_gain_button">Absolute</string>
+    <string name="reprocess_button">Reprocess</string>
 
     <!-- Low-memory dialog message [CHAR LIMT=NONE] -->
     <string name="spaceIsLow_content" product="nosdcard">Your USB storage is running out of space. Change the quality setting or delete some images or other files.</string>
@@ -693,6 +703,10 @@
     <!-- The button to back to the first-level indicators of the camera settings. [CHAR LIMIT = NONE] -->
     <string name="accessibility_back_to_first_level">Close setting controls</string>
     <!-- The zoom control button. [CHAR LIMIT = NONE] -->
+    <!-- The zoom control button. [CHAR LIMIT = NONE] -->
+    <string name="accessibility_cpcam_gain_control">Gain control</string>
+    <!-- The zoom control button. [CHAR LIMIT = NONE] -->
+    <string name="accessibility_cpcam_exposure_control">Exposure control</string>
     <string name="accessibility_zoom_control">Zoom control</string>
     <!-- The decrement button in camera preference such as exposure, picture size. [CHAR LIMIT = NONE] -->
     <string name="accessibility_decrement">Decrease %1$s</string>
@@ -702,6 +716,8 @@
     <string name="accessibility_switch">%1$s switch</string>
     <!-- The button to switch to Camera mode. [CHAR LIMIT = NONE] -->
     <string name="accessibility_switch_to_camera">Switch to photo</string>
+    <!-- The text of menu item to switch the mode to CPcam. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_switch_to_cpcam">Switch to CPcam</string>
     <!-- The button to switch to Video mode. [CHAR LIMIT = NONE] -->
     <string name="accessibility_switch_to_video">Switch to video</string>
     <!-- The button to switch to Panorama mode. [CHAR LIMIT = NONE] -->

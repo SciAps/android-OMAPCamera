@@ -60,6 +60,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import com.android.camera.CameraDisabledException;
+import com.android.camera.CameraHardwareException;
+import com.android.camera.CameraHolder;
+import com.ti.omap.android.cpcam.*;
+
 /**
  * Collection of utility functions used in this package.
  */
@@ -79,6 +84,8 @@ public class Util {
     private static boolean sIsPortraitDevice;
     private static float sPixelDensity = 1;
     private static ImageFileNamer sImageFileNamer;
+
+    private static final String CPCAM_CLASS_NAME = "com.ti.omap.android.cpcam.CPCam";
 
     private Util() {
     }
@@ -101,6 +108,18 @@ public class Util {
 
     public static int dpToPixel(int dp) {
         return Math.round(sPixelDensity * dp);
+    }
+
+    public static boolean isCPCamLibraryPresent() {
+        boolean ret = true;
+        // Check if CPCam library is present
+        try {
+            Class.forName(CPCAM_CLASS_NAME);
+        } catch (ClassNotFoundException e) {
+            ret = false;
+        }
+
+        return ret;
     }
 
     // Rotates the bitmap by the specified degree.
@@ -755,6 +774,90 @@ public class Util {
             }
 
             return result;
+        }
+    }
+
+    //CPCam related methods
+    public static CPCameraManager.CPCameraProxy openCPCamera(Activity activity, int cameraId)
+            throws CameraHardwareException, CameraDisabledException {
+        // Check if device policy has disabled the camera.
+        DevicePolicyManager dpm = (DevicePolicyManager) activity.getSystemService(
+                Context.DEVICE_POLICY_SERVICE);
+        if (dpm.getCameraDisabled(null)) {
+            throw new CameraDisabledException();
+        }
+
+        try {
+            return CameraHolder.instance().openCPCamera(cameraId);
+        } catch (CameraHardwareException e) {
+            // In eng build, we throw the exception so that test tool
+            // can detect it and report it
+            if ("eng".equals(Build.TYPE)) {
+                throw new RuntimeException("openCamera failed", e);
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    public static void setRotationParameterCPCam(com.ti.omap.android.cpcam.CPCam.Parameters parameters,
+            int cameraId, int orientation) {
+        // See android.hardware.Camera.Parameters.setRotation for
+        // documentation.
+        int rotation = 0;
+        CameraInfo info = CameraHolder.instance().getCameraInfo()[cameraId];
+        if (orientation != OrientationEventListener.ORIENTATION_UNKNOWN) {
+            if (info.facing == CameraInfo.CAMERA_FACING_FRONT) {
+                rotation = (info.orientation - orientation + 360) % 360;
+            } else {  // back-facing camera
+                rotation = (info.orientation + orientation) % 360;
+            }
+        } else {
+            //If it hits this case, it means the the first orientaion
+            // itself is not aquired yet. So just set the sensor mount
+            // orientation.
+            rotation = info.orientation;
+        }
+
+        parameters.setRotation(rotation);
+    }
+
+    public static void setGpsParametersCPCam(com.ti.omap.android.cpcam.CPCam.Parameters parameters,
+            Location loc) {
+        // Clear previous GPS location from the parameters.
+        parameters.removeGpsData();
+
+        // We always encode GpsTimeStamp
+        parameters.setGpsTimestamp(System.currentTimeMillis() / 1000);
+
+        // Set GPS location.
+        if (loc != null) {
+            double lat = loc.getLatitude();
+            double lon = loc.getLongitude();
+            boolean hasLatLon = (lat != 0.0d) || (lon != 0.0d);
+
+            if (hasLatLon) {
+                Log.d(TAG, "Set gps location");
+                parameters.setGpsLatitude(lat);
+                parameters.setGpsLongitude(lon);
+                parameters.setGpsProcessingMethod(loc.getProvider().toUpperCase());
+                if (loc.hasAltitude()) {
+                    parameters.setGpsAltitude(loc.getAltitude());
+                } else {
+                    // for NETWORK_PROVIDER location provider, we may have
+                    // no altitude information, but the driver needs it, so
+                    // we fake one.
+                    parameters.setGpsAltitude(0);
+                }
+                if (loc.getTime() != 0) {
+                    // Location.getTime() is UTC in milliseconds.
+                    // gps-timestamp is UTC in seconds.
+                    long utcTimeSeconds = loc.getTime() / 1000;
+                    parameters.setGpsTimestamp(utcTimeSeconds);
+                }
+            } else {
+                loc = null;
+            }
         }
     }
 }

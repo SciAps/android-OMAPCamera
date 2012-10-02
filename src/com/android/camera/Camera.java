@@ -73,6 +73,7 @@ import com.android.camera.CameraSettings;
 import com.android.camera.ui.ManualConvergenceSettings;
 import com.android.camera.ui.ManualGainExposureSettings;
 import com.android.camera.R;
+import com.android.camera.ui.FaceViewData;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -1793,7 +1794,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
         CameraPicker.setImageResourceId(R.drawable.ic_switch_photo_facing_holo_light);
         mIndicatorControlContainer.initialize(this, mPreferenceGroup,
-                mParameters.isZoomSupported(),
+                mParameters.isZoomSupported(),false,
                 SETTING_KEYS, OTHER_SETTING_KEYS);
         mCameraPicker = (CameraPicker) mIndicatorControlContainer.findViewById(
                 R.id.camera_picker);
@@ -3436,7 +3437,30 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
     @Override
     public void onFaceDetection(Face[] faces, android.hardware.Camera camera) {
-        mFaceView.setFaces(faces);
+        // Sometimes onFaceDetection is called after onPause.
+        // Ex: onPause during burst capture. Ignore it.
+        if (mPausing || isFinishing()) return;
+
+        FaceViewData faceData[] = new FaceViewData[faces.length];
+
+        int i = 0;
+        for ( Face face : faces ) {
+
+            faceData[i] = new FaceViewData();
+            if ( null == faceData[i] ) {
+                break;
+            }
+
+            faceData[i].id = face.id;
+            faceData[i].leftEye = face.leftEye;
+            faceData[i].mouth = face.mouth;
+            faceData[i].rect = face.rect;
+            faceData[i].rightEye = face.rightEye;
+            faceData[i].score = face.score;
+            i++;
+        }
+
+        mFaceView.setFaces(faceData);
     }
 
     private void showTapToFocusToast() {

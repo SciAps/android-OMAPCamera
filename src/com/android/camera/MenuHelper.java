@@ -16,6 +16,8 @@
 
 package com.android.camera;
 
+import com.android.camera.ModePicker;
+
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -39,6 +41,7 @@ public class MenuHelper {
     private static final String CAMERA_CLASS = "com.android.camera.Camera";
     private static final String PANORAMA_CLASS = "com.android.camera.PanoramaActivity";
     private static final String VIDEO_CAMERA_CLASS = "com.android.camera.VideoCamera";
+    private static final String CPCAM_CLASS = "com.android.camera.CPCam";
 
     private static void startCameraActivity(Activity activity, Intent intent,
             String className) {
@@ -73,6 +76,10 @@ public class MenuHelper {
             case ModePicker.MODE_CAMERA:
                 action = MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA;
                 className = CAMERA_CLASS;
+                break;
+            case ModePicker.MODE_CPCAM:
+                action = CPCAM_CLASS;
+                className = CPCAM_CLASS;
                 break;
             default:
                 Log.e(TAG, "unknown camera mode:" + mode);
