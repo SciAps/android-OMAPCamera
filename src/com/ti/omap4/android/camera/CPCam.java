@@ -443,6 +443,9 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
                     mShotParams.setPictureFormat(ImageFormat.NV21);
                     mShotParams.set(CPCameraSettings.KEY_SHOTPARAMS_EXP_GAIN_PAIRS, expGainPair);
                     mShotParams.set(CPCameraSettings.KEY_SHOTPARAMS_BURST, 1);
+                    if(mTapOut != null) {
+                        mShotParams.set(CPCameraSettings.KEY_TAP_OUT, mTapOut.getId());
+                    }
 
                     break;
                 }
@@ -838,6 +841,20 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         }
     }
 
+    private void recreateTapout(final com.ti.omap.android.cpcam.CPCam camera) {
+        // WA: Re-create CPCamBufferQueue before next shot
+        try {
+            camera.setBufferSource(null, null);
+            mTapOut.release();
+            mTapOut = new CPCamBufferQueue(true);
+            mTapOut.setOnFrameAvailableListener(CPCam.this);
+            mParameters.setPictureFormat(ImageFormat.NV21);
+            mParameters.setPictureSize(mFrameWidth, mFrameHeight);
+            camera.setParameters(mParameters);
+            camera.setBufferSource(null, mTapOut);
+        } catch(IOException e) { e.printStackTrace(); }
+    }
+
     private final class JpegPictureCallback implements PictureCallback {
         Location mLocation;
 
@@ -850,14 +867,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
             if (mPausing) {
                 return;
             }
-            // WA: Re-create CPCamBufferQueue before next shot
-            try {
-                camera.setBufferSource(null, null);
-                mTapOut.release();
-                mTapOut = new CPCamBufferQueue(true);
-                mTapOut.setOnFrameAvailableListener(CPCam.this);
-                camera.setBufferSource(null, mTapOut);
-            } catch(IOException e) { e.printStackTrace(); }
+
 
             if ( mReprocessNextFrame ) {
                 mReprocessNextFrame = false;
@@ -890,7 +900,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
                     startPreview(true);
                     startFaceDetection();
                 } else {
-                    mHandler.sendEmptyMessageDelayed(RESTART_PREVIEW, delay);
+                    mHandler.sendEmptyMessage(RESTART_PREVIEW);
                 }
 
             }
@@ -1165,6 +1175,10 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
                mShotParams.set(CPCameraSettings.KEY_SHOTPARAMS_BURST, 1);
         } else {
             mCPCamDevice.setParameters(mShotParams);
+        }
+        recreateTapout(mCPCamDevice);
+        if(mTapOut != null) {
+            mShotParams.set(CPCameraSettings.KEY_TAP_OUT, mTapOut.getId());
         }
 
         try {
@@ -1734,10 +1748,12 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         // Dismiss open menu if exists.
         PopupManager.getInstance(this).notifyShowPopup(null);
 
-        try {
-            mCPCamDevice.setBufferSource(null, mTapOut);
-        } catch (IOException ioe) {
-            Log.e(TAG, "Error trying to setBufferSource!");
+        if (mTapOut != null) {
+            try {
+                mCPCamDevice.setBufferSource(null, mTapOut);
+            } catch (IOException ioe) {
+                Log.e(TAG, "Error trying to setBufferSource!");
+            }
         }
 
     }
@@ -2108,6 +2124,10 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
             // WA: This should be done on first preview callback.
             //     For some reason callbacks are not called after
             //     the second iteration.
+            recreateTapout(mCPCamDevice);
+            if(mTapOut != null) {
+                mShotParams.set(CPCameraSettings.KEY_TAP_OUT, mTapOut.getId());
+            }
             mHandler.sendEmptyMessageDelayed(QUEUE_NEXT_SHOT, CAMERA_RELEASE_DELAY);
 
         } else {
@@ -2763,6 +2783,10 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
                         mCPCamDevice.setParameters(mParameters);
                         mTapOut.setDefaultBufferSize(mFrameWidth, mFrameHeight);
                         mCPCamDevice.setBufferSource(mTapOut,null);
+                        if(mTapOut != null) {
+                            mShotParams.set(CPCameraSettings.KEY_TAP_IN, mTapOut.getId());
+                        }
+                        mShotParams.setPictureFormat(ImageFormat.JPEG);
                         mCPCamDevice.reprocess(mShotParams);
                     } catch (IOException ioe) {
                         ioe.printStackTrace();

@@ -99,6 +99,10 @@ public class CPCameraSettings {
     public static final String KEY_EXP_COMPENSATION = "exp-compensation";
     public static final String KEY_FLUSH_CONFIG = "flush";
 
+    //CPCam tap-out/-in
+    public static final String KEY_TAP_OUT = "tap-out";
+    public static final String KEY_TAP_IN = "tap-in";
+
     public static final int CURRENT_VERSION = 5;
     public static final int CURRENT_LOCAL_VERSION = 2;
 
