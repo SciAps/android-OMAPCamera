@@ -844,8 +844,10 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
     private void recreateTapout(final com.ti.omap.android.cpcam.CPCam camera) {
         // WA: Re-create CPCamBufferQueue before next shot
         try {
-            camera.setBufferSource(null, null);
-            mTapOut.release();
+            if(mTapOut != null) {
+                camera.releaseBufferSource(null, mTapOut);
+                mTapOut.release();
+            }
             mTapOut = new CPCamBufferQueue(true);
             mTapOut.setOnFrameAvailableListener(CPCam.this);
             mParameters.setPictureFormat(ImageFormat.NV21);
@@ -2139,9 +2141,15 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
      private void stopPreview() {
         if (mCPCamDevice != null && mCameraState != PREVIEW_STOPPED) {
             Log.v(TAG, "stopPreview");
-
-            mCPCamDevice.cancelAutoFocus(); // Reset the focus.
-            mCPCamDevice.stopPreview();
+            try {
+                mCPCamDevice.cancelAutoFocus(); // Reset the focus.
+                mCPCamDevice.stopPreview();
+                if ( mTapOut != null ) {
+                    mCPCamDevice.releaseBufferSource(null, mTapOut);
+                    mTapOut.release();
+                    mTapOut = null;
+                }
+            } catch(IOException e) { e.printStackTrace(); }
             mFaceDetectionStarted = false;
         }
         setCameraState(PREVIEW_STOPPED);
