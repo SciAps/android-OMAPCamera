@@ -127,7 +127,7 @@
     <string name="pref_video_time_lapse_frame_interval_entry_5000" translatable="false">5s</string>
     <string name="pref_video_time_lapse_frame_interval_entry_10000" translatable="false">10s</string>
 
-	<!-- Settings screen, Audio Encoder category title -->
+    <!-- Settings screen, Audio Encoder category title -->
     <string name="pref_camera_audioencoder_category">Audio Encoder</string>
 
     <!-- Default Audio Encoder setting. A numerical value. Do not translate. -->
@@ -141,7 +141,7 @@
     <string name="pref_camera_audioencoder_entry_2">AMR-WB</string>
     <string name="pref_camera_audioencoder_entry_3">AAC</string>
 
-	<!-- Settings screen, Video BitRate category title -->
+    <!-- Settings screen, Video BitRate category title -->
     <string name="pref_camera_videobitrate_category">Video BitRate</string>
 
     <!-- Default Video bitRate setting. A numerical value. Do not translate. -->
@@ -173,13 +173,13 @@
     <string name="pref_camera_videobitrate_entry_20">18M</string>
     <string name="pref_camera_videobitrate_entry_21">20M</string>
 
-	<!-- Default Video FrameRate setting. A string value -->
+    <!-- Default Video FrameRate setting. A string value -->
     <string name="pref_camera_videoframerate_range_default" translatable="false">30000,30000</string>
 
     <!-- Settings screen, Select Video FrameRate range title -->
     <string name="pref_camera_videoframerate_range_title">Select FrameRate Range</string>
 
-	<!-- Settings screen, Video Encoder category title -->
+    <!-- Settings screen, Video Encoder category title -->
     <string name="pref_camera_videoencoder_category">Video Encoder</string>
 
     <!-- Default Video Encoder setting. A numerical value. Do not translate. -->
@@ -199,7 +199,7 @@
     <!-- Settings screen, Camcorder setting category title -->
     <string name="pref_camcorder_settings_category">Camcorder settings</string>
 
-	<!-- Default video format setting. A numerical value. -->
+    <!-- Default video format setting. A numerical value. -->
     <string name="pref_camera_video_format_default" translatable="false">8</string>
 
     <!-- Settings screen, Video format title -->
@@ -478,7 +478,7 @@
     <string name="pref_camera_vnf_entry_on">ON</string>
     <string name="pref_camera_vnf_entry_off">OFF</string>
 
-	<!-- Video File Container Setting -->
+    <!-- Video File Container Setting -->
     <string name="pref_video_record_container_title">Video File Container</string>
     <string name="pref_video_record_container_default" translatable="false">mp4</string>
     <string name="pref_video_record_container_mp4">MP4</string>
@@ -565,6 +565,16 @@
     <!-- Manual Convergence Settings Dialog -->
     <string name="settings_manual_convergence_caption">Manual Convergence: </string>
     <string name="settings_manual_convergence_button_ok">Ok</string>
+
+    <!--  Mechanical Misalignment Correction mode setting -->
+    <string name="pref_camera_mechanical_misalignment_correction_default" translatable="false">true</string>
+
+    <!-- Settings screen, Mechanical Misalignment Correction title -->
+    <string name="pref_camera_mechanical_misalignment_correction_title">SMALC</string>
+
+    <!-- Settings screen, Misalignment dialog radio button choices -->
+    <string name="pref_camera_mechanical_misalignment_correction_enable">Enable</string>
+    <string name="pref_camera_mechanical_misalignment_correction_disable">Disable</string>
 
     <!--  Picture Format setting -->
     <string name="pref_camera_picture_format_default" translatable="false">jpeg</string>
