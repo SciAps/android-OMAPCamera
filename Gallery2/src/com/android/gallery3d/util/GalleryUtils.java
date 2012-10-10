@@ -35,7 +35,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.WindowManager;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 import com.android.gallery3d.app.PackagesMonitor;
 import com.android.gallery3d.data.DataManager;
 import com.android.gallery3d.data.MediaItem;
@@ -50,7 +50,7 @@ public class GalleryUtils {
     private static final String TAG = "GalleryUtils";
     private static final String MAPS_PACKAGE_NAME = "com.google.android.apps.maps";
     private static final String MAPS_CLASS_NAME = "com.google.android.maps.MapsActivity";
-    private static final String CAMERA_LAUNCHER_NAME = "com.android.camera.CameraLauncher";
+    private static final String CAMERA_LAUNCHER_NAME = "com.ti.omap.android.camera.CameraLauncher";
 
     private static final String MIME_TYPE_IMAGE = "image/*";
     private static final String MIME_TYPE_VIDEO = "video/*";

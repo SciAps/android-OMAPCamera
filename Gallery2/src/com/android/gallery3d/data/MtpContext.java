@@ -9,7 +9,7 @@ import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 import com.android.gallery3d.util.BucketNames;
 import com.android.gallery3d.util.GalleryUtils;
 

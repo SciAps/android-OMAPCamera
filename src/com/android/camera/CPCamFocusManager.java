@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.camera;
+package com.ti.omap.android.camera;
 
 import android.graphics.Matrix;
 import android.graphics.Rect;
@@ -30,9 +30,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
-import com.android.camera.ui.FaceView;
-import com.android.camera.ui.FocusIndicator;
-import com.android.camera.ui.FocusIndicatorRotateLayout;
+import com.ti.omap.android.camera.ui.FaceView;
+import com.ti.omap.android.camera.ui.FocusIndicator;
+import com.ti.omap.android.camera.ui.FocusIndicatorRotateLayout;
 
 import java.util.ArrayList;
 import java.util.List;

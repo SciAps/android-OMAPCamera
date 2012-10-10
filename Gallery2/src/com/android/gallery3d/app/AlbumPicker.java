@@ -19,7 +19,7 @@ package com.android.gallery3d.app;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 import com.android.gallery3d.data.DataManager;
 
 public class AlbumPicker extends PickerActivity {

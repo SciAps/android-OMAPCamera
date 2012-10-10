@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.camera.ui;
+package com.ti.omap.android.camera.ui;
 
 import java.util.ArrayList;
 import android.content.Context;
@@ -27,8 +27,8 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
-import com.android.camera.R;
-import com.android.camera.ListPreference;
+import com.ti.omap.android.camera.R;
+import com.ti.omap.android.camera.ListPreference;
 
 // This is an indicator button and pressing it opens a popup window. Ex: flash or other settings.
 public abstract class AbstractIndicatorButton extends RotateImageView implements

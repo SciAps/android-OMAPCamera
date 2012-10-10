@@ -35,7 +35,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 
 /**
  * The playback controller for the Movie Player.

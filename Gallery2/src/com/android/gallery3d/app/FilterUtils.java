@@ -16,7 +16,7 @@
 
 package com.android.gallery3d.app;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 import com.android.gallery3d.data.MediaObject;
 import com.android.gallery3d.data.Path;
 

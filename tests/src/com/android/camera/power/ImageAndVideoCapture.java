@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.camera.power;
+package com.ti.omap.android.camera.power;
 
-import com.android.camera.Camera;
-import com.android.camera.VideoCamera;
+import com.ti.omap.android.camera.Camera;
+import com.ti.omap.android.camera.VideoCamera;
 
 import android.app.Instrumentation;
 import android.test.ActivityInstrumentationTestCase2;
@@ -31,8 +31,8 @@ import android.content.Intent;
  * Running the test suite:
  *
  * adb shell am instrument \
- *    -e com.android.camera.power.ImageAndVideoCapture \
- *    -w com.android.camera.tests/android.test.InstrumentationTestRunner
+ *    -e com.ti.omap.android.camera.power.ImageAndVideoCapture \
+ *    -w com.ti.omap.android.camera.tests/android.test.InstrumentationTestRunner
  *
  */
 

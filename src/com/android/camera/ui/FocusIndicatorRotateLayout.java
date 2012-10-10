@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.camera.ui;
+package com.ti.omap.android.camera.ui;
 
 import android.content.Context;
 import android.util.AttributeSet;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 
 // A view that indicates the focus area or the metering area.
 public class FocusIndicatorRotateLayout extends RotateLayout implements FocusIndicator {

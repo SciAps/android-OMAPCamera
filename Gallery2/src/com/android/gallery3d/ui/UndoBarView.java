@@ -19,7 +19,7 @@ package com.android.gallery3d.ui;
 import android.content.Context;
 import android.view.MotionEvent;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 import com.android.gallery3d.common.Utils;
 import com.android.gallery3d.util.GalleryUtils;
 

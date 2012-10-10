@@ -38,7 +38,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ShareActionProvider;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 import com.android.gallery3d.common.Utils;
 
 /**

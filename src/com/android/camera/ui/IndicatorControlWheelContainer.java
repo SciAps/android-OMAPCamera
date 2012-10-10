@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.camera.ui;
+package com.ti.omap.android.camera.ui;
 
 import java.util.ArrayList;
 
@@ -24,11 +24,11 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.android.camera.CameraPreference.OnPreferenceChangedListener;
-import com.android.camera.PreferenceGroup;
-import com.android.camera.R;
-import com.android.camera.Util;
-import com.android.camera.ListPreference;
+import com.ti.omap.android.camera.CameraPreference.OnPreferenceChangedListener;
+import com.ti.omap.android.camera.PreferenceGroup;
+import com.ti.omap.android.camera.R;
+import com.ti.omap.android.camera.Util;
+import com.ti.omap.android.camera.ListPreference;
 
 /**
  * On the tablet UI, we have IndicatorControlWheelContainer which contains a

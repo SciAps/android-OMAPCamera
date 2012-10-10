@@ -1,4 +1,4 @@
-package com.android.camera;
+package com.ti.omap.android.camera;
 
 import android.graphics.Matrix;
 import android.graphics.Rect;

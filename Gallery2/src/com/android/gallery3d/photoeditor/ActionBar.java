@@ -21,7 +21,7 @@ import android.content.res.Configuration;
 import android.util.AttributeSet;
 import android.widget.ViewSwitcher;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 
 /**
  * Action bar that contains buttons such as undo, redo, save, etc.

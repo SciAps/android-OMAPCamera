@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.camera.unittest;
+package com.ti.omap.android.camera.unittest;
 
-import com.android.camera.Util;
+import com.ti.omap.android.camera.Util;
 
 import android.graphics.Matrix;
 import android.test.suitebuilder.annotation.SmallTest;

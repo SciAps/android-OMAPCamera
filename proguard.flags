@@ -10,25 +10,25 @@
 }
 
 # ctors of subclasses of CameraPreference are called with Java reflection.
--keep class * extends com.android.camera.CameraPreference {
+-keep class * extends com.ti.omap.android.camera.CameraPreference {
   <init>(...);
 }
 
--keep class com.android.camera.ActivityBase {
+-keep class com.ti.omap.android.camera.ActivityBase {
   public int getResultCode();
   public android.content.Intent getResultData();
 }
 
--keep class com.android.camera.VideoCamera {
+-keep class com.ti.omap.android.camera.VideoCamera {
   public boolean isRecording();
   public void onCancelBgTraining(...);
   public void onProtectiveCurtainClick(...);
 }
 
 -keep class * extends android.app.Activity {
-  @com.android.camera.OnClickAttr <methods>;
+  @com.ti.omap.android.camera.OnClickAttr <methods>;
 }
 
--keep class com.android.camera.CameraHolder {
+-keep class com.ti.omap.android.camera.CameraHolder {
   public static void injectMockCamera(...);
 }

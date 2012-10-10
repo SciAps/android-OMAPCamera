@@ -27,7 +27,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.View;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 import com.android.gallery3d.anim.CanvasAnimation;
 import com.android.gallery3d.common.Utils;
 import com.android.gallery3d.util.GalleryUtils;

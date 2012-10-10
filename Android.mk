@@ -12,7 +12,7 @@ LOCAL_SRC_FILES += $(call all-java-files-under, Gallery2/src_pd)
 LOCAL_SRC_FILES += $(call all-java-files-under, Gallery2/src)
 
 LOCAL_RESOURCE_DIR += $(LOCAL_PATH)/res packages/apps/OMAPCamera/Gallery2/res
-LOCAL_AAPT_FLAGS := --auto-add-overlay --extra-packages com.android.camera
+LOCAL_AAPT_FLAGS := --auto-add-overlay --extra-packages com.ti.omap.android.camera
 
 LOCAL_PACKAGE_NAME := CameraOMAP
 

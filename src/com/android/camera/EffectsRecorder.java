@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.android.camera;
+package com.ti.omap.android.camera;
 
 import android.content.Context;
 import android.filterfw.GraphEnvironment;

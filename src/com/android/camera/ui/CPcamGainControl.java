@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.camera.ui;
+package com.ti.omap.android.camera.ui;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 
 import android.content.Context;
 import android.os.Handler;

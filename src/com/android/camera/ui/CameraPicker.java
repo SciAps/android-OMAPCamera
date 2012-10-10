@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.camera.ui;
+package com.ti.omap.android.camera.ui;
 
 import android.content.Context;
 import android.hardware.Camera.CameraInfo;
 import android.view.View;
 
-import com.android.camera.CameraPreference.OnPreferenceChangedListener;
-import com.android.camera.ListPreference;
-import com.android.camera.R;
+import com.ti.omap.android.camera.CameraPreference.OnPreferenceChangedListener;
+import com.ti.omap.android.camera.ListPreference;
+import com.ti.omap.android.camera.R;
 
 /**
  * A view for switching the front/back camera.

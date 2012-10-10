@@ -22,7 +22,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 
 /**
  * Main activity of the photo editor that opens a photo and prepares tools for photo editing.

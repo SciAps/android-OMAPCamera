@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.camera;
+package com.ti.omap.android.camera;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -60,9 +60,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import com.android.camera.CameraDisabledException;
-import com.android.camera.CameraHardwareException;
-import com.android.camera.CameraHolder;
+import com.ti.omap.android.camera.CameraDisabledException;
+import com.ti.omap.android.camera.CameraHardwareException;
+import com.ti.omap.android.camera.CameraHolder;
 import com.ti.omap.android.cpcam.*;
 
 /**
@@ -74,7 +74,7 @@ public class Util {
     // Orientation hysteresis amount used in rounding, in degrees
     public static final int ORIENTATION_HYSTERESIS = 5;
 
-    public static final String REVIEW_ACTION = "com.android.camera.action.REVIEW";
+    public static final String REVIEW_ACTION = "com.ti.omap.android.camera.action.REVIEW";
 
     // Private intent extras. Test only.
     private static final String EXTRAS_CAMERA_FACING =
@@ -662,7 +662,7 @@ public class Util {
     public static void broadcastNewPicture(Context context, Uri uri) {
         context.sendBroadcast(new Intent(android.hardware.Camera.ACTION_NEW_PICTURE, uri));
         // Keep compatibility
-        context.sendBroadcast(new Intent("com.android.camera.NEW_PICTURE", uri));
+        context.sendBroadcast(new Intent("com.ti.omap.android.camera.NEW_PICTURE", uri));
     }
 
     public static void fadeIn(View view, float startAlpha, float endAlpha, long duration) {

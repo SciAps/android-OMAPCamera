@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.camera;
+package com.ti.omap.android.camera;
 
 import android.app.Activity;
 import android.content.Context;
@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import com.android.camera.ListPreference;
+import com.ti.omap.android.camera.ListPreference;
 
 
 /**

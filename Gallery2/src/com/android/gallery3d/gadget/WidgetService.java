@@ -23,7 +23,7 @@ import android.net.Uri;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 import com.android.gallery3d.app.GalleryApp;
 import com.android.gallery3d.data.ContentListener;
 import com.android.gallery3d.data.DataManager;

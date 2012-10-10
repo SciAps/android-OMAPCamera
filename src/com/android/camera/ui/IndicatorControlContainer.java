@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.camera.ui;
+package com.ti.omap.android.camera.ui;
 
 import java.util.ArrayList;
 import android.content.Context;
 import android.util.AttributeSet;
 
-import com.android.camera.PreferenceGroup;
-import com.android.camera.ListPreference;
+import com.ti.omap.android.camera.PreferenceGroup;
+import com.ti.omap.android.camera.ListPreference;
 
 public abstract class IndicatorControlContainer extends IndicatorControl
         implements OnIndicatorEventListener {

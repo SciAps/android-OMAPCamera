@@ -18,7 +18,7 @@ package com.android.gallery3d.ui;
 
 import android.content.Context;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 
 public class ProgressSpinner {
     private static float ROTATE_SPEED_OUTER = 1080f / 3500f;

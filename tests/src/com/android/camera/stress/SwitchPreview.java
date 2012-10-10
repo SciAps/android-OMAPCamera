@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.camera.stress;
+package com.ti.omap.android.camera.stress;
 
-import com.android.camera.Camera;
-import com.android.camera.VideoCamera;
+import com.ti.omap.android.camera.Camera;
+import com.ti.omap.android.camera.VideoCamera;
 
 import android.app.Instrumentation;
 import android.content.Intent;
@@ -35,8 +35,8 @@ import java.io.FileWriter;
  * Running the test suite:
  *
  * adb shell am instrument \
- *    -e class com.android.camera.stress.SwitchPreview \
- *    -w com.android.camera.tests/com.android.camera.stress.CameraStressTestRunner
+ *    -e class com.ti.omap.android.camera.stress.SwitchPreview \
+ *    -w com.ti.omap.android.camera.tests/com.ti.omap.android.camera.stress.CameraStressTestRunner
  *
  */
 public class SwitchPreview extends ActivityInstrumentationTestCase2 <VideoCamera>{

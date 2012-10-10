@@ -13,7 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<com.android.camera.ui.RotateImageView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.ti.omap.android.camera.ui.RotateImageView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/thumbnail"
         style="@style/ReviewThumbnail"
         android:onClick="onThumbnailClicked"

@@ -18,7 +18,7 @@ package com.android.gallery3d.data;
 
 import android.media.ExifInterface;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 
 import java.io.IOException;
 import java.util.HashMap;

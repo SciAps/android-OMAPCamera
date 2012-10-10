@@ -25,7 +25,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.widget.RemoteViews;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 import com.android.gallery3d.app.AlbumPicker;
 import com.android.gallery3d.app.CropImage;
 import com.android.gallery3d.app.DialogPicker;

@@ -23,7 +23,7 @@ import android.os.AsyncTask;
 import android.view.Gravity;
 import android.widget.Toast;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 
 /**
  * Asynchronous task for loading source photo screennail.

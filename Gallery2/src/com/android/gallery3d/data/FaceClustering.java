@@ -19,7 +19,7 @@ package com.android.gallery3d.data;
 import android.content.Context;
 import android.graphics.Rect;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 import com.android.gallery3d.picasasource.PicasaSource;
 
 import java.util.ArrayList;

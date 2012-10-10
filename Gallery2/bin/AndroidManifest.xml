@@ -113,7 +113,7 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-                <action android:name="com.android.camera.action.REVIEW" />
+                <action android:name="com.ti.omap.android.camera.action.REVIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="" />
@@ -129,7 +129,7 @@
                 <data android:mimeType="image/vnd.wap.wbmp" />
             </intent-filter>
             <intent-filter>
-                <action android:name="com.android.camera.action.REVIEW" />
+                <action android:name="com.ti.omap.android.camera.action.REVIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="http" />
@@ -201,7 +201,7 @@
                 android:label="@string/crop_label"
                 android:process=":crop">
             <intent-filter android:label="@string/crop_label">
-                <action android:name="com.android.camera.action.CROP" />
+                <action android:name="com.ti.omap.android.camera.action.CROP" />
                 <data android:scheme="http" />
                 <data android:scheme="https" />
                 <data android:scheme="content" />
@@ -258,8 +258,8 @@
                 android:configChanges="keyboardHidden|orientation|screenSize"
                 android:theme="@android:style/Theme.Holo.Dialog"/>
 
-        <activity android:name="com.android.camera.Camera"
-                android:taskAffinity="com.android.camera"
+        <activity android:name="com.ti.omap.android.camera.Camera"
+                android:taskAffinity="com.ti.omap.android.camera"
                 android:label="@string/camera_label"
                 android:theme="@style/ThemeCamera"
                 android:icon="@mipmap/ic_launcher_camera"
@@ -278,8 +278,8 @@
 
         <activity-alias android:icon="@mipmap/ic_launcher_camera"
                         android:label="@string/camera_label"
-                        android:name="com.android.camera.CameraLauncher"
-                        android:targetActivity="com.android.camera.Camera" >
+                        android:name="com.ti.omap.android.camera.CameraLauncher"
+                        android:targetActivity="com.ti.omap.android.camera.Camera" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -287,8 +287,8 @@
             </intent-filter>
         </activity-alias>
 
-        <activity android:name="com.android.camera.VideoCamera"
-                android:taskAffinity="com.android.camera"
+        <activity android:name="com.ti.omap.android.camera.VideoCamera"
+                android:taskAffinity="com.ti.omap.android.camera"
                 android:label="@string/video_camera_label"
                 android:theme="@style/ThemeCamera"
                 android:configChanges="orientation|screenSize|keyboardHidden"
@@ -304,16 +304,16 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name="com.android.camera.PanoramaActivity"
-                android:taskAffinity="com.android.camera"
+        <activity android:name="com.ti.omap.android.camera.PanoramaActivity"
+                android:taskAffinity="com.ti.omap.android.camera"
                 android:label="@string/pano_dialog_title"
                 android:theme="@style/ThemeCamera"
                 android:configChanges="orientation|screenSize|keyboardHidden"
                 android:clearTaskOnLaunch="true"
                 android:windowSoftInputMode="stateAlwaysHidden|adjustPan">
         </activity>
-        <activity android:name="com.android.camera.CPCam"
-                android:taskAffinity="com.android.camera"
+        <activity android:name="com.ti.omap.android.camera.CPCam"
+                android:taskAffinity="com.ti.omap.android.camera"
                 android:label="@string/cpcam_camera_label"
                 android:theme="@style/ThemeCamera"
                 android:configChanges="orientation|screenSize|keyboardHidden"
@@ -336,12 +336,12 @@
                 <data android:scheme="package"/>
             </intent-filter>
         </receiver>
-        <receiver android:name="com.android.camera.CameraButtonIntentReceiver">
+        <receiver android:name="com.ti.omap.android.camera.CameraButtonIntentReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.CAMERA_BUTTON"/>
             </intent-filter>
         </receiver>
-        <receiver android:name="com.android.camera.DisableCameraReceiver">
+        <receiver android:name="com.ti.omap.android.camera.DisableCameraReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>

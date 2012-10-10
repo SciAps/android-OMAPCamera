@@ -44,7 +44,7 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.widget.Toast;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 import com.android.gallery3d.common.BitmapUtils;
 import com.android.gallery3d.common.Utils;
 import com.android.gallery3d.data.DataManager;
@@ -80,7 +80,7 @@ import java.util.Date;
  */
 public class CropImage extends AbstractGalleryActivity {
     private static final String TAG = "CropImage";
-    public static final String ACTION_CROP = "com.android.camera.action.CROP";
+    public static final String ACTION_CROP = "com.ti.omap.android.camera.action.CROP";
 
     private static final int MAX_PIXEL_COUNT = 5 * 1000000; // 5M pixels
     private static final int MAX_FILE_INDEX = 1000;
@@ -124,7 +124,7 @@ public class CropImage extends AbstractGalleryActivity {
     public static final File DOWNLOAD_BUCKET = new File(
             Environment.getExternalStorageDirectory(), BucketNames.DOWNLOAD);
 
-    public static final String CROP_ACTION = "com.android.camera.action.CROP";
+    public static final String CROP_ACTION = "com.ti.omap.android.camera.action.CROP";
 
     private int mState = STATE_INIT;
 

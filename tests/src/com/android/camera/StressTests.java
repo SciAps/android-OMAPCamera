@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.camera;
+package com.ti.omap.android.camera;
 
-import com.android.camera.stress.ImageCapture;
-import com.android.camera.stress.SwitchPreview;
-import com.android.camera.stress.CameraLatency;
-import com.android.camera.stress.CameraStartUp;
+import com.ti.omap.android.camera.stress.ImageCapture;
+import com.ti.omap.android.camera.stress.SwitchPreview;
+import com.ti.omap.android.camera.stress.CameraLatency;
+import com.ti.omap.android.camera.stress.CameraStartUp;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -31,8 +31,8 @@ import junit.framework.TestSuite;
  * Running all tests:
  *
  * adb shell am instrument \
- *    -e class com.android.camera.StressTests \
- *    -w com.android.camera.tests/com.android.camera.stress.CameraStressTestRunner
+ *    -e class com.ti.omap.android.camera.StressTests \
+ *    -w com.ti.omap.android.camera.tests/com.ti.omap.android.camera.stress.CameraStressTestRunner
  */
 
 public class StressTests extends TestSuite {

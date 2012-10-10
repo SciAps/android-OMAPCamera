@@ -4,7 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 
 /**
  * Alert dialog builder that builds a simple Yes/Cancel dialog.

@@ -18,7 +18,7 @@ package com.android.gallery3d.data;
 
 import android.content.Context;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 
 import java.util.ArrayList;
 import java.util.Map;

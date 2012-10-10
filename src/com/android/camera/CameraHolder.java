@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.camera;
+package com.ti.omap.android.camera;
 
-import static com.android.camera.Util.Assert;
+import static com.ti.omap.android.camera.Util.Assert;
 
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Parameters;
@@ -27,8 +27,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
-import com.android.camera.CameraManager.CameraProxy;
-import com.android.camera.CPCameraManager.CPCameraProxy;
+import com.ti.omap.android.camera.CameraManager.CameraProxy;
+import com.ti.omap.android.camera.CPCameraManager.CPCameraProxy;
 
 import java.io.IOException;
 

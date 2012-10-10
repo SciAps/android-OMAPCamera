@@ -24,7 +24,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 import com.android.gallery3d.app.Gallery;
 import com.android.gallery3d.app.PhotoPage;
 

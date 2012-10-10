@@ -22,7 +22,7 @@ import android.os.Looper;
 import android.util.FloatMath;
 import android.widget.Toast;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 import com.android.gallery3d.util.GalleryUtils;
 import com.android.gallery3d.util.ReverseGeocoder;
 

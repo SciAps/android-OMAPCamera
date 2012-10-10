@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.camera.ui;
+package com.ti.omap.android.camera.ui;
 
 public interface OnIndicatorEventListener {
     public static int EVENT_ENTER_SECOND_LEVEL_INDICATOR_BAR = 0;

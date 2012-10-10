@@ -27,7 +27,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.RelativeLayout;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 
 import java.util.ArrayList;
 import java.util.List;

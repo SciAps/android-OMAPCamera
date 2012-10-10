@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.camera.ui;
+package com.ti.omap.android.camera.ui;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -25,10 +25,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.android.camera.CameraSettings;
-import com.android.camera.ListPreference;
-import com.android.camera.PreferenceGroup;
-import com.android.camera.R;
+import com.ti.omap.android.camera.CameraSettings;
+import com.ti.omap.android.camera.ListPreference;
+import com.ti.omap.android.camera.PreferenceGroup;
+import com.ti.omap.android.camera.R;
 
 import java.util.ArrayList;
 

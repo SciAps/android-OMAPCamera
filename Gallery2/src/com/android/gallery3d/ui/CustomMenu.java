@@ -25,7 +25,7 @@ import android.widget.Button;
 import android.widget.PopupMenu;
 import android.widget.PopupMenu.OnMenuItemClickListener;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 
 import java.util.ArrayList;
 

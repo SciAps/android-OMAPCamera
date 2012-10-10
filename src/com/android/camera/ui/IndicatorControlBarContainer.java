@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.camera.ui;
+package com.ti.omap.android.camera.ui;
 
 import java.util.ArrayList;
 
@@ -26,10 +26,10 @@ import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 
-import com.android.camera.CameraPreference.OnPreferenceChangedListener;
-import com.android.camera.PreferenceGroup;
-import com.android.camera.R;
-import com.android.camera.ListPreference;
+import com.ti.omap.android.camera.CameraPreference.OnPreferenceChangedListener;
+import com.ti.omap.android.camera.PreferenceGroup;
+import com.ti.omap.android.camera.R;
+import com.ti.omap.android.camera.ListPreference;
 
 /**
  * The IndicatorControlBarContainer is an IndicatorControlContainer containing

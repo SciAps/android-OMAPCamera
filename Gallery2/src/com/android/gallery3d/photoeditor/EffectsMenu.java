@@ -21,7 +21,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 
 /**
  * Effects menu that contains toggles mapping to corresponding groups of effects.

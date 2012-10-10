@@ -29,7 +29,7 @@ import android.provider.MediaStore.Images.ImageColumns;
 import android.view.Gravity;
 import android.widget.Toast;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 import com.android.gallery3d.util.BucketNames;
 
 import java.io.File;

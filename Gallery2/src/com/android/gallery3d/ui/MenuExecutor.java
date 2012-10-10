@@ -29,7 +29,7 @@ import android.os.Message;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 import com.android.gallery3d.app.CropImage;
 import com.android.gallery3d.app.GalleryActivity;
 import com.android.gallery3d.common.Utils;

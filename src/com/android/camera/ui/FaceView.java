@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.camera.ui;
+package com.ti.omap.android.camera.ui;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -26,8 +26,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 
-import com.android.camera.R;
-import com.android.camera.Util;
+import com.ti.omap.android.camera.R;
+import com.ti.omap.android.camera.Util;
 
 public class FaceView extends View implements FocusIndicator, Rotatable {
     private static final String TAG = "FaceView";

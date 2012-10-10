@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.camera;
+package com.ti.omap.android.camera;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -59,21 +59,21 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.camera.ui.CameraPicker;
-import com.android.camera.ui.FaceView;
-import com.android.camera.ui.IndicatorControlContainer;
-import com.android.camera.ui.PopupManager;
-import com.android.camera.ui.Rotatable;
-import com.android.camera.ui.RotateImageView;
-import com.android.camera.ui.RotateLayout;
-import com.android.camera.ui.RotateTextToast;
-import com.android.camera.ui.TwoStateImageView;
-import com.android.camera.ui.ZoomControl;
-import com.android.camera.CameraSettings;
-import com.android.camera.ui.ManualConvergenceSettings;
-import com.android.camera.ui.ManualGainExposureSettings;
-import com.android.camera.R;
-import com.android.camera.ui.FaceViewData;
+import com.ti.omap.android.camera.ui.CameraPicker;
+import com.ti.omap.android.camera.ui.FaceView;
+import com.ti.omap.android.camera.ui.IndicatorControlContainer;
+import com.ti.omap.android.camera.ui.PopupManager;
+import com.ti.omap.android.camera.ui.Rotatable;
+import com.ti.omap.android.camera.ui.RotateImageView;
+import com.ti.omap.android.camera.ui.RotateLayout;
+import com.ti.omap.android.camera.ui.RotateTextToast;
+import com.ti.omap.android.camera.ui.TwoStateImageView;
+import com.ti.omap.android.camera.ui.ZoomControl;
+import com.ti.omap.android.camera.CameraSettings;
+import com.ti.omap.android.camera.ui.ManualConvergenceSettings;
+import com.ti.omap.android.camera.ui.ManualGainExposureSettings;
+import com.ti.omap.android.camera.R;
+import com.ti.omap.android.camera.ui.FaceViewData;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -1979,7 +1979,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 newExtras.putBoolean("return-data", true);
             }
 
-            Intent cropIntent = new Intent("com.android.camera.action.CROP");
+            Intent cropIntent = new Intent("com.ti.omap.android.camera.action.CROP");
 
             cropIntent.setData(tempUri);
             cropIntent.putExtras(newExtras);

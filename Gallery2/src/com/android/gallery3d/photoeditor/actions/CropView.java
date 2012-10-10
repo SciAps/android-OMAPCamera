@@ -25,7 +25,7 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 
 /**
  * A view that tracks touch motions and adjusts crop bounds accordingly.

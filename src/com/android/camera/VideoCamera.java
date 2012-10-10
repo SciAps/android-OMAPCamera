@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.android.camera;
+package com.ti.omap.android.camera;
 
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -58,17 +58,17 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.camera.ActivityBase.CameraOpenThread;
-import com.android.camera.ui.CameraPicker;
-import com.android.camera.ui.IndicatorControlContainer;
-import com.android.camera.ui.IndicatorControlWheelContainer;
-import com.android.camera.ui.PopupManager;
-import com.android.camera.ui.Rotatable;
-import com.android.camera.ui.RotateImageView;
-import com.android.camera.ui.RotateLayout;
-import com.android.camera.ui.RotateTextToast;
-import com.android.camera.ui.TwoStateImageView;
-import com.android.camera.ui.ZoomControl;
+import com.ti.omap.android.camera.ActivityBase.CameraOpenThread;
+import com.ti.omap.android.camera.ui.CameraPicker;
+import com.ti.omap.android.camera.ui.IndicatorControlContainer;
+import com.ti.omap.android.camera.ui.IndicatorControlWheelContainer;
+import com.ti.omap.android.camera.ui.PopupManager;
+import com.ti.omap.android.camera.ui.Rotatable;
+import com.ti.omap.android.camera.ui.RotateImageView;
+import com.ti.omap.android.camera.ui.RotateLayout;
+import com.ti.omap.android.camera.ui.RotateTextToast;
+import com.ti.omap.android.camera.ui.TwoStateImageView;
+import com.ti.omap.android.camera.ui.ZoomControl;
 
 import java.io.File;
 import java.io.IOException;

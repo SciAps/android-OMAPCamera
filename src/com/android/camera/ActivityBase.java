@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.camera;
+package com.ti.omap.android.camera;
 
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -34,9 +34,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.DecelerateInterpolator;
 
-import com.android.camera.ui.CameraPicker;
-import com.android.camera.ui.PopupManager;
-import com.android.camera.ui.RotateImageView;
+import com.ti.omap.android.camera.ui.CameraPicker;
+import com.ti.omap.android.camera.ui.PopupManager;
+import com.ti.omap.android.camera.ui.RotateImageView;
 import com.android.gallery3d.app.AbstractGalleryActivity;
 import com.android.gallery3d.app.AppBridge;
 import com.android.gallery3d.app.GalleryActionBar;

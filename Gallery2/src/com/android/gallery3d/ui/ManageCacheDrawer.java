@@ -18,7 +18,7 @@ package com.android.gallery3d.ui;
 
 import android.content.Context;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 import com.android.gallery3d.app.GalleryActivity;
 import com.android.gallery3d.data.DataSourceType;
 import com.android.gallery3d.data.MediaSet;

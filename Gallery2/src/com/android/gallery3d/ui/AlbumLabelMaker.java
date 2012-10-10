@@ -27,7 +27,7 @@ import android.graphics.Typeface;
 import android.text.TextPaint;
 import android.text.TextUtils;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 import com.android.gallery3d.data.BitmapPool;
 import com.android.gallery3d.data.DataSourceType;
 import com.android.gallery3d.util.ThreadPool;

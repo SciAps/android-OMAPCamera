@@ -31,7 +31,7 @@ import android.widget.BaseAdapter;
 import android.widget.ShareActionProvider;
 import android.widget.TextView;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 
 import java.util.ArrayList;
 

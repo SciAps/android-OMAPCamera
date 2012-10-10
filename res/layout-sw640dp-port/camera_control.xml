@@ -13,7 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<com.android.camera.ui.ControlPanelLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.ti.omap.android.camera.ui.ControlPanelLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:minHeight="@dimen/control_panel_min_length"
@@ -25,12 +25,12 @@
 
     <include layout="@layout/review_thumbnail" />
     <include layout="@layout/review_control" />
-    <com.android.camera.ui.IndicatorControlWheelContainer android:id="@+id/indicator_control"
+    <com.ti.omap.android.camera.ui.IndicatorControlWheelContainer android:id="@+id/indicator_control"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_alignParentBottom="true">
-        <com.android.camera.ShutterButton android:id="@+id/shutter_button"
+        <com.ti.omap.android.camera.ShutterButton android:id="@+id/shutter_button"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:scaleType="center"
@@ -38,15 +38,15 @@
                 android:focusable="true"
                 android:contentDescription="@string/accessibility_shutter_button"
                 android:background="@drawable/btn_shutter" />
-        <com.android.camera.ui.IndicatorControlWheel android:id="@+id/indicator_control_wheel"
+        <com.ti.omap.android.camera.ui.IndicatorControlWheel android:id="@+id/indicator_control_wheel"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
-            <com.android.camera.ui.ZoomControlWheel
+            <com.ti.omap.android.camera.ui.ZoomControlWheel
                     android:id="@+id/zoom_control"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:visibility="gone" />
-        </com.android.camera.ui.IndicatorControlWheel>
-    </com.android.camera.ui.IndicatorControlWheelContainer>
+        </com.ti.omap.android.camera.ui.IndicatorControlWheel>
+    </com.ti.omap.android.camera.ui.IndicatorControlWheelContainer>
     <include layout="@layout/mode_picker" />
-</com.android.camera.ui.ControlPanelLayout>
+</com.ti.omap.android.camera.ui.ControlPanelLayout>

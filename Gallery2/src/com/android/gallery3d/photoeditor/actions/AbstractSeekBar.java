@@ -25,7 +25,7 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.SeekBar;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 
 /**
  * Seek-bar base that implements a draggable thumb that fits seek-bar's track height.

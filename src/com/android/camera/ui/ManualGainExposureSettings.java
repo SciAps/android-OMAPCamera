@@ -1,7 +1,7 @@
-package com.android.camera.ui;
+package com.ti.omap.android.camera.ui;
 
-import com.android.camera.R;
-import com.android.camera.Camera;
+import com.ti.omap.android.camera.R;
+import com.ti.omap.android.camera.Camera;
 
 import android.app.Dialog;
 import android.opengl.Visibility;

@@ -24,7 +24,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 import com.android.gallery3d.photoeditor.FilterStack;
 import com.android.gallery3d.photoeditor.OnDoneCallback;
 import com.android.gallery3d.photoeditor.filters.Filter;

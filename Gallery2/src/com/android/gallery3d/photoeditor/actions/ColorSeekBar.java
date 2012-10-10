@@ -26,7 +26,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.util.AttributeSet;
 import android.widget.SeekBar;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 
 /**
  * Seek-bar that has a draggable thumb to set and get the color from predefined color set.

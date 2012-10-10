@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.camera;
+package com.ti.omap.android.camera;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -31,7 +31,7 @@ public class DisableCameraReceiver extends BroadcastReceiver {
     private static final String TAG = "DisableCameraReceiver";
     private static final boolean CHECK_BACK_CAMERA_ONLY = true;
     private static final String ACTIVITIES[] = {
-        "com.android.camera.CameraLauncher",
+        "com.ti.omap.android.camera.CameraLauncher",
     };
 
     @Override
@@ -49,7 +49,7 @@ public class DisableCameraReceiver extends BroadcastReceiver {
         }
 
         // Disable this receiver so it won't run again.
-        disableComponent(context, "com.android.camera.DisableCameraReceiver");
+        disableComponent(context, "com.ti.omap.android.camera.DisableCameraReceiver");
     }
 
     private boolean hasCamera() {

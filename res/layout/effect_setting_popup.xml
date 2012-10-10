@@ -13,7 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<com.android.camera.ui.EffectSettingPopup xmlns:android="http://schemas.android.com/apk/res/android"
+<com.ti.omap.android.camera.ui.EffectSettingPopup xmlns:android="http://schemas.android.com/apk/res/android"
         style="@style/SettingPopupWindow">
     <LinearLayout android:orientation="vertical"
             android:background="@color/popup_background"
@@ -47,7 +47,7 @@
                 <View android:id="@+id/effect_silly_faces_title_separator"
                         android:visibility="gone"
                         style="@style/EffectTypeSeparator"/>
-                <com.android.camera.ui.ExpandedGridView android:id="@+id/effect_silly_faces"
+                <com.ti.omap.android.camera.ui.ExpandedGridView android:id="@+id/effect_silly_faces"
                         style="@style/EffectSettingGrid"/>
                 <View android:id="@+id/effect_background_separator"
                         android:visibility="gone"
@@ -59,10 +59,10 @@
                 <View android:id="@+id/effect_background_title_separator"
                         android:visibility="gone"
                         style="@style/EffectTypeSeparator"/>
-                <com.android.camera.ui.ExpandedGridView android:id="@+id/effect_background"
+                <com.ti.omap.android.camera.ui.ExpandedGridView android:id="@+id/effect_background"
                         android:visibility="gone"
                         style="@style/EffectSettingGrid"/>
             </LinearLayout>
         </ScrollView>
     </LinearLayout>
-</com.android.camera.ui.EffectSettingPopup>
+</com.ti.omap.android.camera.ui.EffectSettingPopup>

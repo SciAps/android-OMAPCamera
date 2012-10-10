@@ -33,7 +33,7 @@ import android.widget.PopupMenu.OnMenuItemClickListener;
 import android.widget.ShareActionProvider;
 import android.widget.ShareActionProvider.OnShareTargetSelectedListener;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 import com.android.gallery3d.app.GalleryActionBar;
 import com.android.gallery3d.app.GalleryActivity;
 import com.android.gallery3d.common.Utils;

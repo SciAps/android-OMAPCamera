@@ -24,7 +24,7 @@ import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ProgressBar;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 
 import java.util.ArrayList;
 import java.util.List;

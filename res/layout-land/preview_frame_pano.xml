@@ -27,7 +27,7 @@
         <FrameLayout style="@style/PanoViewHorizontalBar"
                 android:padding="5dp">
 
-            <com.android.camera.ui.RotateLayout
+            <com.ti.omap.android.camera.ui.RotateLayout
                     android:id="@+id/pano_capture_indicator"
                     android:visibility="gone"
                     android:layout_gravity="top|left"
@@ -42,7 +42,7 @@
                         android:layout_marginTop="16dp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
-            </com.android.camera.ui.RotateLayout>
+            </com.ti.omap.android.camera.ui.RotateLayout>
         </FrameLayout>
 
         <View android:id="@+id/pano_preview_area"
@@ -56,18 +56,18 @@
         <!-- The bottom bar with progress bar and direction indicators -->
         <RelativeLayout style="@style/PanoViewHorizontalBar">
 
-            <com.android.camera.ui.RotateLayout
+            <com.ti.omap.android.camera.ui.RotateLayout
                     android:id="@+id/pano_pan_progress_bar_layout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true">
-                <com.android.camera.PanoProgressBar
+                <com.ti.omap.android.camera.PanoProgressBar
                         android:id="@+id/pano_pan_progress_bar"
                         android:visibility="gone"
                         android:src="@drawable/ic_pan_progression"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
-            </com.android.camera.ui.RotateLayout>
+            </com.ti.omap.android.camera.ui.RotateLayout>
             <ImageView
                     android:id="@+id/pano_pan_left_indicator"
                     android:src="@drawable/pano_direction_left_indicator"
@@ -92,7 +92,7 @@
     </LinearLayout>
 
     <!-- The hint for "Too fast" text view -->
-    <com.android.camera.ui.RotateLayout
+    <com.ti.omap.android.camera.ui.RotateLayout
             android:id="@+id/pano_capture_too_fast_textview_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -103,5 +103,5 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone" />
-    </com.android.camera.ui.RotateLayout>
+    </com.ti.omap.android.camera.ui.RotateLayout>
 </RelativeLayout>
