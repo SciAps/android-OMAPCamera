@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.camera.ui;
+package com.ti.omap.android.camera.ui;
 
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
-import com.android.camera.CameraSettings;
-import com.android.camera.IconListPreference;
-import com.android.camera.R;
+import com.ti.omap.android.camera.CameraSettings;
+import com.ti.omap.android.camera.IconListPreference;
+import com.ti.omap.android.camera.R;
 
 // An indicator button that represents one camera setting. Ex: flash. Pressing it opens a popup
 // window.

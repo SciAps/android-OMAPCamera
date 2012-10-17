@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.camera;
+package com.ti.omap.android.camera;
 
-import static com.android.camera.Util.Assert;
+import static com.ti.omap.android.camera.Util.Assert;
 
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Parameters;
@@ -27,7 +27,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
-import com.android.camera.CameraManager.CameraProxy;
+import com.ti.omap.android.camera.CameraManager.CameraProxy;
+import com.ti.omap.android.camera.CPCameraManager.CPCameraProxy;
 
 import java.io.IOException;
 
@@ -57,6 +58,10 @@ public class CameraHolder {
     private final CameraInfo[] mInfo;
     private static CameraProxy mMockCamera[];
     private static CameraInfo mMockCameraInfo[];
+    private CPCameraProxy mCPcamDevice;
+    private int mUsers = 0;  // number of open() - number of release()
+
+    private com.ti.omap.android.cpcam.CPCam.Parameters mParametersCPCam;
 
     // We store the camera parameters when we actually open the device,
     // so we can restore them in the subsequent open() requests by the user.
@@ -195,16 +200,9 @@ public class CameraHolder {
     public synchronized void release() {
         Assert(mCameraDevice != null);
 
-        long now = System.currentTimeMillis();
-        if (now < mKeepBeforeTime) {
-            if (mCameraOpened) {
-                mCameraOpened = false;
-                mCameraDevice.stopPreview();
-            }
-            mHandler.sendEmptyMessageDelayed(RELEASE_CAMERA,
-                    mKeepBeforeTime - now);
-            return;
-        }
+        /* This delay is removed, due to holding the instance too much.It's critical
+        for management CPCam and Camera instances
+         */
         mCameraOpened = false;
         mCameraDevice.release();
         mCameraDevice = null;
@@ -229,5 +227,69 @@ public class CameraHolder {
 
     public int getFrontCameraId() {
         return mFrontCameraId;
+    }
+
+    //CPCam related methods
+    public synchronized CPCameraProxy openCPCamera(int cameraId)
+            throws CameraHardwareException {
+        Assert(mUsers == 0);
+        if (mCPcamDevice != null && mCameraId != cameraId) {
+            mCPcamDevice.release();
+            mCPcamDevice = null;
+            mCameraId = -1;
+        }
+        if (mCPcamDevice == null) {
+            try {
+                Log.v(TAG, "open CPCamera " + cameraId);
+                mCPcamDevice = CPCameraManager.instance().cameraOpen(cameraId);
+                mCameraId = cameraId;
+            } catch (RuntimeException e) {
+                Log.e(TAG, "fail to connect CPCamera", e);
+                throw new CameraHardwareException(e);
+            }
+            mParametersCPCam = mCPcamDevice.getParameters();
+        } else {
+            try {
+                mCPcamDevice.reconnect();
+            } catch (IOException e) {
+                Log.e(TAG, "reconnect to CPCamera failed.");
+                throw new CameraHardwareException(e);
+            }
+            mCPcamDevice.setParameters(mParametersCPCam);
+        }
+        ++mUsers;
+        mHandler.removeMessages(RELEASE_CAMERA);
+        mKeepBeforeTime = 0;
+        return mCPcamDevice;
+    }
+
+    public synchronized CPCameraProxy tryOpenCPCamera(int cameraId) {
+        try {
+            return mUsers == 0 ? openCPCamera(cameraId) : null;
+        } catch (CameraHardwareException e) {
+            // In eng build, we throw the exception so that test tool
+            // can detect it and report it
+            if ("eng".equals(Build.TYPE)) {
+                throw new RuntimeException(e);
+            }
+            return null;
+        }
+    }
+    public synchronized void CPCamInstanceRelease() {
+        Assert(mUsers == 1);
+        --mUsers;
+        mCPcamDevice.stopPreview();
+        releaseCPCamera();
+    }
+
+    private synchronized void releaseCPCamera() {
+        Assert(mUsers == 0);
+        Assert(mCPcamDevice != null);
+        mCPcamDevice.release();
+        mCPcamDevice = null;
+        // We must set this to null because it has a reference to Camera.
+        // Camera has references to the listeners.
+        mParametersCPCam = null;
+        mCameraId = -1;
     }
 }

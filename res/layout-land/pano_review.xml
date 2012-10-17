@@ -32,7 +32,7 @@
             android:layout_height="@dimen/pano_mosaic_surface_height" />
 
     <RelativeLayout style="@style/PanoViewHorizontalBar">
-        <com.android.camera.ui.RotateLayout
+        <com.ti.omap.android.camera.ui.RotateLayout
                 android:id="@+id/pano_review_saving_indication_layout"
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
@@ -43,22 +43,22 @@
                     android:textAppearance="?android:textAppearanceMedium"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content" />
-        </com.android.camera.ui.RotateLayout>
+        </com.ti.omap.android.camera.ui.RotateLayout>
 
-        <com.android.camera.ui.RotateLayout
+        <com.ti.omap.android.camera.ui.RotateLayout
                 android:id="@+id/pano_saving_progress_bar_layout"
                 android:layout_centerInParent="true"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content">
-            <com.android.camera.PanoProgressBar
+            <com.ti.omap.android.camera.PanoProgressBar
                     android:id="@+id/pano_saving_progress_bar"
                     android:src="@drawable/ic_pan_progression"
                     android:layout_centerInParent="true"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content" />
-        </com.android.camera.ui.RotateLayout>
+        </com.ti.omap.android.camera.ui.RotateLayout>
 
-        <com.android.camera.ui.RotateLayout
+        <com.ti.omap.android.camera.ui.RotateLayout
                 android:id="@+id/pano_review_cancel_button_layout"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
@@ -74,6 +74,6 @@
                     android:minWidth="@dimen/pano_review_button_width"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent" />
-        </com.android.camera.ui.RotateLayout>
+        </com.ti.omap.android.camera.ui.RotateLayout>
     </RelativeLayout>
 </LinearLayout>

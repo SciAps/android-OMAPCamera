@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.camera.activity;
+package com.ti.omap.android.camera.activity;
 
 import android.hardware.Camera.Parameters;
 import android.test.suitebuilder.annotation.LargeTest;
 
-import com.android.camera.Camera;
-import com.android.camera.CameraHolder;
-import com.android.camera.R;
+import com.ti.omap.android.camera.Camera;
+import com.ti.omap.android.camera.CameraHolder;
+import com.ti.omap.android.camera.R;
 
 import static com.google.testing.littlemock.LittleMock.doReturn;
 

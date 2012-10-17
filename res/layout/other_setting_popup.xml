@@ -13,7 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<com.android.camera.ui.OtherSettingsPopup xmlns:android="http://schemas.android.com/apk/res/android"
+<com.ti.omap.android.camera.ui.OtherSettingsPopup xmlns:android="http://schemas.android.com/apk/res/android"
         style="@style/SettingPopupWindow">
 
     <LinearLayout android:orientation="vertical"
@@ -38,4 +38,4 @@
                     style="@style/SettingItemList" />
         </FrameLayout>
     </LinearLayout>
-</com.android.camera.ui.OtherSettingsPopup>
+</com.ti.omap.android.camera.ui.OtherSettingsPopup>

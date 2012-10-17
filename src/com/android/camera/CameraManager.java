@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.camera;
+package com.ti.omap.android.camera;
 
-import static com.android.camera.Util.Assert;
+import static com.ti.omap.android.camera.Util.Assert;
 
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera.AutoFocusCallback;

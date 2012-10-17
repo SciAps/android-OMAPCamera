@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.camera.ui;
+package com.ti.omap.android.camera.ui;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -22,8 +22,8 @@ import android.view.accessibility.AccessibilityEvent;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.android.camera.ListPreference;
-import com.android.camera.R;
+import com.ti.omap.android.camera.ListPreference;
+import com.ti.omap.android.camera.R;
 
 /**
  * A one-line camera setting could be one of three types: knob, switch or restore
@@ -77,7 +77,10 @@ public abstract class InLineSettingItem extends LinearLayout {
 
     // The value of the preference may have changed. Update the UI.
     public void reloadPreference() {
-        mIndex = mPreference.findIndexOfValue(mPreference.getValue());
+        if (mPreference != null) {
+            mIndex = mPreference.findIndexOfValue(mPreference.getValue());
+
+        }
         updateView();
     }
 

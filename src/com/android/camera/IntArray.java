@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.camera;
+package com.ti.omap.android.camera;
 
 public class IntArray {
     private static final int INIT_CAPACITY = 8;

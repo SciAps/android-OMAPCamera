@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.camera.ui;
+package com.ti.omap.android.camera.ui;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -22,10 +22,10 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.android.camera.IconListPreference;
-import com.android.camera.PreferenceGroup;
-import com.android.camera.R;
-import com.android.camera.Util;
+import com.ti.omap.android.camera.IconListPreference;
+import com.ti.omap.android.camera.PreferenceGroup;
+import com.ti.omap.android.camera.R;
+import com.ti.omap.android.camera.Util;
 
 /**
  * A view that contains camera setting indicators which are spread over a

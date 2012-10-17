@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.camera.stress;
+package com.ti.omap.android.camera.stress;
 
-import com.android.camera.Camera;
-import com.android.camera.VideoCamera;
+import com.ti.omap.android.camera.Camera;
+import com.ti.omap.android.camera.VideoCamera;
 
 import android.app.Activity;
 import android.app.Instrumentation;

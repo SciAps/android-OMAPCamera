@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.camera.activity;
+package com.ti.omap.android.camera.activity;
 
 import android.app.Activity;
 import android.app.Instrumentation;
@@ -29,10 +29,10 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.android.camera.CameraHolder;
-import com.android.camera.CameraManager.CameraProxy;
-import com.android.camera.R;
-import com.android.camera.Util;
+import com.ti.omap.android.camera.CameraHolder;
+import com.ti.omap.android.camera.CameraManager.CameraProxy;
+import com.ti.omap.android.camera.R;
+import com.ti.omap.android.camera.Util;
 
 import static com.google.testing.littlemock.LittleMock.mock;
 import static com.google.testing.littlemock.LittleMock.doAnswer;

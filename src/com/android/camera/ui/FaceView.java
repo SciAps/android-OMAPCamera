@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.camera.ui;
+package com.ti.omap.android.camera.ui;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -26,8 +26,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 
-import com.android.camera.R;
-import com.android.camera.Util;
+import com.ti.omap.android.camera.R;
+import com.ti.omap.android.camera.Util;
 
 public class FaceView extends View implements FocusIndicator, Rotatable {
     private static final String TAG = "FaceView";
@@ -42,7 +42,7 @@ public class FaceView extends View implements FocusIndicator, Rotatable {
     private boolean mPause;
     private Matrix mMatrix = new Matrix();
     private RectF mRect = new RectF();
-    private Face[] mFaces;
+    private FaceViewData[] mFaces;
     private Drawable mFaceIndicator;
     private final Drawable mDrawableFocusing;
     private final Drawable mDrawableFocused;
@@ -56,7 +56,7 @@ public class FaceView extends View implements FocusIndicator, Rotatable {
         mFaceIndicator = mDrawableFocusing;
     }
 
-    public void setFaces(Face[] faces) {
+    public void setFaces(FaceViewData[] faces) {
         if (LOGV) Log.v(TAG, "Num of faces=" + faces.length);
         if (mPause) return;
         mFaces = faces;

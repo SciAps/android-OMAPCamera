@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.camera;
+package com.ti.omap.android.camera;
 
 import android.test.InstrumentationTestRunner;
 import android.test.InstrumentationTestSuite;
 
-import com.android.camera.activity.CameraActivityTest;
-import com.android.camera.activity.PanoramaActivityTest;
-import com.android.camera.activity.VideoCameraActivityTest;
-import com.android.camera.functional.CameraTest;
-import com.android.camera.functional.ImageCaptureIntentTest;
-import com.android.camera.functional.VideoCaptureIntentTest;
-import com.android.camera.unittest.CameraUnitTest;
+import com.ti.omap.android.camera.activity.CameraActivityTest;
+import com.ti.omap.android.camera.activity.PanoramaActivityTest;
+import com.ti.omap.android.camera.activity.VideoCameraActivityTest;
+import com.ti.omap.android.camera.functional.CameraTest;
+import com.ti.omap.android.camera.functional.ImageCaptureIntentTest;
+import com.ti.omap.android.camera.functional.VideoCaptureIntentTest;
+import com.ti.omap.android.camera.unittest.CameraUnitTest;
 
 import junit.framework.TestSuite;
 

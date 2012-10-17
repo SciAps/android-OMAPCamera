@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.camera;
+package com.ti.omap.android.camera;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -45,7 +45,8 @@ public class PreviewFrameLayout extends RelativeLayout {
         mBorder = findViewById(R.id.preview_border);
     }
 
-    public void setAspectRatio(double ratio) {
+    /** Return true if Aspect ratio changed */
+    public boolean setAspectRatio(double ratio) {
         if (ratio <= 0.0) throw new IllegalArgumentException();
 
         if (getResources().getConfiguration().orientation
@@ -56,7 +57,9 @@ public class PreviewFrameLayout extends RelativeLayout {
         if (mAspectRatio != ratio) {
             mAspectRatio = ratio;
             requestLayout();
+            return true;
         }
+        return false;
     }
 
     public void showBorder(boolean enabled) {

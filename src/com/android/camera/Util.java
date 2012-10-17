@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.camera;
+package com.ti.omap.android.camera;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -55,9 +55,15 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.StringTokenizer;
+
+import com.ti.omap.android.camera.CameraDisabledException;
+import com.ti.omap.android.camera.CameraHardwareException;
+import com.ti.omap.android.camera.CameraHolder;
+import com.ti.omap.android.cpcam.*;
 
 /**
  * Collection of utility functions used in this package.
@@ -68,19 +74,25 @@ public class Util {
     // Orientation hysteresis amount used in rounding, in degrees
     public static final int ORIENTATION_HYSTERESIS = 5;
 
-    public static final String REVIEW_ACTION = "com.android.camera.action.REVIEW";
+    public static final String REVIEW_ACTION = "com.ti.omap.android.camera.action.REVIEW";
 
     // Private intent extras. Test only.
     private static final String EXTRAS_CAMERA_FACING =
             "android.intent.extras.CAMERA_FACING";
 
+    private static boolean sIsTabletUI;
+    private static boolean sIsPortraitDevice;
     private static float sPixelDensity = 1;
     private static ImageFileNamer sImageFileNamer;
+
+    private static final String CPCAM_CLASS_NAME = "com.ti.omap.android.cpcam.CPCam";
 
     private Util() {
     }
 
     public static void initialize(Context context) {
+        sIsTabletUI = (context.getResources().getConfiguration().smallestScreenWidthDp >= 600);
+        sIsPortraitDevice = (context.getResources().getConfiguration().screenWidthDp < context.getResources().getConfiguration().screenHeightDp);
         DisplayMetrics metrics = new DisplayMetrics();
         WindowManager wm = (WindowManager)
                 context.getSystemService(Context.WINDOW_SERVICE);
@@ -90,8 +102,24 @@ public class Util {
                 context.getString(R.string.image_file_name_format));
     }
 
+    public static boolean isTabletUI() {
+        return sIsTabletUI;
+    }
+
     public static int dpToPixel(int dp) {
         return Math.round(sPixelDensity * dp);
+    }
+
+    public static boolean isCPCamLibraryPresent() {
+        boolean ret = true;
+        // Check if CPCam library is present
+        try {
+            Class.forName(CPCAM_CLASS_NAME);
+        } catch (ClassNotFoundException e) {
+            ret = false;
+        }
+
+        return ret;
     }
 
     // Rotates the bitmap by the specified degree.
@@ -136,6 +164,54 @@ public class Util {
             }
         }
         return b;
+    }
+
+    public static ArrayList<int[]> parseRange(String str) {
+        if ( ( str == null ) ||
+             ( str.charAt(0) != '(' ) ||
+             ( str.charAt(str.length() - 1) != ')') ) {
+            return null;
+        }
+
+        String token = "),(";
+        int start = 1;
+        int end = 1;
+        ArrayList<int[]> rangeList = new ArrayList<int[]>();
+        do {
+            int[] range = new int[2];
+            end = str.indexOf(token, start);
+            if (end == -1) {
+                end = str.length() - 1;
+            }
+            if ( !parsePair(str.substring(start, end), range) ) {
+                break;
+            }
+
+            rangeList.add(range);
+            start = end + token.length();
+        } while (end != str.length() - 1);
+
+        return rangeList;
+    }
+
+    private static boolean parsePair(String str, int[] pair) {
+        if (str == null) {
+            return false;
+        }
+
+        StringTokenizer tokenizer = new StringTokenizer(str, ",");
+        if ( !tokenizer.hasMoreElements() ) {
+            return false;
+        }
+
+        int i = 0;
+        do {
+            String token = tokenizer.nextToken();
+            pair[i] = Integer.parseInt(token);
+            i++;
+        } while (tokenizer.hasMoreElements() && ( i < pair.length ) );
+
+        return i == pair.length;
     }
 
     /*
@@ -586,7 +662,7 @@ public class Util {
     public static void broadcastNewPicture(Context context, Uri uri) {
         context.sendBroadcast(new Intent(android.hardware.Camera.ACTION_NEW_PICTURE, uri));
         // Keep compatibility
-        context.sendBroadcast(new Intent("com.android.camera.NEW_PICTURE", uri));
+        context.sendBroadcast(new Intent("com.ti.omap.android.camera.NEW_PICTURE", uri));
     }
 
     public static void fadeIn(View view, float startAlpha, float endAlpha, long duration) {
@@ -698,6 +774,90 @@ public class Util {
             }
 
             return result;
+        }
+    }
+
+    //CPCam related methods
+    public static CPCameraManager.CPCameraProxy openCPCamera(Activity activity, int cameraId)
+            throws CameraHardwareException, CameraDisabledException {
+        // Check if device policy has disabled the camera.
+        DevicePolicyManager dpm = (DevicePolicyManager) activity.getSystemService(
+                Context.DEVICE_POLICY_SERVICE);
+        if (dpm.getCameraDisabled(null)) {
+            throw new CameraDisabledException();
+        }
+
+        try {
+            return CameraHolder.instance().openCPCamera(cameraId);
+        } catch (CameraHardwareException e) {
+            // In eng build, we throw the exception so that test tool
+            // can detect it and report it
+            if ("eng".equals(Build.TYPE)) {
+                throw new RuntimeException("openCamera failed", e);
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    public static void setRotationParameterCPCam(com.ti.omap.android.cpcam.CPCam.Parameters parameters,
+            int cameraId, int orientation) {
+        // See android.hardware.Camera.Parameters.setRotation for
+        // documentation.
+        int rotation = 0;
+        CameraInfo info = CameraHolder.instance().getCameraInfo()[cameraId];
+        if (orientation != OrientationEventListener.ORIENTATION_UNKNOWN) {
+            if (info.facing == CameraInfo.CAMERA_FACING_FRONT) {
+                rotation = (info.orientation - orientation + 360) % 360;
+            } else {  // back-facing camera
+                rotation = (info.orientation + orientation) % 360;
+            }
+        } else {
+            //If it hits this case, it means the the first orientaion
+            // itself is not aquired yet. So just set the sensor mount
+            // orientation.
+            rotation = info.orientation;
+        }
+
+        parameters.setRotation(rotation);
+    }
+
+    public static void setGpsParametersCPCam(com.ti.omap.android.cpcam.CPCam.Parameters parameters,
+            Location loc) {
+        // Clear previous GPS location from the parameters.
+        parameters.removeGpsData();
+
+        // We always encode GpsTimeStamp
+        parameters.setGpsTimestamp(System.currentTimeMillis() / 1000);
+
+        // Set GPS location.
+        if (loc != null) {
+            double lat = loc.getLatitude();
+            double lon = loc.getLongitude();
+            boolean hasLatLon = (lat != 0.0d) || (lon != 0.0d);
+
+            if (hasLatLon) {
+                Log.d(TAG, "Set gps location");
+                parameters.setGpsLatitude(lat);
+                parameters.setGpsLongitude(lon);
+                parameters.setGpsProcessingMethod(loc.getProvider().toUpperCase());
+                if (loc.hasAltitude()) {
+                    parameters.setGpsAltitude(loc.getAltitude());
+                } else {
+                    // for NETWORK_PROVIDER location provider, we may have
+                    // no altitude information, but the driver needs it, so
+                    // we fake one.
+                    parameters.setGpsAltitude(0);
+                }
+                if (loc.getTime() != 0) {
+                    // Location.getTime() is UTC in milliseconds.
+                    // gps-timestamp is UTC in seconds.
+                    long utcTimeSeconds = loc.getTime() / 1000;
+                    parameters.setGpsTimestamp(utcTimeSeconds);
+                }
+            } else {
+                loc = null;
+            }
         }
     }
 }

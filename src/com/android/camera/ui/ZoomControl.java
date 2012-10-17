@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.camera.ui;
+package com.ti.omap.android.camera.ui;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -22,7 +22,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
-import com.android.camera.R;
+import com.ti.omap.android.camera.R;
 
 /**
  * A view that contains camera zoom control which could adjust the zoom ratio

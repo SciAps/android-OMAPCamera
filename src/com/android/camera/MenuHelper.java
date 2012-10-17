@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.camera;
+package com.ti.omap.android.camera;
+
+import com.ti.omap.android.camera.ModePicker;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
@@ -36,9 +38,10 @@ public class MenuHelper {
     private static final int INCLUDE_IMAGES = (1 << 0);
     private static final int INCLUDE_VIDEOS = (1 << 2);
 
-    private static final String CAMERA_CLASS = "com.android.camera.Camera";
-    private static final String PANORAMA_CLASS = "com.android.camera.PanoramaActivity";
-    private static final String VIDEO_CAMERA_CLASS = "com.android.camera.VideoCamera";
+    private static final String CAMERA_CLASS = "com.ti.omap.android.camera.Camera";
+    private static final String PANORAMA_CLASS = "com.ti.omap.android.camera.PanoramaActivity";
+    private static final String VIDEO_CAMERA_CLASS = "com.ti.omap.android.camera.VideoCamera";
+    private static final String CPCAM_CLASS = "com.ti.omap.android.camera.CPCam";
 
     private static void startCameraActivity(Activity activity, Intent intent,
             String className) {
@@ -73,6 +76,10 @@ public class MenuHelper {
             case ModePicker.MODE_CAMERA:
                 action = MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA;
                 className = CAMERA_CLASS;
+                break;
+            case ModePicker.MODE_CPCAM:
+                action = CPCAM_CLASS;
+                className = CPCAM_CLASS;
                 break;
             default:
                 Log.e(TAG, "unknown camera mode:" + mode);

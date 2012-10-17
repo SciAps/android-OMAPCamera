@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.camera.ui;
+package com.ti.omap.android.camera.ui;
 
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
-import com.android.camera.ListPreference;
-import com.android.camera.R;
+import com.ti.omap.android.camera.ListPreference;
+import com.ti.omap.android.camera.R;
 
 /* A restore setting is simply showing the restore title. */
 public class InLineSettingRestore extends InLineSettingItem {

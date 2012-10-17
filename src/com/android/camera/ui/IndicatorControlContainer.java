@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.camera.ui;
+package com.ti.omap.android.camera.ui;
 
+import java.util.ArrayList;
 import android.content.Context;
 import android.util.AttributeSet;
 
-import com.android.camera.PreferenceGroup;
+import com.ti.omap.android.camera.PreferenceGroup;
+import com.ti.omap.android.camera.ListPreference;
 
 public abstract class IndicatorControlContainer extends IndicatorControl
         implements OnIndicatorEventListener {
     public abstract void initialize(Context context, PreferenceGroup group,
-            boolean isZoomSupported, String[] keys, String[] otherSettingKeys);
+            boolean isZoomSupported, boolean isCPcamSlidersSupported,
+            String[] keys, String[] otherSettingKeys);
 
     public IndicatorControlContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -41,4 +44,9 @@ public abstract class IndicatorControlContainer extends IndicatorControl
 
     public void stopTimeLapseAnimation() {
     }
+
+    public abstract void showCPCamSliders(boolean enabled);
+
+    public void replace(String key, ListPreference pref, ArrayList<CharSequence[]> allEntries, ArrayList<CharSequence[]> allEntryValues){ }
+
 }

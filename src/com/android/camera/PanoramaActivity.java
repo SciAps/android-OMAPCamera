@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.camera;
+package com.ti.omap.android.camera;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -51,10 +51,10 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.android.camera.ui.PopupManager;
-import com.android.camera.ui.Rotatable;
-import com.android.camera.ui.RotateImageView;
-import com.android.camera.ui.RotateLayout;
+import com.ti.omap.android.camera.ui.PopupManager;
+import com.ti.omap.android.camera.ui.Rotatable;
+import com.ti.omap.android.camera.ui.RotateImageView;
+import com.ti.omap.android.camera.ui.RotateLayout;
 import com.android.gallery3d.ui.GLRootView;
 
 import java.io.ByteArrayOutputStream;

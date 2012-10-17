@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.camera.functional;
+package com.ti.omap.android.camera.functional;
 
-import com.android.camera.Camera;
-import com.android.camera.VideoCamera;
+import com.ti.omap.android.camera.Camera;
+import com.ti.omap.android.camera.VideoCamera;
 
 import android.app.Activity;
 import android.content.Intent;

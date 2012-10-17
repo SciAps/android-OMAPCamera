@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.camera.ui;
+package com.ti.omap.android.camera.ui;
 
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.RelativeLayout;
 
-import com.android.camera.CameraPreference.OnPreferenceChangedListener;
-import com.android.camera.CameraSettings;
-import com.android.camera.IconListPreference;
-import com.android.camera.ListPreference;
-import com.android.camera.PreferenceGroup;
-import com.android.camera.R;
+import com.ti.omap.android.camera.CameraPreference.OnPreferenceChangedListener;
+import com.ti.omap.android.camera.CameraSettings;
+import com.ti.omap.android.camera.IconListPreference;
+import com.ti.omap.android.camera.ListPreference;
+import com.ti.omap.android.camera.PreferenceGroup;
+import com.ti.omap.android.camera.R;
+import com.ti.omap.android.camera.ui.AbstractIndicatorButton;
 
 import java.util.ArrayList;
 
@@ -242,6 +243,16 @@ public abstract class IndicatorControl extends RelativeLayout implements
             View v = getChildAt(i);
             if (v instanceof TwoStateImageView) {
                 ((TwoStateImageView) v).enableFilter(enabled);
+            }
+        }
+    }
+
+    public void replace(String key, ListPreference pref, ArrayList<CharSequence[]> allEntries,
+            ArrayList<CharSequence[]> allEntryValues){
+        for (AbstractIndicatorButton btn : mIndicators) {
+            if (btn.findPref(key)) {
+                btn.replace(key, pref, allEntries, allEntryValues);
+                return;
             }
         }
     }

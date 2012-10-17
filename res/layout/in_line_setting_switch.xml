@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 
-<com.android.camera.ui.InLineSettingSwitch xmlns:android="http://schemas.android.com/apk/res/android"
+<com.ti.omap.android.camera.ui.InLineSettingSwitch xmlns:android="http://schemas.android.com/apk/res/android"
         style="@style/SettingRow">
     <TextView android:id="@+id/title"
             style="@style/SettingItemTitle" />
@@ -28,4 +28,4 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent" />
     </FrameLayout>
-</com.android.camera.ui.InLineSettingSwitch>
+</com.ti.omap.android.camera.ui.InLineSettingSwitch>

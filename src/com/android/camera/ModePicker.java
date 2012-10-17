@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.camera;
+package com.ti.omap.android.camera;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -27,10 +27,12 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
-import com.android.camera.ui.PopupManager;
-import com.android.camera.ui.Rotatable;
-import com.android.camera.ui.RotateImageView;
-import com.android.camera.ui.TwoStateImageView;
+import com.ti.omap.android.camera.ui.PopupManager;
+import com.ti.omap.android.camera.ui.Rotatable;
+import com.ti.omap.android.camera.ui.RotateImageView;
+import com.ti.omap.android.camera.ui.TwoStateImageView;
+import com.ti.omap.android.camera.Util;
+import android.util.Log;
 
 /**
  * A widget that includes three mode selections {@code RotateImageView}'s and
@@ -41,9 +43,10 @@ public class ModePicker extends RelativeLayout implements View.OnClickListener,
     public static final int MODE_CAMERA = 0;
     public static final int MODE_VIDEO = 1;
     public static final int MODE_PANORAMA = 2;
+    public static final int MODE_CPCAM = 3;
 
     // Total mode number
-    private static final int MODE_NUM = 3;
+    private static final int MODE_NUM = 4;
 
     /** A callback to be called when the user wants to switch activity. */
     public interface OnModeChangeListener {
@@ -88,6 +91,8 @@ public class ModePicker extends RelativeLayout implements View.OnClickListener,
                 (RotateImageView) findViewById(R.id.mode_video);
         mModeSelectionIcon[MODE_CAMERA] =
                 (RotateImageView) findViewById(R.id.mode_camera);
+        mModeSelectionIcon[MODE_CPCAM] =
+                (RotateImageView) findViewById(R.id.mode_cpcam);
 
         // The current mode frame is for Phone UI only.
         mCurrentModeFrame = findViewById(R.id.current_mode);
@@ -96,11 +101,18 @@ public class ModePicker extends RelativeLayout implements View.OnClickListener,
             mCurrentModeIcon[0] = (RotateImageView) findViewById(R.id.mode_0);
             mCurrentModeIcon[1] = (RotateImageView) findViewById(R.id.mode_1);
             mCurrentModeIcon[2] = (RotateImageView) findViewById(R.id.mode_2);
+            mCurrentModeIcon[3] = (RotateImageView) findViewById(R.id.mode_0);
         } else {
             // current_mode_bar is only for tablet.
             mCurrentModeBar = findViewById(R.id.current_mode_bar);
             enableModeSelection(true);
         }
+
+        // Remove CPCam icon if library is not available
+        if ( !Util.isCPCamLibraryPresent() ) {
+            mModeSelectionIcon[MODE_CPCAM].setVisibility(GONE);
+        }
+
         registerOnClickListener();
     }
 
@@ -248,6 +260,7 @@ public class ModePicker extends RelativeLayout implements View.OnClickListener,
         // Grey-out the unselected icons for Phone UI.
         if (mCurrentModeFrame != null) {
             for (int i = 0; i < MODE_NUM; ++i) {
+                if(!Util.isCPCamLibraryPresent() && i==3) continue;
                 highlightView(mModeSelectionIcon[i], (i == mCurrentMode));
             }
         }
@@ -265,6 +278,7 @@ public class ModePicker extends RelativeLayout implements View.OnClickListener,
                     if (j == mCurrentMode) j++;
                     target = j++;
                 }
+                if(!Util.isCPCamLibraryPresent() && i==3) continue;
                 mCurrentModeIcon[i].setImageDrawable(
                         mModeSelectionIcon[target].getDrawable());
             }

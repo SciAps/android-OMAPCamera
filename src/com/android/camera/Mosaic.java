@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.camera;
+package com.ti.omap.android.camera;
 
 /**
  * The Java interface to JNI calls regarding mosaic stitching.

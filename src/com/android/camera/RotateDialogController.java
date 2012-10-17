@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.camera;
+package com.ti.omap.android.camera;
 
 import android.app.Activity;
 import android.view.LayoutInflater;
@@ -26,8 +26,8 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.android.camera.ui.Rotatable;
-import com.android.camera.ui.RotateLayout;
+import com.ti.omap.android.camera.ui.Rotatable;
+import com.ti.omap.android.camera.ui.RotateLayout;
 
 public class RotateDialogController implements Rotatable {
 

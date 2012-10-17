@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.camera.ui;
+package com.ti.omap.android.camera.ui;
+
+import java.util.ArrayList;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -22,10 +24,11 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.android.camera.CameraPreference.OnPreferenceChangedListener;
-import com.android.camera.PreferenceGroup;
-import com.android.camera.R;
-import com.android.camera.Util;
+import com.ti.omap.android.camera.CameraPreference.OnPreferenceChangedListener;
+import com.ti.omap.android.camera.PreferenceGroup;
+import com.ti.omap.android.camera.R;
+import com.ti.omap.android.camera.Util;
+import com.ti.omap.android.camera.ListPreference;
 
 /**
  * On the tablet UI, we have IndicatorControlWheelContainer which contains a
@@ -72,7 +75,8 @@ public class IndicatorControlWheelContainer extends IndicatorControlContainer {
 
     @Override
     public void initialize(Context context, PreferenceGroup group,
-            boolean isZoomSupported, String[] keys, String[] otherSettingKeys) {
+            boolean isZoomSupported, boolean isCPcamSlidersSupported,
+            String[] keys, String[] otherSettingKeys) {
         mIndicatorControlWheel.initialize(context, group, isZoomSupported,
                 keys, otherSettingKeys);
     }
@@ -231,5 +235,14 @@ public class IndicatorControlWheelContainer extends IndicatorControlContainer {
     @Override
     public void enableFilter(boolean enabled) {
         mIndicatorControlWheel.setupFilter(enabled);
+    }
+
+    @Override
+    public void showCPCamSliders(boolean enabled) {
+    }
+
+    @Override
+    public void replace(String key, ListPreference pref, ArrayList<CharSequence[]> entries,ArrayList<CharSequence[]> entryValues){
+        mIndicatorControlWheel.replace(key, pref, entries, entryValues);
     }
 }

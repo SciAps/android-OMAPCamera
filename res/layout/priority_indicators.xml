@@ -13,7 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<com.android.camera.ui.RotateLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.ti.omap.android.camera.ui.RotateLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/on_screen_indicators"
         android:layout_height="match_parent"
@@ -27,12 +27,27 @@
             android:layout_height="match_parent"
             android:layout_width="match_parent">
         <LinearLayout
-                android:orientation="horizontal"
-                android:layout_height="@dimen/onscreen_indicators_height"
-                android:layout_width="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentLeft="true"
-                android:gravity="center_vertical">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:gravity="center_vertical"
+            android:padding="3dp"
+            android:orientation="vertical" >
+            <Button
+                    android:id="@+id/reprocess_button"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:visibility="gone"
+                    android:gravity="left"
+                    android:text="@string/reprocess_button"/>
+            <Button
+                    android:id="@+id/manual_gain_exposure_button"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:visibility="gone"
+                    android:gravity="left"
+                    android:text="@string/manual_gain_button"/>
             <ImageView android:id="@+id/onscreen_flash_indicator"
                     style="@style/OnScreenIndicator"
                     android:visibility="visible"/>
@@ -45,6 +60,12 @@
                     android:gravity="center_vertical"
                     android:textSize="@dimen/onscreen_exposure_indicator_text_size"
                     android:textColor="@android:color/white"/>
+            <TextView android:id="@+id/onscreen_metadata_indicator"
+                    android:gravity="center_vertical"
+                    android:textSize="15dp"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:textColor="@android:color/white"/>
             <ImageView android:id="@+id/onscreen_scene_indicator"
                     style="@style/OnScreenIndicator"
                     android:src="@drawable/ic_indicators_scn"/>
@@ -54,5 +75,5 @@
                     style="@style/OnScreenIndicator"/>
         </LinearLayout>
     </RelativeLayout>
-</com.android.camera.ui.RotateLayout>
+</com.ti.omap.android.camera.ui.RotateLayout>
 

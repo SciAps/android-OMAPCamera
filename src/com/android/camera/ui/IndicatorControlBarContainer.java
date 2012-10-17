@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.camera.ui;
+package com.ti.omap.android.camera.ui;
+
+import java.util.ArrayList;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -24,9 +26,10 @@ import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 
-import com.android.camera.CameraPreference.OnPreferenceChangedListener;
-import com.android.camera.PreferenceGroup;
-import com.android.camera.R;
+import com.ti.omap.android.camera.CameraPreference.OnPreferenceChangedListener;
+import com.ti.omap.android.camera.PreferenceGroup;
+import com.ti.omap.android.camera.R;
+import com.ti.omap.android.camera.ListPreference;
 
 /**
  * The IndicatorControlBarContainer is an IndicatorControlContainer containing
@@ -58,9 +61,6 @@ public class IndicatorControlBarContainer extends IndicatorControlContainer {
 
     @Override
     protected void onFinishInflate() {
-        mIndicatorControlBar = (IndicatorControlBar)
-                findViewById(R.id.indicator_bar);
-        mIndicatorControlBar.setOnIndicatorEventListener(this);
         mSecondLevelIndicatorControlBar = (SecondLevelIndicatorControlBar)
                 findViewById(R.id.second_level_indicator_bar);
         mSecondLevelIndicatorControlBar.setOnIndicatorEventListener(this);
@@ -68,10 +68,20 @@ public class IndicatorControlBarContainer extends IndicatorControlContainer {
 
     @Override
     public void initialize(Context context, PreferenceGroup group,
-            boolean isZoomSupported, String[] secondLevelKeys,
+            boolean isZoomSupported, boolean isCPcamSlidersSupported, String[] secondLevelKeys,
             String[] secondLevelOtherSettingKeys) {
 
-        mIndicatorControlBar.initialize(context, group, isZoomSupported);
+        if (isCPcamSlidersSupported) {
+            mIndicatorControlBar = (IndicatorControlBar)
+                findViewById(R.id.cpcam_indicator_bar);
+            mIndicatorControlBar.setOnIndicatorEventListener(this);
+        } else {
+            mIndicatorControlBar = (IndicatorControlBar)
+                findViewById(R.id.indicator_bar);
+            mIndicatorControlBar.setOnIndicatorEventListener(this);
+        }
+
+        mIndicatorControlBar.initialize(context, group, isZoomSupported, isCPcamSlidersSupported);
 
         mSecondLevelIndicatorControlBar.initialize(context, group,
                 secondLevelKeys, secondLevelOtherSettingKeys);
@@ -192,5 +202,16 @@ public class IndicatorControlBarContainer extends IndicatorControlContainer {
     public void enableFilter(boolean enabled) {
         mIndicatorControlBar.setupFilter(enabled);
         mSecondLevelIndicatorControlBar.setupFilter(enabled);
+    }
+
+    @Override
+    public void showCPCamSliders(boolean enabled) {
+        mIndicatorControlBar.showCPCamSliders(enabled);
+    }
+
+    @Override
+    public void replace(String key, ListPreference pref,ArrayList<CharSequence[]> allEntries,
+            ArrayList<CharSequence[]> allEntryValues) {
+        mSecondLevelIndicatorControlBar.replace(key, pref, allEntries, allEntryValues);
     }
 }

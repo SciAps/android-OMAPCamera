@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.camera.ui;
+package com.ti.omap.android.camera.ui;
 
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
-import com.android.camera.PreferenceGroup;
-import com.android.camera.R;
+import com.ti.omap.android.camera.PreferenceGroup;
+import com.ti.omap.android.camera.R;
 
 public class OtherSettingIndicatorButton extends AbstractIndicatorButton {
     @SuppressWarnings("unused")

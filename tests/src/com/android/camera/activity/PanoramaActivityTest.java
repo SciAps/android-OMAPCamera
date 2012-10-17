@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.camera.activity;
+package com.ti.omap.android.camera.activity;
 
-import com.android.camera.PanoramaActivity;
+import com.ti.omap.android.camera.PanoramaActivity;
 
 import android.test.suitebuilder.annotation.LargeTest;
 

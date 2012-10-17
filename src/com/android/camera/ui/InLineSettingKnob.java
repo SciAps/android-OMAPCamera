@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.camera.ui;
+package com.ti.omap.android.camera.ui;
 
 import android.content.Context;
 import android.os.Handler;
@@ -26,8 +26,8 @@ import android.view.accessibility.AccessibilityEvent;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.android.camera.ListPreference;
-import com.android.camera.R;
+import com.ti.omap.android.camera.ListPreference;
+import com.ti.omap.android.camera.R;
 
 /* A knob setting control. */
 public class InLineSettingKnob extends InLineSettingItem {
@@ -116,6 +116,11 @@ public class InLineSettingKnob extends InLineSettingItem {
 
     @Override
     protected void updateView() {
+
+        if ( null == mPreference ) {
+            return;
+        }
+
         if (mOverrideValue == null) {
             mEntry.setText(mPreference.getEntry());
             mNextButton.setVisibility(mIndex == 0 ? View.INVISIBLE : View.VISIBLE);
