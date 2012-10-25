@@ -2113,7 +2113,7 @@ public class VideoCamera extends ActivityBase
     private void fillVideoFramerateRangeItems() {
         List<int[]> supportedFpsRanges;
         String extFPS = mParameters.get(CameraSettings.KEY_SUPPORTED_PREVIEW_FRAMERATE_RANGES_EXT);
-        if ( null == extFPS ) {
+        if ( (null == extFPS) || (extFPS.length() == 0) ) {
             supportedFpsRanges = mParameters.getSupportedPreviewFpsRange();
         } else {
             supportedFpsRanges = Util.parseRange(extFPS);
@@ -2383,7 +2383,7 @@ public class VideoCamera extends ActivityBase
         }
         String extFPS = mParameters.get(CameraSettings.KEY_SUPPORTED_PREVIEW_FRAMERATE_RANGES_EXT);
         List<int[]> supportedFpsRanges = null;
-        if ( null == extFPS ) {
+        if ( (null == extFPS) || (extFPS.length() == 0 )) {
             supportedFpsRanges = mParameters.getSupportedPreviewFpsRange();
         } else {
             supportedFpsRanges = Util.parseRange(extFPS);
