@@ -93,6 +93,7 @@ public class CameraSettings {
     public static final String KEY_PREVIEW_LAYOUT = "pref_camera_preview_layout_key";
     public static final String KEY_CAPTURE_LAYOUT_VALUES = "s3d-cap-frame-layout-values";
     public static final String KEY_PREVIEW_LAYOUT_VALUES = "s3d-prv-frame-layout-values";
+    public static final String KEY_VIDEO_PREVIEW_LAYOUT = "pref_video_preview_layout_key";
     public static final String KEY_PREVIEW_SIZES_SS = "pref_camera_ss_previewsize_key";
     public static final String KEY_PREVIEW_SIZES_TB = "pref_camera_tb_previewsize_key";
     public static final String KEY_PICTURE_SIZES_SS = "pref_camera_ss_picturesize_key";
@@ -429,6 +430,7 @@ public class CameraSettings {
         ListPreference contrastEnhancement = group.findPreference(KEY_GBCE);
         ListPreference exposureMode = group.findPreference(KEY_EXPOSURE_MODE_MENU);
         ListPreference pictureFormat = group.findPreference(KEY_PICTURE_FORMAT_MENU);
+        ListPreference videoPreviewLayout = group.findPreference(KEY_VIDEO_PREVIEW_LAYOUT);
         ListPreference previewFramerate = group.findPreference(KEY_PREVIEW_FRAMERATE);
         ListPreference cpcam_manual_exp_gain = group.findPreference(KEY_SHOTPARAMS_MANUAL_EXPOSURE_GAIN_POPUP_SLIDERS);
         ListPreference mechanicalMisalignmentCorrection = group.findPreference(KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU);
@@ -543,6 +545,17 @@ public class CameraSettings {
             key_preview_sizes = KEY_PREVIEW_SIZE_2D;
         }
 
+        if (videoPreviewLayout != null) {
+            ArrayList<String> suppLayout = new ArrayList<String>();
+            String videoLayouts = mParameters.get(KEY_PREVIEW_LAYOUT_VALUES);
+            if (videoLayouts != null && !videoLayouts.equals("") && !videoLayouts.equals("none")) {
+                for (String item : videoLayouts.split(",")) {
+                    suppLayout.add(item);
+                }
+            }
+            filterUnsupportedOptions(group,videoPreviewLayout,suppLayout);
+        }
+
         if (captureLayout != null) {
             ArrayList<String> suppLayout = new ArrayList<String>();
             String captureLayouts = mParameters.get(KEY_CAPTURE_LAYOUT_VALUES);
@@ -565,8 +578,6 @@ public class CameraSettings {
             }
         }
 
-        ArrayList<CharSequence[]> allPictureEntries = new ArrayList<CharSequence[]>();
-        ArrayList<CharSequence[]> allPictureEntryValues = new ArrayList<CharSequence[]>();
         ArrayList<CharSequence[]> allPreviewEntries = new ArrayList<CharSequence[]>();
         ArrayList<CharSequence[]> allPreviewEntryValues = new ArrayList<CharSequence[]>();
         allPreviewEntries.add(previewSize2d.getEntries());
@@ -575,6 +586,9 @@ public class CameraSettings {
         allPreviewEntryValues.add(previewSize2d.getEntryValues());
         allPreviewEntryValues.add(previewSizeTB.getEntryValues());
         allPreviewEntryValues.add(previewSizeSS.getEntryValues());
+
+        ArrayList<CharSequence[]> allPictureEntries = new ArrayList<CharSequence[]>();
+        ArrayList<CharSequence[]> allPictureEntryValues = new ArrayList<CharSequence[]>();
 
         if(pictureSize2d != null  && pictureSizeTB != null && pictureSizeSS != null){
             allPictureEntries.add(pictureSize2d.getEntries());
@@ -599,14 +613,6 @@ public class CameraSettings {
             if (previewSizes !=null) {
                 previewSizes.clearAndSetEntries(allPreviewEntries, allPreviewEntryValues,
                         filteredSizes.getEntries(), filteredSizes.getEntryValues());
-            }
-        }
-
-        if (previewSize != null) {
-            ListPreference previewSizes = group.findPreference(KEY_PREVIEW_SIZE);
-            if (previewSizes !=null) {
-                previewSizes.clearAndSetEntries(allPreviewEntries, allPreviewEntryValues,
-                        previewSize.getEntries(), previewSize.getEntryValues());
             }
         }
 
@@ -763,28 +769,6 @@ public class CameraSettings {
 
         if ( contrastEnhancement != null ) {
             filterContrastEnhancement(group, contrastEnhancement);
-        }
-
-        if (captureLayout != null) {
-            ArrayList<String> suppLayout = new ArrayList<String>();
-            String captureLayouts = mParameters.get(KEY_CAPTURE_LAYOUT_VALUES);
-            if (captureLayouts !=null && !captureLayouts.equals("")) {
-                for (String item : captureLayouts.split(",")) {
-                    suppLayout.add(item);
-                }
-                filterUnsupportedOptions(group,captureLayout,suppLayout);
-            }
-        }
-
-        if (previewLayout != null) {
-            ArrayList<String> suppLayout = new ArrayList<String>();
-            String previewLayouts = mParameters.get(KEY_PREVIEW_LAYOUT_VALUES);
-            if (previewLayouts !=null && !previewLayouts.equals("")) {
-                for (String item : previewLayouts.split(",")) {
-                    suppLayout.add(item);
-                }
-                filterUnsupportedOptions(group,previewLayout,suppLayout);
-            }
         }
 
         if (pictureFormat != null) {
