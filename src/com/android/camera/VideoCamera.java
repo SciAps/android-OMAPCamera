@@ -1987,13 +1987,6 @@ public class VideoCamera extends ActivityBase
 
         mParameters.setRecordingHint(true);
 
-        // Enable video stabilization. Convenience methods not available in API
-        // level <= 14
-        String vstabSupported = mParameters.get("video-stabilization-supported");
-        if ("true".equals(vstabSupported)) {
-            mParameters.set("video-stabilization", "true");
-        }
-
         // Set picture size.
         // The logic here is different from the logic in still-mode camera.
         // There we determine the preview size based on the picture size, but
