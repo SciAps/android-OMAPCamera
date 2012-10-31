@@ -808,7 +808,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             if (mMeteringAreaSupported && !cafActive &&
                     mAutoConvergence.equals(mTouchConvergence)) {
             //    if (mS3dViewEnabled || is2DMode()) {
-                    mTouchManager.onTouch(e);
+                    mTouchManager.onTouch(Math.round(x),Math.round(y));
 /*
                 } else {
                     mTouchManager.onTouch(e, mPreviewLayout);
