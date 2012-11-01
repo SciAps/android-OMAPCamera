@@ -418,6 +418,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                         updateAllParams = false;
                     }
                     startPreview(updateAllParams);
+                    startFaceDetection();
                     break;
                 }
                 case CLEAR_SCREEN_DELAY: {
@@ -3122,6 +3123,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             // This will only restart the preview
             // without trying to apply any new
             // camera parameters.
+            mFaceDetectionStarted = false;
             Message msg = new Message();
             msg.what = RESTART_PREVIEW;
             msg.arg1 = MODE_RESTART;
