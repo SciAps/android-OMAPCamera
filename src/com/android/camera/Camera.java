@@ -1100,10 +1100,15 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                     + mPictureDisplayedToJpegCallbackTime + "ms");
 
             mFocusManager.updateFocusUI(); // Ensure focus indicator is hidden.
-            if (!mIsImageCaptureIntent) {
-                startPreview(true);
-                setCameraState(IDLE);
-                startFaceDetection();
+            if (!mIsImageCaptureIntent ) {
+                if (( tempState != FocusManager.TempBracketingStates.RUNNING ) &&
+                        !mCaptureMode.equals(mExposureBracketing) &&
+                        !mCaptureMode.equals(mZoomBracketing) &&
+                        !mBurstRunning == true) {
+                    startPreview(true);
+                    setCameraState(IDLE);
+                    startFaceDetection();
+                }
             }
 
             if (!mIsImageCaptureIntent) {
@@ -1118,6 +1123,11 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                     width = s.height;
                     height = s.width;
                 }
+
+                mCaptureStartTime = System.currentTimeMillis();
+                mImageNamer.prepareUri(mContentResolver, mCaptureStartTime,
+                        width, height, mJpegRotation);
+
                 Uri uri = mImageNamer.getUri();
                 String title = mImageNamer.getTitle();
                 mImageSaver.addImage(jpegData, uri, title, mLocation,
@@ -1535,10 +1545,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
         mCameraDevice.takePicture(mShutterCallback, mRawPictureCallback,
                 mPostViewPictureCallback, new JpegPictureCallback(loc));
-
-        Size size = mParameters.getPictureSize();
-        mImageNamer.prepareUri(mContentResolver, mCaptureStartTime,
-                size.width, size.height, mJpegRotation);
 
         if (!mIsImageCaptureIntent) {
             // Start capture animation.
