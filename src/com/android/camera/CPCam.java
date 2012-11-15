@@ -1156,6 +1156,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         int width, height;
         int thumbnailWidth;
         int orientation;
+        long dateTaken;
     }
 
     // We use a queue to store the SaveRequests that have not been completed
@@ -1200,6 +1201,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
             r.height = height;
             r.thumbnailWidth = thumbnailWidth;
             r.orientation = orientation;
+            r.dateTaken = System.currentTimeMillis();
             synchronized (this) {
                 while (mQueue.size() >= QUEUE_LIMIT) {
                     try {
@@ -1236,7 +1238,7 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
                     r = mQueue.get(0);
                 }
                 storeImage(r.data, r.uri, r.title, r.loc, r.width, r.height,
-                        r.thumbnailWidth, r.orientation);
+                        r.thumbnailWidth, r.orientation, r.dateTaken);
                 synchronized (this) {
                     mQueue.remove(0);
                     notifyAll();  // the main thread may wait in addImage
@@ -1291,9 +1293,9 @@ public class CPCam extends ActivityBase implements CPCamFocusManager.Listener,
         // Runs in saver thread
         private void storeImage(final byte[] data, Uri uri, String title,
                 Location loc, int width, int height, int thumbnailWidth,
-                int orientation) {
+                int orientation, long date) {
             boolean ok = Storage.updateImage(mContentResolver, uri, title, loc,
-                    orientation, data, width, height);
+                    orientation, data, width, height, date);
             if (ok) {
                 boolean needThumbnail;
                 synchronized (this) {

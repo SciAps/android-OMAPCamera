@@ -65,6 +65,8 @@ public class Storage {
             }
         }
 
+        Log.e(TAG, "PPM: StoreImage: " + (System.currentTimeMillis() - date) + " ms");
+
         // Insert into MediaStore.
         ContentValues values = new ContentValues(9);
         values.put(ImageColumns.TITLE, title);
@@ -135,7 +137,7 @@ public class Storage {
     // Returns true if the update is successful.
     public static boolean updateImage(ContentResolver resolver, Uri uri,
             String title, Location location, int orientation, byte[] jpeg,
-            int width, int height) {
+            int width, int height, long date) {
         // Save the image.
         String path = generateFilepath(title);
         String tmpPath = path + ".tmp";
@@ -156,6 +158,8 @@ public class Storage {
             } catch (Exception e) {
             }
         }
+
+        Log.e(TAG, "PPM: StoreImage: " + (System.currentTimeMillis() - date) + " ms");
 
         // Insert into MediaStore.
         ContentValues values = new ContentValues(9);
