@@ -1,3 +1,5 @@
+ifdef OMAP_ENHANCEMENT_CPCAM
+
 LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
@@ -36,5 +38,7 @@ include $(call all-makefiles-under, $(LOCAL_PATH))
 
 # Use the following include to make camera test apk.
 include $(call all-makefiles-under, /Gallery)
+
+endif
 
 endif
