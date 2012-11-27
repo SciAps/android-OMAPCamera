@@ -478,20 +478,20 @@ extern "C"
 {
     JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved);
     JNIEXPORT void JNICALL JNI_OnUnload(JavaVM* vm, void* reserved);
-    JNIEXPORT jint JNICALL Java_com_android_camera_MosaicRenderer_init(
+    JNIEXPORT jint JNICALL Java_com_ti_omap_android_camera_MosaicRenderer_init(
             JNIEnv * env, jobject obj);
-    JNIEXPORT void JNICALL Java_com_android_camera_MosaicRenderer_reset(
+    JNIEXPORT void JNICALL Java_com_ti_omap_android_camera_MosaicRenderer_reset(
             JNIEnv * env, jobject obj,  jint width, jint height,
             jboolean isLandscapeOrientation);
-    JNIEXPORT void JNICALL Java_com_android_camera_MosaicRenderer_preprocess(
+    JNIEXPORT void JNICALL Java_com_ti_omap_android_camera_MosaicRenderer_preprocess(
             JNIEnv * env, jobject obj, jfloatArray stMatrix);
-    JNIEXPORT void JNICALL Java_com_android_camera_MosaicRenderer_transferGPUtoCPU(
+    JNIEXPORT void JNICALL Java_com_ti_omap_android_camera_MosaicRenderer_transferGPUtoCPU(
             JNIEnv * env, jobject obj);
-    JNIEXPORT void JNICALL Java_com_android_camera_MosaicRenderer_step(
+    JNIEXPORT void JNICALL Java_com_ti_omap_android_camera_MosaicRenderer_step(
             JNIEnv * env, jobject obj);
-    JNIEXPORT void JNICALL Java_com_android_camera_MosaicRenderer_updateMatrix(
+    JNIEXPORT void JNICALL Java_com_ti_omap_android_camera_MosaicRenderer_updateMatrix(
             JNIEnv * env, jobject obj);
-    JNIEXPORT void JNICALL Java_com_android_camera_MosaicRenderer_setWarping(
+    JNIEXPORT void JNICALL Java_com_ti_omap_android_camera_MosaicRenderer_setWarping(
             JNIEnv * env, jobject obj, jboolean flag);
 };
 
@@ -508,7 +508,7 @@ JNIEXPORT void JNICALL JNI_OnUnload(JavaVM* vm, void* reserved)
 {
     sem_destroy(&gPreviewImage_semaphore);
 }
-JNIEXPORT jint JNICALL Java_com_android_camera_MosaicRenderer_init(
+JNIEXPORT jint JNICALL Java_com_ti_omap_android_camera_MosaicRenderer_init(
         JNIEnv * env, jobject obj)
 {
     gSurfTexRenderer[LR].InitializeGLProgram();
@@ -572,7 +572,7 @@ void calculateUILayoutScaling(int width, int height, bool isLandscape) {
     }
 }
 
-JNIEXPORT void JNICALL Java_com_android_camera_MosaicRenderer_reset(
+JNIEXPORT void JNICALL Java_com_ti_omap_android_camera_MosaicRenderer_reset(
         JNIEnv * env, jobject obj,  jint width, jint height, jboolean isLandscapeOrientation)
 {
     gIsLandscapeOrientation = isLandscapeOrientation;
@@ -653,7 +653,7 @@ JNIEXPORT void JNICALL Java_com_android_camera_MosaicRenderer_reset(
     gPreview.SetInputTextureType(GL_TEXTURE_2D);
 }
 
-JNIEXPORT void JNICALL Java_com_android_camera_MosaicRenderer_preprocess(
+JNIEXPORT void JNICALL Java_com_ti_omap_android_camera_MosaicRenderer_preprocess(
         JNIEnv * env, jobject obj, jfloatArray stMatrix)
 {
     jfloat *stmat = env->GetFloatArrayElements(stMatrix, 0);
@@ -682,7 +682,7 @@ now_ms(void)
 
 
 
-JNIEXPORT void JNICALL Java_com_android_camera_MosaicRenderer_transferGPUtoCPU(
+JNIEXPORT void JNICALL Java_com_ti_omap_android_camera_MosaicRenderer_transferGPUtoCPU(
         JNIEnv * env, jobject obj)
 {
     double t0, t1, time_c;
@@ -720,7 +720,7 @@ JNIEXPORT void JNICALL Java_com_android_camera_MosaicRenderer_transferGPUtoCPU(
     sem_post(&gPreviewImage_semaphore);
 }
 
-JNIEXPORT void JNICALL Java_com_android_camera_MosaicRenderer_step(
+JNIEXPORT void JNICALL Java_com_ti_omap_android_camera_MosaicRenderer_step(
         JNIEnv * env, jobject obj)
 {
     if(!gWarpImage) // ViewFinder
@@ -754,7 +754,7 @@ JNIEXPORT void JNICALL Java_com_android_camera_MosaicRenderer_step(
     }
 }
 
-JNIEXPORT void JNICALL Java_com_android_camera_MosaicRenderer_setWarping(
+JNIEXPORT void JNICALL Java_com_ti_omap_android_camera_MosaicRenderer_setWarping(
         JNIEnv * env, jobject obj, jboolean flag)
 {
     // TODO: Review this logic
@@ -780,7 +780,7 @@ JNIEXPORT void JNICALL Java_com_android_camera_MosaicRenderer_setWarping(
     gWarpImage = (bool)flag;
 }
 
-JNIEXPORT void JNICALL Java_com_android_camera_MosaicRenderer_updateMatrix(
+JNIEXPORT void JNICALL Java_com_ti_omap_android_camera_MosaicRenderer_updateMatrix(
         JNIEnv * env, jobject obj)
 {
     for(int i=0; i<16; i++)
