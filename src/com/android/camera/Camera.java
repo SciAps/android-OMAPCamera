@@ -2947,6 +2947,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             supported = CameraSettings.sizeListToStringList(mParameters.getSupportedPreviewSizes());
             CameraSettings.setCameraPreviewSize(previewSize, supported, mParameters);
             mPreviewSize = previewSize;
+            stopFaceDetection();
         }
 
         if (setPreviewFrameLayoutAspectRatio()) {
@@ -3136,6 +3137,18 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             msg.what = RESTART_PREVIEW;
             msg.arg1 = MODE_RESTART;
             mHandler.sendMessage(msg);
+        } else {
+            // If there was only a change in preferences and
+            // preview doesn't need to restart
+            // this will ensure that face detection is started
+            int checkParam = UPDATE_PARAM_MODE | UPDATE_PARAM_ZOOM
+                                | UPDATE_PARAM_INITIALIZE;
+
+            if ( ( updateSet & checkParam ) == 0
+                 && ( updateSet & UPDATE_PARAM_PREFERENCE ) != 0 ) {
+
+                startFaceDetection();
+            }
         }
     }
 
