@@ -1842,7 +1842,7 @@ public class VideoCamera extends ActivityBase
     private void fillVideoFramerateRangeItems() {
         List<int[]> supportedFpsRanges;
         String extFPS = mParameters.get(CameraSettings.KEY_SUPPORTED_PREVIEW_FRAMERATE_RANGES_EXT);
-        if ( null == extFPS ) {
+        if ( (null == extFPS) || (extFPS.length() == 0) ) {
             supportedFpsRanges = mParameters.getSupportedPreviewFpsRange();
         } else {
             supportedFpsRanges = Util.parseRange(extFPS);
@@ -1899,16 +1899,12 @@ public class VideoCamera extends ActivityBase
 
     @SuppressWarnings("deprecation")
     private void setCameraParameters() {
-        mParameters.setPreviewSize(mDesiredPreviewWidth, mDesiredPreviewHeight);
-        //mParameters.setPreviewFrameRate(mProfile.videoFrameRate);
-
-      //Set Video Resolution
+        //Set Video Resolution
 
         String vidFormat = mPreferences.getString(CameraSettings.KEY_VIDEO_FORMAT, (getString(R.string.pref_camera_video_format_default)));
         int optVideoFormat = Integer.parseInt(vidFormat);
         updateVideoFormat(optVideoFormat);
 
-        mParameters.setPreviewSize(mProfile.videoFrameWidth, mProfile.videoFrameHeight);
         filterVideoBitrateItems(mProfile.videoFrameWidth*mProfile.videoFrameHeight);
 
         // Set flash mode.
@@ -2067,7 +2063,7 @@ public class VideoCamera extends ActivityBase
         }
         String extFPS = mParameters.get(CameraSettings.KEY_SUPPORTED_PREVIEW_FRAMERATE_RANGES_EXT);
         List<int[]> supportedFpsRanges = null;
-        if ( null == extFPS ) {
+        if ( (null == extFPS) || (extFPS.length() == 0 )) {
             supportedFpsRanges = mParameters.getSupportedPreviewFpsRange();
         } else {
             supportedFpsRanges = Util.parseRange(extFPS);
@@ -2757,9 +2753,22 @@ public class VideoCamera extends ActivityBase
             // 1080P resolution
             mProfile.videoFrameWidth  = 1920;
             mProfile.videoFrameHeight = 1080;
-        }
+       }
+       List<Size> sizes = mParameters.getSupportedPreviewSizes();
+       if (!sizes.contains(mCameraDevice.getCamera().new Size(mProfile.videoFrameWidth, mProfile.videoFrameHeight))) {
+           Log.w(TAG, "Prewie size " + mDesiredPreviewWidth + "x" + mDesiredPreviewHeight +
+                    " unsupported");
+           Size supported = mParameters.getPreviewSize();
+           mDesiredPreviewWidth = supported.width;
+           mDesiredPreviewHeight = supported.height;
+           mProfile.videoFrameWidth = supported.width;
+           mProfile.videoFrameHeight = supported.height;
+       }
+       Log.w(TAG, "Prewie size is set to" + mDesiredPreviewWidth + "x" + mDesiredPreviewHeight);
 
-            updateCameraScreenNailSize(mProfile.videoFrameWidth,mProfile.videoFrameHeight);
+       mParameters.setPreviewSize(mDesiredPreviewWidth, mDesiredPreviewHeight);
+
+       updateCameraScreenNailSize(mProfile.videoFrameWidth,mProfile.videoFrameHeight);
     }
 
     private void showTapToSnapshotToast() {

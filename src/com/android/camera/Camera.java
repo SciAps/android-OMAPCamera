@@ -1100,10 +1100,15 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                     + mPictureDisplayedToJpegCallbackTime + "ms");
 
             mFocusManager.updateFocusUI(); // Ensure focus indicator is hidden.
-            if (!mIsImageCaptureIntent) {
-                startPreview(true);
-                setCameraState(IDLE);
-                startFaceDetection();
+            if (!mIsImageCaptureIntent ) {
+                if (( tempState != FocusManager.TempBracketingStates.RUNNING ) &&
+                        !mCaptureMode.equals(mExposureBracketing) &&
+                        !mCaptureMode.equals(mZoomBracketing) &&
+                        !mBurstRunning == true) {
+                    startPreview(true);
+                    setCameraState(IDLE);
+                    startFaceDetection();
+                }
             }
 
             if (!mIsImageCaptureIntent) {
@@ -1118,6 +1123,11 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                     width = s.height;
                     height = s.width;
                 }
+
+                mCaptureStartTime = System.currentTimeMillis();
+                mImageNamer.prepareUri(mContentResolver, mCaptureStartTime,
+                        width, height, mJpegRotation);
+
                 Uri uri = mImageNamer.getUri();
                 String title = mImageNamer.getTitle();
                 mImageSaver.addImage(jpegData, uri, title, mLocation,
@@ -1241,6 +1251,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         int width, height;
         int thumbnailWidth;
         int orientation;
+        long dateTaken;
     }
 
     // We use a queue to store the SaveRequests that have not been completed
@@ -1285,6 +1296,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             r.height = height;
             r.thumbnailWidth = thumbnailWidth;
             r.orientation = orientation;
+            r.dateTaken = System.currentTimeMillis();
             synchronized (this) {
                 while (mQueue.size() >= QUEUE_LIMIT) {
                     try {
@@ -1321,7 +1333,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                     r = mQueue.get(0);
                 }
                 storeImage(r.data, r.uri, r.title, r.loc, r.width, r.height,
-                        r.thumbnailWidth, r.orientation);
+                        r.thumbnailWidth, r.orientation, r.dateTaken);
                 synchronized (this) {
                     mQueue.remove(0);
                     notifyAll();  // the main thread may wait in addImage
@@ -1376,9 +1388,9 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         // Runs in saver thread
         private void storeImage(final byte[] data, Uri uri, String title,
                 Location loc, int width, int height, int thumbnailWidth,
-                int orientation) {
+                int orientation, long date) {
             boolean ok = Storage.updateImage(mContentResolver, uri, title, loc,
-                    orientation, data, width, height);
+                    orientation, data, width, height, date);
             if (ok) {
                 boolean needThumbnail;
                 synchronized (this) {
@@ -1535,10 +1547,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
         mCameraDevice.takePicture(mShutterCallback, mRawPictureCallback,
                 mPostViewPictureCallback, new JpegPictureCallback(loc));
-
-        Size size = mParameters.getPictureSize();
-        mImageNamer.prepareUri(mContentResolver, mCaptureStartTime,
-                size.width, size.height, mJpegRotation);
 
         if (!mIsImageCaptureIntent) {
             // Start capture animation.
