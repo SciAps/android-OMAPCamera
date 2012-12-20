@@ -724,4 +724,24 @@
     <string name="accessibility_switch_to_panorama">Switch to panorama</string>
     <!-- TODO: remove the string as it is a work-around solution to bypass the default speak of the element type. -->
     <string name="empty" translatable="false">" "</string>
+
+    <!--  Preview Layouts -->
+    <string name="pref_camera_preview_layout_default" translatable="false">tb-full</string>
+    <string name="pref_camera_preview_layout_title">Preview Layouts</string>
+
+    <string name="pref_video_preview_layout_default" translatable="false">tb-subsampled</string>
+    <string name="pref_video_preview_layout_title">Preview Layouts</string>
+
+    <!--  Capture Layouts -->
+    <string name="pref_camera_capture_layout_default" translatable="false">tb-full</string>
+    <string name="pref_camera_capture_layout_title">Capture Layouts</string>
+
+    <string name="pref_video_capture_layout_default" translatable="false">tb-full</string>
+    <string name="pref_video_capture_layout_title">Capture Layouts</string>
+
+    <!-- Layouts entries -->
+    <string name="pref_camera_layout_entry_tb_full">TB Full</string>
+    <string name="pref_camera_layout_entry_tb_subsampled">TB Subsampled</string>
+    <string name="pref_camera_layout_entry_ss_full">SS Full</string>
+    <string name="pref_camera_layout_entry_ss_subsampled">SS Subsampled</string>
 </resources>

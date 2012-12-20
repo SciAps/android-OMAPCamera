@@ -92,7 +92,7 @@
         <item>glbce</item>
     </string-array>
 
-	<!-- Camera Preferences Audio Encoder dialog box entries -->
+    <!-- Camera Preferences Audio Encoder dialog box entries -->
     <string-array name="pref_camera_audioencoder_entries">
         <item>@string/pref_camera_audioencoder_entry_1</item>
         <item>@string/pref_camera_audioencoder_entry_2</item>
@@ -105,7 +105,7 @@
         <item>3</item>
     </string-array>
 
-	<!-- Camera Preferences Video Encoder dialog box entries -->
+    <!-- Camera Preferences Video Encoder dialog box entries -->
     <string-array name="pref_camera_videoencoder_entries">
         <item>@string/pref_camera_videoencoder_entry_1</item>
         <item>@string/pref_camera_videoencoder_entry_2</item>
@@ -167,7 +167,7 @@
         <item>20000000</item>
     </string-array>
 
-	<!-- Camera Preferences Preview framerate dialog box entries -->
+    <!-- Camera Preferences Preview framerate dialog box entries -->
     <string-array name="pref_camera_previewframerate_entries">
         <item>@string/pref_camera_previewframerate_entry_thirty</item>
         <item>@string/pref_camera_previewframerate_entry_twentyseven</item>
@@ -187,7 +187,7 @@
         <item>5</item>
     </string-array>
 
-	<!-- Camera Preferences 'Video Stabilization' Enabling dialog box entries -->
+    <!-- Camera Preferences 'Video Stabilization' Enabling dialog box entries -->
     <string-array name="pref_camera_vstab_entries" translatable="false">
         <item>@string/pref_camera_vstab_entry_on</item>
         <item>@string/pref_camera_vstab_entry_off</item>
@@ -344,6 +344,8 @@
     <!-- Camera Preferences Picture size dialog box entries -->
     <string-array name="pref_camera_previewsize_default_array" translatable="false">
         <item>640x480</item>
+        <item>1280x480</item>
+        <item>640x960</item>
     </string-array>
 
     <string-array name="pref_camera_previewsize_entries" translatable="false">
@@ -370,6 +372,60 @@
          <item>352x288</item>
          <item>176x144</item>
          <item>128x96</item>
+    </string-array>
+
+    <string-array name="pref_camera_tb_previewsize_entryvalues" translatable="false">
+         <item>1920x2160</item>
+         <item>1280x1440</item>
+         <item>800x960</item>
+         <item>720x1152</item>
+         <item>768x1152</item>
+         <item>640x960</item>
+         <item>320x480</item>
+         <item>352x576</item>
+         <item>176x288</item>
+         <item>128x192</item>
+    </string-array>
+
+    <string-array name="pref_camera_ss_previewsize_entryvalues" translatable="false">
+         <item>3840x1080</item>
+         <item>2560x720</item>
+         <item>1600x480</item>
+         <item>1440x576</item>
+         <item>1536x576</item>
+         <item>1280x480</item>
+         <item>640x240</item>
+         <item>704x288</item>
+         <item>352x144</item>
+         <item>256x96</item>
+    </string-array>
+
+    <string-array name="pref_camera_capture_layout_entries" translatable="false">
+        <item>@string/pref_camera_layout_entry_ss_subsampled</item>
+        <item>@string/pref_camera_layout_entry_ss_full</item>
+        <item>@string/pref_camera_layout_entry_tb_subsampled</item>
+        <item>@string/pref_camera_layout_entry_tb_full</item>
+    </string-array>
+
+    <string-array name="pref_camera_capture_layout_entryvalues" translatable="false">
+        <item>ss-subsampled</item>
+        <item>ss-full</item>
+        <item>tb-subsampled</item>
+        <item>tb-full</item>
+    </string-array>
+
+    <string-array name="pref_camera_preview_layout_entries" translatable="false">
+        <item>@string/pref_camera_layout_entry_ss_subsampled</item>
+        <item>@string/pref_camera_layout_entry_ss_full</item>
+        <item>@string/pref_camera_layout_entry_tb_subsampled</item>
+        <item>@string/pref_camera_layout_entry_tb_full</item>
+    </string-array>
+
+    <string-array name="pref_camera_preview_layout_entryvalues" translatable="false">
+        <item>ss-subsampled</item>
+        <item>ss-full</item>
+        <item>tb-subsampled</item>
+        <item>tb-full</item>
     </string-array>
 
     <!-- Camera Preferences Time Lapse Frame Interval entries -->
@@ -439,16 +495,49 @@
         <item>320x240</item>
     </string-array>
 
-	<string-array name="pref_camera_video_mode_entries" translatable="false">
+    <string-array name="pref_camera_tb_picturesize_entryvalues" translatable="false">
+        <item>4416x6624</item>
+        <item>4032x6048</item>
+        <item>3648x5472</item>
+        <item>3264x4896</item>
+        <item>2592x3888</item>
+        <item>2592x3872</item>
+        <item>2560x3840</item>
+        <item>2048x3072</item>
+        <item>1600x2400</item>
+        <item>1280x1920</item>
+        <item>1024x1536</item>
+        <item>640x960</item>
+        <item>320x480</item>
+    </string-array>
+
+    <string-array name="pref_camera_ss_picturesize_entryvalues" translatable="false">
+        <item>8832x3312</item>
+        <item>8064x3024</item>
+        <item>7296x2736</item>
+        <item>6528x2448</item>
+        <item>5184x1944</item>
+        <item>5184x1936</item>
+        <item>5120x1920</item>
+        <item>4096x1536</item>
+        <item>3200x1200</item>
+        <item>2560x960</item>
+        <item>2048x768</item>
+        <item>1280x480</item>
+        <item>640x240</item>
+    </string-array>
+
+    <string-array name="pref_camera_video_mode_entries" translatable="false">
         <item>@string/pref_camera_video_mode_entry_st</item>
         <item>@string/pref_camera_video_mode_entry_hq</item>
     </string-array>
+
     <string-array name="pref_camera_video_mode_entryvalues" translatable="false">
         <item>video-mode</item>
         <item>video-mode-hq</item>
     </string-array>
 
-	<!-- Camera Preferences Video format dialog box entries -->
+    <!-- Camera Preferences Video format dialog box entries -->
     <string-array name="pref_camera_video_format_entries" translatable="false">
         <item>@string/pref_camera_video_format_entry_9_1080p</item>
         <item>@string/pref_camera_video_format_entry_8_720p</item>
@@ -491,13 +580,13 @@
         <item>128x96</item>
     </string-array>
 
-	<!-- Video recording timer entries -->
+    <!-- Video recording timer entries -->
     <string-array name="pref_camera_video_timer_entries" translatable="false">
         <item>@string/pref_camera_video_timer_entry_on</item>
         <item>@string/pref_camera_video_timer_entry_off</item>
     </string-array>
 
-	<string-array name="pref_camera_video_timer_entryvalues" translatable="false">
+    <string-array name="pref_camera_video_timer_entryvalues" translatable="false">
         <item>true</item>
         <item>false</item>
     </string-array>
@@ -807,7 +896,7 @@
             <item>manual</item>
     </string-array>
 
-	<!-- Video File Container Setting -->
+    <!-- Video File Container Setting -->
     <string-array name="pref_video_record_container_entries" translatable="false">
        <item>@string/pref_video_record_container_mp4</item>
        <item>@string/pref_video_record_container_3gp</item>
