@@ -74,12 +74,10 @@ public class TouchManager {
         Util.rectFToRect(rectF, rect);
     }
 
-    public boolean onTouch(MotionEvent e) {
+    public boolean onTouch(int x,int y) {
         if(!mInitialized)
             return false;
-        // Initialize variables.
-        int x = Math.round(e.getX());
-        int y = Math.round(e.getY());
+
         if (mMeteringArea == null) {
             mMeteringArea = new ArrayList<Area>();
             mMeteringArea.add(new Area(new Rect(), 1));
@@ -104,7 +102,6 @@ public class TouchManager {
         mListener.setTouchParameters();
         return true;
     }
-
 /*
     public boolean onTouch(MotionEvent e, String previewLayout) {
         if(!mInitialized)
