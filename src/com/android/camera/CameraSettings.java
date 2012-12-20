@@ -78,6 +78,10 @@ public class CameraSettings {
     public static final String KEY_PREVIEW_SIZE_2D = "pref_camera_previewsize2d_key";
     public static final String KEY_PREVIEW_FRAMERATE = "pref_camera_previewframerate_key";
 
+    public static final String KEY_MECHANICAL_MISALIGNMENT_CORRECTION_SUPPORTED = "mechanical-misalignment-correction-supported";
+    public static final String KEY_MECHANICAL_MISALIGNMENT_CORRECTION = "mechanical-misalignment-correction";
+    public static final String KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU="pref_camera_mechanical_misalignment_correction_key";
+
     public static final String KEY_AUTO_CONVERGENCE = "pref_camera_autoconvergence_key";
     public static final String KEY_AUTOCONVERGENCE_MODE = "auto-convergence-mode";
     public static final String KEY_AUTOCONVERGENCE_MODE_VALUES = "auto-convergence-mode-values";
@@ -427,7 +431,7 @@ public class CameraSettings {
         ListPreference pictureFormat = group.findPreference(KEY_PICTURE_FORMAT_MENU);
         ListPreference previewFramerate = group.findPreference(KEY_PREVIEW_FRAMERATE);
         ListPreference cpcam_manual_exp_gain = group.findPreference(KEY_SHOTPARAMS_MANUAL_EXPOSURE_GAIN_POPUP_SLIDERS);
-
+        ListPreference mechanicalMisalignmentCorrection = group.findPreference(KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU);
         ListPreference pictureSize = group.findPreference(KEY_PICTURE_SIZE);
         ListPreference pictureSize2d = group.findPreference(KEY_PICTURE_SIZE_2D);
         ListPreference previewSize = group.findPreference(KEY_PREVIEW_SIZE);
@@ -742,6 +746,19 @@ public class CameraSettings {
             }
             filterUnsupportedOptions(group,
                     autoConvergence, suppConvergence);
+        }
+
+        if(mechanicalMisalignmentCorrection !=null){
+            final String mechanicalMisalignmentSupported =
+                    mParameters.get(KEY_MECHANICAL_MISALIGNMENT_CORRECTION_SUPPORTED);
+            ArrayList<String> suppMechanicalMisalignmentCorrection = new ArrayList<String>();
+            if ( mechanicalMisalignmentSupported != null && mechanicalMisalignmentSupported.equals(Camera.TRUE) ) {
+                final String enable = mContext.getString(R.string.pref_camera_mechanical_misalignment_correction_enable);
+                final String disable = mContext.getString(R.string.pref_camera_mechanical_misalignment_correction_disable);
+                suppMechanicalMisalignmentCorrection.add(mechanicalMisalignmentCorrection.findEntryValueByEntry(enable));
+                suppMechanicalMisalignmentCorrection.add(mechanicalMisalignmentCorrection.findEntryValueByEntry(disable));
+            }
+            filterUnsupportedOptions(group, mechanicalMisalignmentCorrection, suppMechanicalMisalignmentCorrection);
         }
 
         if ( contrastEnhancement != null ) {
