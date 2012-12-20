@@ -62,6 +62,7 @@ import com.ti.omap.android.camera.ActivityBase.CameraOpenThread;
 import com.ti.omap.android.camera.ui.CameraPicker;
 import com.ti.omap.android.camera.ui.IndicatorControlContainer;
 import com.ti.omap.android.camera.ui.IndicatorControlWheelContainer;
+import com.ti.omap.android.camera.ui.ManualConvergenceSettings;
 import com.ti.omap.android.camera.ui.PopupManager;
 import com.ti.omap.android.camera.ui.Rotatable;
 import com.ti.omap.android.camera.ui.RotateImageView;
@@ -84,7 +85,7 @@ public class VideoCamera extends ActivityBase
         implements CameraPreference.OnPreferenceChangedListener,
         ShutterButton.OnShutterButtonListener, MediaRecorder.OnErrorListener,
         MediaRecorder.OnInfoListener, ModePicker.OnModeChangeListener,
-        EffectsRecorder.EffectsListener {
+        EffectsRecorder.EffectsListener, TouchManager.Listener {
 
     private static final String TAG = "videocamera";
 
@@ -157,7 +158,10 @@ public class VideoCamera extends ActivityBase
     private String mVSTABDisable = "";
     private String mVNFEnable = "";
     private String mVNFDisable = "";
-
+    private Integer mManualConvergenceValue = new Integer(0);
+    private String mManualConvergence;
+    private boolean isManualConvergence = false;
+    private boolean isConvergenceInit = false;
     private MediaRecorder mMediaRecorder;
     private EffectsRecorder mEffectsRecorder;
     private boolean mEffectsDisplayResult;
@@ -227,7 +231,13 @@ public class VideoCamera extends ActivityBase
     private ZoomControl mZoomControl;
     private boolean mRestoreFlash;  // This is used to check if we need to restore the flash
                                     // status when going back from gallery.
+    private String mPreviewLayout = "";
 
+    private boolean mMeteringAreaSupported;
+    private String mTouchConvergence;
+    private TouchManager mTouchManager;
+    private String mAutoConvergence;
+    private String mMechanicalMisalignmentCorrection;
     // This Handler is used to post message back onto the main thread of the
     // application
     private class MainHandler extends Handler {
@@ -268,6 +278,15 @@ public class VideoCamera extends ActivityBase
 
                 case SHOW_TAP_TO_SNAPSHOT_TOAST: {
                     showTapToSnapshotToast();
+                    break;
+                }
+
+                case Camera.MANUAL_CONVERGENCE_CHANGED: {
+                    mManualConvergenceValue = (Integer) msg.obj;
+                    mParameters.set(CameraSettings.KEY_MANUAL_CONVERGENCE, mManualConvergenceValue.intValue());
+                    if (mCameraDevice != null) {
+                        mCameraDevice.setParameters(mParameters);
+                    }
                     break;
                 }
 
@@ -381,6 +400,7 @@ public class VideoCamera extends ActivityBase
             @Override
             public void run() {
                 readVideoPreferences();
+                mMeteringAreaSupported = (mCameraDevice.getParameters().getMaxNumMeteringAreas() > 0);
                 startPreview();
             }
         });
@@ -388,11 +408,12 @@ public class VideoCamera extends ActivityBase
 
         initializeControlByIntent();
         initializeMiscControls();
-
         mRotateDialog = new RotateDialogController(this, R.layout.rotate_dialog);
         mQuickCapture = getIntent().getBooleanExtra(EXTRA_QUICK_CAPTURE, false);
         mOrientationListener = new MyOrientationEventListener(this);
         mLocationManager = new LocationManager(this, null);
+
+        mTouchManager = new TouchManager();
 
         // Make sure preview is started.
         try {
@@ -413,6 +434,19 @@ public class VideoCamera extends ActivityBase
         resizeForPreviewAspectRatio();
 
         initializeIndicatorControl();
+
+        ListPreference autoConvergencePreference = mPreferenceGroup.findPreference(CameraSettings.KEY_AUTO_CONVERGENCE);
+        if (autoConvergencePreference != null) {
+            mTouchConvergence = autoConvergencePreference.findEntryValueByEntry(getString(R.string.pref_camera_autoconvergence_entry_mode_touch));
+            if (mTouchConvergence == null) {
+                mTouchConvergence = "";
+            }
+            mManualConvergence = autoConvergencePreference.findEntryValueByEntry(getString(R.string.pref_camera_autoconvergence_entry_mode_manual));
+            if (mManualConvergence == null) {
+                mManualConvergence = "";
+            }
+        }
+
         ListPreference vstab = mPreferenceGroup.findPreference(CameraSettings.KEY_VSTAB);
         if ( vstab != null ) {
             mVSTABEnable = vstab.findEntryValueByEntry(getString(R.string.pref_camera_vstab_entry_on));
@@ -469,10 +503,13 @@ public class VideoCamera extends ActivityBase
                     CameraSettings.KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL};
                     //CameraSettings.KEY_VIDEO_QUALITY}; //Disabling redundant Video Qualily Menu
         final String[] OTHER_SETTING_KEYS = {
+                    CameraSettings.KEY_VIDEO_PREVIEW_LAYOUT,
                     CameraSettings.KEY_RECORD_LOCATION,
                     CameraSettings.KEY_VIDEO_MODE,
                     CameraSettings.KEY_VIDEO_FORMAT,
                     CameraSettings.KEY_VIDEO_TIMER,
+                    CameraSettings.KEY_AUTO_CONVERGENCE,
+                    CameraSettings.KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU,
                     CameraSettings.KEY_AUDIO_ENCODER,
                     CameraSettings.KEY_VIDEO_ENCODER,
                     CameraSettings.KEY_VIDEO_BITRATE,
@@ -640,6 +677,13 @@ public class VideoCamera extends ActivityBase
     }
 
     @Override
+    public void setTouchParameters() {
+        mParameters = mCameraDevice.getParameters();
+        mParameters.setMeteringAreas(mTouchManager.getMeteringAreas());
+        mCameraDevice.setParameters(mParameters);
+    }
+
+    @Override
     public void onShutterButtonClick() {
         if (collapseCameraControls() || mSwitchingCamera) return;
 
@@ -802,9 +846,27 @@ public class VideoCamera extends ActivityBase
         super.onResume();
         if (mOpenCameraFail || mCameraDisabled) return;
 
+        if ( null == mAutoConvergence || mPaused ) {
+            mAutoConvergence = getString(R.string.pref_camera_autoconvergence_default);
+        }
+
+        if ( null == mMechanicalMisalignmentCorrection || mPaused ) {
+            mMechanicalMisalignmentCorrection = getString(R.string.pref_camera_mechanical_misalignment_correction_default);
+        }
+
+        if (mPaused) {
+            mPreviewLayout = null;
+        }
+
+        mPaused = false;
         mZoomValue = 0;
 
         showVideoSnapshotUI(false);
+        CameraInfo info = CameraHolder.instance().getCameraInfo()[mCameraId];
+        boolean mirror = (info.facing == CameraInfo.CAMERA_FACING_FRONT);
+        int displayRotation = Util.getDisplayRotation(this);
+        int displayOrientation = Util.getDisplayOrientation(displayRotation, mCameraId);
+        mTouchManager.initialize(this, mirror, displayOrientation);
 
         // Start orientation listener as soon as possible because it takes
         // some time to get first orientation.
@@ -1899,6 +1961,29 @@ public class VideoCamera extends ActivityBase
 
     @SuppressWarnings("deprecation")
     private void setCameraParameters() {
+        mTouchManager.setPreviewSize(mDesiredPreviewWidth, mDesiredPreviewHeight);
+
+        String previewLayout = null;
+        if (is2DMode()) {
+            previewLayout = "none";
+        } else {
+            previewLayout = mPreferences.getString(
+                    CameraSettings.KEY_VIDEO_PREVIEW_LAYOUT,
+                    getString(R.string.pref_video_preview_layout_default));
+        }
+        if (previewLayout != null  && !previewLayout.equals(mPreviewLayout)) {
+            String captureLayout = previewLayout;
+            // We support only full 3D layouts when capturing
+            if (captureLayout.equals(CameraSettings.TB_SUB_S3D_LAYOUT)) {
+                captureLayout = CameraSettings.TB_FULL_S3D_LAYOUT;
+            } else if (captureLayout.equals(CameraSettings.SS_SUB_S3D_LAYOUT)) {
+                captureLayout = CameraSettings.SS_FULL_S3D_LAYOUT;
+            }
+            mParameters.set(CameraSettings.KEY_S3D_PRV_FRAME_LAYOUT, previewLayout);
+            mParameters.set(CameraSettings.KEY_S3D_CAP_FRAME_LAYOUT, captureLayout);
+            mPreviewLayout = previewLayout;
+        }
+
         //Set Video Resolution
 
         String vidFormat = mPreferences.getString(CameraSettings.KEY_VIDEO_FORMAT, (getString(R.string.pref_camera_video_format_default)));
@@ -1938,6 +2023,42 @@ public class VideoCamera extends ActivityBase
             whiteBalance = mParameters.getWhiteBalance();
             if (whiteBalance == null) {
                 whiteBalance = Parameters.WHITE_BALANCE_AUTO;
+            }
+        }
+
+        // Mechanical Misalignment Correction
+        String mechanicalMisalignmentCorrection = mPreferences.getString(
+                    CameraSettings.KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU,
+                    getString(R.string.pref_camera_mechanical_misalignment_correction_default));
+
+        if( !mechanicalMisalignmentCorrection.equals(mMechanicalMisalignmentCorrection)) {
+            mParameters.set(CameraSettings.KEY_MECHANICAL_MISALIGNMENT_CORRECTION, mechanicalMisalignmentCorrection);
+            mMechanicalMisalignmentCorrection = mechanicalMisalignmentCorrection;
+        }
+
+        // Auto Convergence
+        String autoConvergence = mPreferences.getString(
+                CameraSettings.KEY_AUTO_CONVERGENCE,
+                getString(R.string.pref_camera_autoconvergence_default));
+
+        if (!autoConvergence.equals(mAutoConvergence)) {
+            mParameters.set(CameraSettings.KEY_AUTOCONVERGENCE_MODE, autoConvergence);
+            mAutoConvergence = autoConvergence;
+            if (!isConvergenceInit) isConvergenceInit = true;
+            else if (autoConvergence.equals(mManualConvergence) && isManualConvergence) {
+                int convergenceMin = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_CONVERGENCE_MIN));
+                int convergenceMax = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_CONVERGENCE_MAX));
+                int convergenceStep = Integer.parseInt(mParameters.get(CameraSettings.KEY_SUPPORTED_MANUAL_CONVERGENCE_STEP));
+                int convergenceValue = Integer.parseInt(mParameters.get(CameraSettings.KEY_MANUAL_CONVERGENCE));
+                ManualConvergenceSettings manualConvergenceDialog = new ManualConvergenceSettings(this, mHandler,
+                        convergenceValue, convergenceMin, convergenceMax, convergenceStep);
+                Editor edit = mPreferences.edit();
+                edit.putString(CameraSettings.KEY_AUTO_CONVERGENCE, autoConvergence);
+                edit.commit();
+                manualConvergenceDialog.show();
+                isManualConvergence = false;
+            } else {
+                isManualConvergence = true;
             }
         }
 
@@ -2365,6 +2486,19 @@ public class VideoCamera extends ActivityBase
         }
     }
 
+    private boolean is2DMode(){
+        if (mParameters == null) mParameters = mCameraDevice.getParameters();
+        String currentPreviewLayout = mParameters.get(CameraSettings.KEY_S3D_PRV_FRAME_LAYOUT);
+        // if there isn't selected layout  -> 2d mode
+        if (currentPreviewLayout == null ||
+                currentPreviewLayout.equals("") ||
+                currentPreviewLayout.equals("none")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     private boolean videoPreferencesChanged() {
         Log.v(TAG, "videoPreferencesChanged +");
 
@@ -2376,6 +2510,14 @@ public class VideoCamera extends ActivityBase
         String vnf = mPreferences.getString(CameraSettings.KEY_VNF,
                                             (getString(R.string.pref_camera_vnf_default)));
         boolean enableVnf = vnf.equals(mVNFEnable);
+
+        boolean layoutChanged = false;
+        if (!is2DMode()) {
+            String previewLayout = mPreferences.getString(
+                    CameraSettings.KEY_VIDEO_PREVIEW_LAYOUT,
+                    getString(R.string.pref_camera_preview_layout_default));
+            layoutChanged = !mPreviewLayout.equals(previewLayout) ? true : false;
+        }
 
         boolean isVstabEnabled = mParameters.getVideoStabilization();
         boolean isVnfEnabled = mVNFEnable.equals(mParameters.get(PARM_VNF));
@@ -2567,7 +2709,7 @@ public class VideoCamera extends ActivityBase
     }
 
     private void initializeVideoSnapshot() {
-        if (mParameters.isVideoSnapshotSupported() && !mIsVideoCaptureIntent) {
+        if (!mIsVideoCaptureIntent) {
             setSingleTapUpListener(mPreviewFrameLayout);
             // Show the tap to focus toast if this is the first start.
             if (mPreferences.getBoolean(
@@ -2591,28 +2733,34 @@ public class VideoCamera extends ActivityBase
     // Preview area is touched. Take a picture.
     @Override
     protected void onSingleTapUp(View view, int x, int y) {
-        if (mMediaRecorderRecording && effectsActive()) {
-            new RotateTextToast(this, R.string.disable_video_snapshot_hint,
-                    mOrientation).show();
+        if (mMeteringAreaSupported &&
+                mAutoConvergence.equals(mTouchConvergence)) {
+                mTouchManager.onTouch(x,y);
             return;
         }
 
-        if (mPaused || mSnapshotInProgress
-                || !mMediaRecorderRecording || effectsActive()) {
-            return;
+        if (mParameters.isVideoSnapshotSupported()) {
+             if (mMediaRecorderRecording && effectsActive()) {
+                new RotateTextToast(this, R.string.disable_video_snapshot_hint,
+                        mOrientation).show();
+                return;
+            }
+            if (mPaused || mSnapshotInProgress
+                    || !mMediaRecorderRecording || effectsActive()) {
+                return;
+            }
+            // Set rotation and gps data.
+            int rotation = Util.getJpegRotation(mCameraId, mOrientation);
+            mParameters.setRotation(rotation);
+            Location loc = mLocationManager.getCurrentLocation();
+            Util.setGpsParameters(mParameters, loc);
+            mCameraDevice.setParameters(mParameters);
+
+            Log.v(TAG, "Video snapshot start");
+            mCameraDevice.takePicture(null, null, null, new JpegPictureCallback(loc));
+            showVideoSnapshotUI(true);
+            mSnapshotInProgress = true;
         }
-
-        // Set rotation and gps data.
-        int rotation = Util.getJpegRotation(mCameraId, mOrientation);
-        mParameters.setRotation(rotation);
-        Location loc = mLocationManager.getCurrentLocation();
-        Util.setGpsParameters(mParameters, loc);
-        mCameraDevice.setParameters(mParameters);
-
-        Log.v(TAG, "Video snapshot start");
-        mCameraDevice.takePicture(null, null, null, new JpegPictureCallback(loc));
-        showVideoSnapshotUI(true);
-        mSnapshotInProgress = true;
     }
 
     @Override

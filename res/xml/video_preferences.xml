@@ -17,25 +17,50 @@
 <PreferenceGroup
         xmlns:camera="http://schemas.android.com/apk/res/com.ti.omap.android.camera"
         camera:title="@string/pref_camcorder_settings_category">
-	<ListPreference
-            camera:key="pref_camera_video_mode_key"
-            camera:defaultValue="@string/pref_camera_video_mode_default"
-            camera:title="@string/pref_camera_video_mode_title"
-            camera:entries="@array/pref_camera_video_mode_entries"
-            camera:entryValues="@array/pref_camera_video_mode_entryvalues" />
+    <IconListPreference
+            camera:key="pref_video_preview_layout_key"
+            camera:defaultValue="@string/pref_video_preview_layout_default"
+            camera:title="@string/pref_video_preview_layout_title"
+            camera:entries="@array/pref_video_preview_layout_entries"
+            camera:entryValues="@array/pref_video_preview_layout_entryvalues"/>
     <ListPreference
             camera:key="pref_camera_previewsize_key"
             camera:defaultValue="@array/pref_camera_previewsize_default_array"
             camera:title="@string/pref_camera_previewsize_title"
             camera:entries="@array/pref_camera_previewsize_entries"
             camera:entryValues="@array/pref_camera_previewsize_entryvalues" />
-	<ListPreference
+    <ListPreference
+            camera:key="pref_camera_previewsize2d_key"
+            camera:defaultValue="@array/pref_camera_previewsize_default_array"
+            camera:title="@string/pref_camera_previewsize_title"
+            camera:entries="@array/pref_camera_previewsize_entries"
+            camera:entryValues="@array/pref_camera_previewsize_entryvalues" />
+    <ListPreference
+            camera:key="pref_camera_ss_previewsize_key"
+            camera:defaultValue="@array/pref_camera_previewsize_default_array"
+            camera:title="@string/pref_camera_previewsize_title"
+            camera:entries="@array/pref_camera_previewsize_entries"
+            camera:entryValues="@array/pref_camera_ss_previewsize_entryvalues" />
+    <ListPreference
+            camera:key="pref_camera_tb_previewsize_key"
+            camera:defaultValue="@array/pref_camera_previewsize_default_array"
+            camera:title="@string/pref_camera_previewsize_title"
+            camera:entries="@array/pref_camera_previewsize_entries"
+            camera:entryValues="@array/pref_camera_tb_previewsize_entryvalues" />
+    <ListPreference
+            camera:key="pref_camera_video_mode_key"
+            camera:defaultValue="@string/pref_camera_video_mode_default"
+            camera:title="@string/pref_camera_video_mode_title"
+            camera:entries="@array/pref_camera_video_mode_entries"
+            camera:entryValues="@array/pref_camera_video_mode_entryvalues" />
+
+    <ListPreference
             camera:key="pref_camera_video_format_key"
             camera:defaultValue="@string/pref_camera_video_format_default"
             camera:title="@string/pref_camera_video_format_title"
             camera:entries="@array/pref_camera_video_format_entries"
             camera:entryValues="@array/pref_camera_video_format_entryvalues" />
-	<ListPreference
+    <ListPreference
             camera:key="pref_camera_video_timer_key"
             camera:defaultValue="@string/pref_camera_video_timer_default"
             camera:title="@string/pref_camera_video_timer_title"
@@ -67,29 +92,29 @@
             camera:largeIcons="@array/video_timelapse_largeicons"
             camera:entries="@array/pref_video_time_lapse_frame_interval_entries"
             camera:entryValues="@array/pref_video_time_lapse_frame_interval_entryvalues"/>
-	<ListPreference
+    <ListPreference
             camera:key="pref_camera_audioencoder_key"
             camera:defaultValue="@string/pref_camera_audioencoder_default"
             camera:title="@string/pref_camera_audioencoder_title"
             camera:entries="@array/pref_camera_audioencoder_entries"
             camera:entryValues="@array/pref_camera_audioencoder_entryvalues" />
-	<ListPreference
+    <ListPreference
             camera:key="pref_camera_videoframerate_range_key"
             camera:defaultValue="@string/pref_camera_videoframerate_range_default"
             camera:title="@string/pref_camera_videoframerate_range_title"/>
-	<ListPreference
+    <ListPreference
             camera:key="pref_camera_videobitrate_key"
             camera:defaultValue="@string/pref_camera_videobitrate_default"
             camera:title="@string/pref_camera_videobitrate_title"
             camera:entries="@array/pref_camera_videobitrate_entries"
             camera:entryValues="@array/pref_camera_videobitrate_entryvalues" />
-	<ListPreference
+    <ListPreference
             camera:key="pref_camera_videoencoder_key"
             camera:defaultValue="@string/pref_camera_videoencoder_default"
             camera:title="@string/pref_camera_videoencoder_title"
             camera:entries="@array/pref_camera_videoencoder_entries"
             camera:entryValues="@array/pref_camera_videoencoder_entryvalues"/>
-	<IconListPreference
+    <IconListPreference
             camera:key="pref_camera_video_flashmode_key"
             camera:defaultValue="@string/pref_camera_video_flashmode_default"
             camera:title="@string/pref_camera_flashmode_title"
@@ -126,7 +151,7 @@
             camera:title="@string/pref_camera_autoconvergence_title"
             camera:entries="@array/pref_camera_autoconvergence_entries"
             camera:entryValues="@array/pref_camera_autoconvergence_entryvalues" />
-	<ListPreference
+    <ListPreference
            camera:key="pref_camera_video_record_container_key"
            camera:title="@string/pref_video_record_container_title"
            camera:defaultValue="@string/pref_video_record_container_default"
@@ -140,4 +165,10 @@
             camera:largeIcons="@array/camera_recordlocation_largeicons"
             camera:entries="@array/pref_camera_recordlocation_entries"
             camera:entryValues="@array/pref_camera_recordlocation_entryvalues" />
+    <ListPreference
+            camera:key="pref_camera_mechanical_misalignment_correction_key"
+            camera:defaultValue="@string/pref_camera_mechanical_misalignment_correction_default"
+            camera:title="@string/pref_camera_mechanical_misalignment_correction_title"
+            camera:entries="@array/pref_camera_mechanical_misalignment_correction_entries"
+            camera:entryValues="@array/pref_camera_mechanical_misalignment_correction_entryvalues" />
 </PreferenceGroup>

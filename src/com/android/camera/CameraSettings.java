@@ -47,7 +47,7 @@ public class CameraSettings {
     public static final String KEY_LOCAL_VERSION = "pref_local_version_key";
     public static final String KEY_RECORD_LOCATION = RecordLocationPreference.KEY;
     public static final String KEY_PICTURE_SIZE = "pref_camera_picturesize_key";
-    public static final String KEY_PREVIEW_SIZE = "pref_camera_previewsize_key";
+    public static final String KEY_PICTURE_SIZE_2D = "pref_camera_picturesize2d_key";
     public static final String KEY_JPEG_QUALITY = "pref_camera_jpegquality_key";
     public static final String KEY_FOCUS_MODE = "pref_camera_focusmode_key";
     public static final String KEY_FLASH_MODE = "pref_camera_flashmode_key";
@@ -74,7 +74,13 @@ public class CameraSettings {
     public static final String KEY_ISO = "pref_camera_iso_key";
     public static final String KEY_COLOR_EFFECT = "pref_camera_coloreffect_key";
     public static final String KEY_GBCE = "pref_camera_gbce_key";
+    public static final String KEY_PREVIEW_SIZE = "pref_camera_previewsize_key";
+    public static final String KEY_PREVIEW_SIZE_2D = "pref_camera_previewsize2d_key";
     public static final String KEY_PREVIEW_FRAMERATE = "pref_camera_previewframerate_key";
+
+    public static final String KEY_MECHANICAL_MISALIGNMENT_CORRECTION_SUPPORTED = "mechanical-misalignment-correction-supported";
+    public static final String KEY_MECHANICAL_MISALIGNMENT_CORRECTION = "mechanical-misalignment-correction";
+    public static final String KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU="pref_camera_mechanical_misalignment_correction_key";
 
     public static final String KEY_AUTO_CONVERGENCE = "pref_camera_autoconvergence_key";
     public static final String KEY_AUTOCONVERGENCE_MODE = "auto-convergence-mode";
@@ -83,6 +89,28 @@ public class CameraSettings {
     public static final String KEY_SUPPORTED_MANUAL_CONVERGENCE_MIN = "supported-manual-convergence-min";
     public static final String KEY_SUPPORTED_MANUAL_CONVERGENCE_MAX = "supported-manual-convergence-max";
     public static final String KEY_SUPPORTED_MANUAL_CONVERGENCE_STEP = "supported-manual-convergence-step";
+    public static final String KEY_CAPTURE_LAYOUT = "pref_camera_capture_layout_key";
+    public static final String KEY_PREVIEW_LAYOUT = "pref_camera_preview_layout_key";
+    public static final String KEY_CAPTURE_LAYOUT_VALUES = "s3d-cap-frame-layout-values";
+    public static final String KEY_PREVIEW_LAYOUT_VALUES = "s3d-prv-frame-layout-values";
+    public static final String KEY_VIDEO_PREVIEW_LAYOUT = "pref_video_preview_layout_key";
+    public static final String KEY_PREVIEW_SIZES_SS = "pref_camera_ss_previewsize_key";
+    public static final String KEY_PREVIEW_SIZES_TB = "pref_camera_tb_previewsize_key";
+    public static final String KEY_PICTURE_SIZES_SS = "pref_camera_ss_picturesize_key";
+    public static final String KEY_PICTURE_SIZES_TB = "pref_camera_tb_picturesize_key";
+    public static final String KEY_SUPPORTED_PICTURE_TOPBOTTOM_SIZES = "supported-picture-topbottom-size-values";
+    public static final String KEY_SUPPORTED_PICTURE_SIDEBYSIDE_SIZES = "supported-picture-sidebyside-size-values";
+    public static final String KEY_SUPPORTED_PREVIEW_TOPBOTTOM_SIZES = "supported-preview-topbottom-size-values";
+    public static final String KEY_SUPPORTED_PREVIEW_SIDEBYSIDE_SIZES = "supported-preview-sidebyside-size-values";
+    public static final String KEY_SUPPORTED_PICTURE_SUBSAMPLED_SIZES = "supported-picture-subsampled-size-values";
+    public static final String KEY_SUPPORTED_PREVIEW_SUBSAMPLED_SIZES = "supported-preview-subsampled-size-values";
+    public static final String TB_FULL_S3D_LAYOUT = "tb-full";
+    public static final String SS_FULL_S3D_LAYOUT = "ss-full";
+    public static final String TB_SUB_S3D_LAYOUT = "tb-subsampled";
+    public static final String SS_SUB_S3D_LAYOUT = "ss-subsampled";
+
+    public static final String KEY_S3D_CAP_FRAME_LAYOUT = "s3d-cap-frame-layout";
+    public static final String KEY_S3D_PRV_FRAME_LAYOUT = "s3d-prv-frame-layout";
 
     public static final String KEY_EXPOSURE_MODE = "exposure";
     // Exposure modes
@@ -104,6 +132,10 @@ public class CameraSettings {
     public static final String KEY_SHOTPARAMS_MANUAL_EXPOSURE_GAIN_POPUP_SLIDERS = "pref_camera_manual_exp_gain_key";
     public static final String KEY_SHOTPARAMS_BURST = "burst-capture";
     public static final String KEY_SHOTPARAMS_EXP_GAIN_PAIRS = "exp-gain-pairs";
+
+    public static final String KEY_PICTURE_FORMAT_MENU = "pref_camera_picture_format_key";
+    public static final String KEY_PICTURE_FORMAT = "picture-format";
+    public static final String KEY_SUPPORTED_PICTURE_FORMATS = "picture-format-values";
 
     public static final int CURRENT_VERSION = 5;
     public static final int CURRENT_LOCAL_VERSION = 2;
@@ -129,7 +161,6 @@ public class CameraSettings {
     public static final String KEY_VIDEO_TIMER = "pref_camera_video_timer_key";
     public static final int DEFAULT_VIDEO_DURATION = 0; // no limit
 
-    public static final String KEY_SUPPORTED_PREVIEW_SUBSAMPLED_SIZES = "supported-preview-subsampled-size-values";
     private static final String TAG = "CameraSettings";
 
     private final Context mContext;
@@ -189,19 +220,53 @@ public class CameraSettings {
     }
 
     public static void initialCameraPictureSize(
-            Context context, Parameters parameters) {
+           Context context, Parameters parameters) {
         // When launching the camera app first time, we will set the picture
         // size to the first one in the list defined in "arrays.xml" and is also
         // supported by the driver.
         List<String> supported = new ArrayList<String>();
-        List<Size> suppSizes = parameters.getSupportedPictureSizes();
-        if (suppSizes != null) {
-            supported = sizeListToStringList(suppSizes);
+        int pictureEntryValues = R.array.pref_camera_picturesize_entryvalues;
+        String supp = null;
+        String captureLayout = parameters.get(KEY_S3D_CAP_FRAME_LAYOUT);
+        if (captureLayout !=null && !captureLayout.equals("")) {
+            if (captureLayout.equals(TB_FULL_S3D_LAYOUT)) {
+                supp = parameters.get(KEY_SUPPORTED_PICTURE_TOPBOTTOM_SIZES);
+                if (supp !=null && !supp.equals("")) {
+                    for (String item : supp.split(",")) {
+                        supported.add(item);
+                    }
+                }
+                pictureEntryValues = R.array.pref_camera_tb_picturesize_entryvalues;
+            } else if (captureLayout.equals(SS_FULL_S3D_LAYOUT)) {
+                supp = parameters.get(KEY_SUPPORTED_PICTURE_SIDEBYSIDE_SIZES);
+                if (supp !=null && !supp.equals("")) {
+                    for (String item : supp.split(",")) {
+                        supported.add(item);
+                    }
+                }
+                pictureEntryValues = R.array.pref_camera_ss_picturesize_entryvalues;
+            } else if(captureLayout.equals(SS_SUB_S3D_LAYOUT)|| captureLayout.equals(TB_SUB_S3D_LAYOUT)) {
+                supp = parameters.get(KEY_SUPPORTED_PICTURE_SUBSAMPLED_SIZES);
+                if (supp !=null && !supp.equals("")) {
+                    for (String item : supp.split(",")) {
+                        supported.add(item);
+                    }
+                }
+            } else {
+                List<Size> suppSizes = parameters.getSupportedPictureSizes();
+                if (suppSizes != null) {
+                    supported = sizeListToStringList(suppSizes);
+                }
+            }
+        }else{
+            List<Size> suppSizes = parameters.getSupportedPictureSizes();
+            if (suppSizes != null) {
+                supported = sizeListToStringList(suppSizes);
+            }
         }
 
         if (supported == null) return;
-        for (String candidate : context.getResources().getStringArray(
-                R.array.pref_camera_picturesize_entryvalues)) {
+        for (String candidate : context.getResources().getStringArray(pictureEntryValues)) {
             if (setCameraPictureSize(candidate, supported, parameters)) {
                 SharedPreferences.Editor editor = ComboPreferences
                         .get(context).edit();
@@ -330,25 +395,32 @@ public class CameraSettings {
          }
          return false;
       }
-
+    private void checkPreferenceSizeMatches(ListPreference a, ListPreference b) {
+        if (a != null && b != null) {
+            if (a.getEntryValues().length != b.getEntryValues().length) {
+                throw new RuntimeException("Preference list sizes do not match for keys: " +
+                        a.getKey() + " and " + b.getKey() + ". Check the arrays.xml");
+            }
+        }
+    }
     private void initPreference(PreferenceGroup group) {
         ListPreference videoQuality = group.findPreference(KEY_VIDEO_QUALITY);
         ListPreference videoFormat = group.findPreference(KEY_VIDEO_FORMAT);
         ListPreference videoMode = group.findPreference(KEY_VIDEO_MODE);
         ListPreference timeLapseInterval = group.findPreference(KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL);
-        ListPreference pictureSize = group.findPreference(KEY_PICTURE_SIZE);
         ListPreference whiteBalance =  group.findPreference(KEY_WHITE_BALANCE);
         ListPreference sceneMode = group.findPreference(KEY_SCENE_MODE);
         ListPreference flashMode = group.findPreference(KEY_FLASH_MODE);
         ListPreference focusMode = group.findPreference(KEY_FOCUS_MODE);
         ListPreference autoConvergence = group.findPreference(KEY_AUTO_CONVERGENCE);
         ListPreference exposure = group.findPreference(KEY_EXPOSURE);
+        ListPreference captureLayout = group.findPreference(KEY_CAPTURE_LAYOUT);
+        ListPreference previewLayout = group.findPreference(KEY_PREVIEW_LAYOUT);
         IconListPreference cameraIdPref =
                 (IconListPreference) group.findPreference(KEY_CAMERA_ID);
         ListPreference videoFlashMode =
                 group.findPreference(KEY_VIDEOCAMERA_FLASH_MODE);
         ListPreference videoEffect = group.findPreference(KEY_VIDEO_EFFECT);
-        ListPreference previewSize = group.findPreference(KEY_PREVIEW_SIZE);
         ListPreference antibanding = group.findPreference(KEY_ANTIBANDING);
         ListPreference vstab = group.findPreference(KEY_VSTAB);
         ListPreference vnf = group.findPreference(KEY_VNF);
@@ -357,27 +429,190 @@ public class CameraSettings {
         ListPreference colorEffect = group.findPreference(KEY_COLOR_EFFECT);
         ListPreference contrastEnhancement = group.findPreference(KEY_GBCE);
         ListPreference exposureMode = group.findPreference(KEY_EXPOSURE_MODE_MENU);
+        ListPreference pictureFormat = group.findPreference(KEY_PICTURE_FORMAT_MENU);
+        ListPreference videoPreviewLayout = group.findPreference(KEY_VIDEO_PREVIEW_LAYOUT);
         ListPreference previewFramerate = group.findPreference(KEY_PREVIEW_FRAMERATE);
         ListPreference cpcam_manual_exp_gain = group.findPreference(KEY_SHOTPARAMS_MANUAL_EXPOSURE_GAIN_POPUP_SLIDERS);
+        ListPreference mechanicalMisalignmentCorrection = group.findPreference(KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU);
+        ListPreference pictureSize = group.findPreference(KEY_PICTURE_SIZE);
+        ListPreference pictureSize2d = group.findPreference(KEY_PICTURE_SIZE_2D);
+        ListPreference previewSize = group.findPreference(KEY_PREVIEW_SIZE);
+        ListPreference previewSize2d = group.findPreference(KEY_PREVIEW_SIZE_2D);
+        ListPreference pictureSizeTB = group.findPreference(KEY_PICTURE_SIZES_TB);
+        ListPreference pictureSizeSS = group.findPreference(KEY_PICTURE_SIZES_SS);
+        ListPreference previewSizeTB = group.findPreference(KEY_PREVIEW_SIZES_TB);
+        ListPreference previewSizeSS = group.findPreference(KEY_PREVIEW_SIZES_SS);
+        checkPreferenceSizeMatches(previewSize, previewSizeTB);
+        checkPreferenceSizeMatches(previewSize, previewSizeSS);
+        checkPreferenceSizeMatches(pictureSize, pictureSizeTB);
+        checkPreferenceSizeMatches(pictureSize, pictureSizeSS);
 
-        ArrayList<CharSequence[]> allPictureEntries = new ArrayList<CharSequence[]>();
-        ArrayList<CharSequence[]> allPictureEntryValues = new ArrayList<CharSequence[]>();
-        ArrayList<CharSequence[]> allPreviewEntries = new ArrayList<CharSequence[]>();
-        ArrayList<CharSequence[]> allPreviewEntryValues = new ArrayList<CharSequence[]>();
+        if (previewSize2d != null) {
+            List<String> supp = new ArrayList<String>();
+            String suppSizes  = mParameters.get(KEY_SUPPORTED_PREVIEW_SUBSAMPLED_SIZES);
+            if (suppSizes !=null && !suppSizes.equals("")) {
+                for (String item : suppSizes.split(",")) {
+                    supp.add(item);
+                }
+            } else {
+                supp = sizeListToStringList(mParameters.getSupportedPreviewSizes());
+            }
+            filterUnsupportedOptions(group, previewSize2d, supp);
+        }
 
-        if (pictureSize != null) {
-            ListPreference pictureSizes = group.findPreference(KEY_PICTURE_SIZE);
-            if (pictureSizes !=null) {
-                pictureSizes.clearAndSetEntries(allPictureEntries, allPictureEntryValues,
-                        pictureSize.getEntries(), pictureSize.getEntryValues());
+        if (pictureSize2d != null) {
+            List<String> supp = new ArrayList<String>();
+            String suppSizes  = mParameters.get(KEY_SUPPORTED_PICTURE_SUBSAMPLED_SIZES);
+            if (suppSizes !=null && !suppSizes.equals("")) {
+                for (String item : suppSizes.split(",")) {
+                    supp.add(item);
+                }
+            } else {
+                supp = sizeListToStringList(mParameters.getSupportedPictureSizes());
+            }
+            filterUnsupportedOptions(group, pictureSize2d, supp);
+        }
+
+        if (pictureSizeTB !=null) {
+            List<String> supp = new ArrayList<String>();
+            String suppSizes = mParameters.get(KEY_SUPPORTED_PICTURE_TOPBOTTOM_SIZES);
+            if (suppSizes !=null && !suppSizes.equals("")) {
+                for (String item : suppSizes.split(",")) {
+                    supp.add(item);
+                }
+            }
+            filterUnsupportedOptions(group, pictureSizeTB, supp);
+        }
+
+        if (pictureSizeSS !=null) {
+            List<String> supp = new ArrayList<String>();
+            String suppSizes = mParameters.get(KEY_SUPPORTED_PICTURE_SIDEBYSIDE_SIZES);
+            if (suppSizes !=null && !suppSizes.equals("")) {
+                for (String item : suppSizes.split(",")) {
+                    supp.add(item);
+                }
+            }
+            filterUnsupportedOptions(group, pictureSizeSS, supp);
+        }
+
+        if (previewSizeSS !=null) {
+            List<String> supp = new ArrayList<String>();
+            String suppSizes = mParameters.get(KEY_SUPPORTED_PREVIEW_SIDEBYSIDE_SIZES);
+            if (suppSizes !=null && !suppSizes.equals("")) {
+                for (String item : suppSizes.split(",")) {
+                    supp.add(item);
+                }
+            }
+            filterUnsupportedOptions(group, previewSizeSS, supp);
+        }
+
+        if(previewSizeTB !=null){
+            List<String> supp = new ArrayList<String>();
+            String suppSizes = mParameters.get(KEY_SUPPORTED_PREVIEW_TOPBOTTOM_SIZES);
+            if (suppSizes !=null && !suppSizes.equals("")) {
+                for (String item : suppSizes.split(",")) {
+                    supp.add(item);
+                }
+            }
+            filterUnsupportedOptions(group, previewSizeTB, supp);
+        }
+
+        String key_picture_sizes = null;
+        String selectedPictureLayout = mParameters.get(KEY_S3D_CAP_FRAME_LAYOUT);
+        if (selectedPictureLayout !=null && !selectedPictureLayout.equals("")) {
+            if (selectedPictureLayout.equals(TB_FULL_S3D_LAYOUT)) {
+                key_picture_sizes = KEY_PICTURE_SIZES_TB;
+            } else if (selectedPictureLayout.equals(SS_FULL_S3D_LAYOUT)) {
+                key_picture_sizes = KEY_PICTURE_SIZES_SS;
+            } else {
+                key_picture_sizes = KEY_PICTURE_SIZE_2D;
+            }
+        } else {
+            key_picture_sizes = KEY_PICTURE_SIZE_2D;
+        }
+
+        String key_preview_sizes = null;
+        String selectedPreviewLayout = mParameters.get(KEY_S3D_PRV_FRAME_LAYOUT);
+        if (selectedPreviewLayout !=null && !selectedPreviewLayout.equals("")) {
+            if (selectedPreviewLayout.equals(TB_FULL_S3D_LAYOUT)) {
+                key_preview_sizes = KEY_PREVIEW_SIZES_TB;
+            } else if (selectedPreviewLayout.equals(SS_FULL_S3D_LAYOUT)) {
+                key_preview_sizes = KEY_PREVIEW_SIZES_SS;
+            } else {
+                key_preview_sizes = KEY_PREVIEW_SIZE_2D;
+            }
+        } else {
+            key_preview_sizes = KEY_PREVIEW_SIZE_2D;
+        }
+
+        if (videoPreviewLayout != null) {
+            ArrayList<String> suppLayout = new ArrayList<String>();
+            String videoLayouts = mParameters.get(KEY_PREVIEW_LAYOUT_VALUES);
+            if (videoLayouts != null && !videoLayouts.equals("") && !videoLayouts.equals("none")) {
+                for (String item : videoLayouts.split(",")) {
+                    suppLayout.add(item);
+                }
+            }
+            filterUnsupportedOptions(group,videoPreviewLayout,suppLayout);
+        }
+
+        if (captureLayout != null) {
+            ArrayList<String> suppLayout = new ArrayList<String>();
+            String captureLayouts = mParameters.get(KEY_CAPTURE_LAYOUT_VALUES);
+            if (captureLayouts !=null && !captureLayouts.equals("")) {
+                for (String item : captureLayouts.split(",")) {
+                    suppLayout.add(item);
+                }
+                filterUnsupportedOptions(group,captureLayout,suppLayout);
             }
         }
 
-        if (previewSize != null) {
+        if (previewLayout != null) {
+            ArrayList<String> suppLayout = new ArrayList<String>();
+            String previewLayouts = mParameters.get(KEY_PREVIEW_LAYOUT_VALUES);
+            if (previewLayouts !=null && !previewLayouts.equals("")) {
+                for (String item : previewLayouts.split(",")) {
+                    suppLayout.add(item);
+                }
+                filterUnsupportedOptions(group,previewLayout,suppLayout);
+            }
+        }
+
+        ArrayList<CharSequence[]> allPreviewEntries = new ArrayList<CharSequence[]>();
+        ArrayList<CharSequence[]> allPreviewEntryValues = new ArrayList<CharSequence[]>();
+        allPreviewEntries.add(previewSize2d.getEntries());
+        allPreviewEntries.add(previewSizeTB.getEntries());
+        allPreviewEntries.add(previewSizeSS.getEntries());
+        allPreviewEntryValues.add(previewSize2d.getEntryValues());
+        allPreviewEntryValues.add(previewSizeTB.getEntryValues());
+        allPreviewEntryValues.add(previewSizeSS.getEntryValues());
+
+        ArrayList<CharSequence[]> allPictureEntries = new ArrayList<CharSequence[]>();
+        ArrayList<CharSequence[]> allPictureEntryValues = new ArrayList<CharSequence[]>();
+
+        if(pictureSize2d != null  && pictureSizeTB != null && pictureSizeSS != null){
+            allPictureEntries.add(pictureSize2d.getEntries());
+            allPictureEntries.add(pictureSizeTB.getEntries());
+            allPictureEntries.add(pictureSizeSS.getEntries());
+            allPictureEntryValues.add(pictureSize2d.getEntryValues());
+            allPictureEntryValues.add(pictureSizeTB.getEntryValues());
+            allPictureEntryValues.add(pictureSizeSS.getEntryValues());
+        }
+
+        ListPreference filteredSizes = group.findPreference(key_picture_sizes);
+        if (filteredSizes != null) {
+            ListPreference pictureSizes = group.findPreference(KEY_PICTURE_SIZE);
+            if (pictureSizes !=null) {
+                pictureSizes.clearAndSetEntries(allPictureEntries, allPictureEntryValues,
+                        filteredSizes.getEntries(), filteredSizes.getEntryValues());
+            }
+        }
+        filteredSizes = group.findPreference(key_preview_sizes);
+        if (filteredSizes != null) {
             ListPreference previewSizes = group.findPreference(KEY_PREVIEW_SIZE);
             if (previewSizes !=null) {
                 previewSizes.clearAndSetEntries(allPreviewEntries, allPreviewEntryValues,
-                        previewSize.getEntries(), previewSize.getEntryValues());
+                        filteredSizes.getEntries(), filteredSizes.getEntryValues());
             }
         }
 
@@ -519,8 +754,32 @@ public class CameraSettings {
                     autoConvergence, suppConvergence);
         }
 
+        if(mechanicalMisalignmentCorrection !=null){
+            final String mechanicalMisalignmentSupported =
+                    mParameters.get(KEY_MECHANICAL_MISALIGNMENT_CORRECTION_SUPPORTED);
+            ArrayList<String> suppMechanicalMisalignmentCorrection = new ArrayList<String>();
+            if ( mechanicalMisalignmentSupported != null && mechanicalMisalignmentSupported.equals(Camera.TRUE) ) {
+                final String enable = mContext.getString(R.string.pref_camera_mechanical_misalignment_correction_enable);
+                final String disable = mContext.getString(R.string.pref_camera_mechanical_misalignment_correction_disable);
+                suppMechanicalMisalignmentCorrection.add(mechanicalMisalignmentCorrection.findEntryValueByEntry(enable));
+                suppMechanicalMisalignmentCorrection.add(mechanicalMisalignmentCorrection.findEntryValueByEntry(disable));
+            }
+            filterUnsupportedOptions(group, mechanicalMisalignmentCorrection, suppMechanicalMisalignmentCorrection);
+        }
+
         if ( contrastEnhancement != null ) {
             filterContrastEnhancement(group, contrastEnhancement);
+        }
+
+        if (pictureFormat != null) {
+            ArrayList<String> suppPictureFormat = new ArrayList<String>();
+            String pictureFormatValues = mParameters.get(KEY_SUPPORTED_PICTURE_FORMATS);
+            if (pictureFormatValues != null && !pictureFormatValues.equals("")) {
+                for (String item : pictureFormatValues.split(",")) {
+                    suppPictureFormat.add(item);
+                }
+            }
+            filterUnsupportedOptions(group, pictureFormat, suppPictureFormat);
         }
     }
 
