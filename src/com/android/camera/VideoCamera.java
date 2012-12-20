@@ -228,6 +228,8 @@ public class VideoCamera extends ActivityBase
     private boolean mRestoreFlash;  // This is used to check if we need to restore the flash
                                     // status when going back from gallery.
     private String mPreviewLayout = "";
+
+    private String mMechanicalMisalignmentCorrection;
     // This Handler is used to post message back onto the main thread of the
     // application
     private class MainHandler extends Handler {
@@ -474,6 +476,7 @@ public class VideoCamera extends ActivityBase
                     CameraSettings.KEY_VIDEO_MODE,
                     CameraSettings.KEY_VIDEO_FORMAT,
                     CameraSettings.KEY_VIDEO_TIMER,
+                    CameraSettings.KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU,
                     CameraSettings.KEY_AUDIO_ENCODER,
                     CameraSettings.KEY_VIDEO_ENCODER,
                     CameraSettings.KEY_VIDEO_BITRATE,
@@ -802,6 +805,10 @@ public class VideoCamera extends ActivityBase
         mPaused = false;
         super.onResume();
         if (mOpenCameraFail || mCameraDisabled) return;
+
+        if ( null == mMechanicalMisalignmentCorrection || mPaused ) {
+            mMechanicalMisalignmentCorrection = getString(R.string.pref_camera_mechanical_misalignment_correction_default);
+        }
 
         if (mPaused) {
             mPreviewLayout = null;
@@ -1966,6 +1973,16 @@ public class VideoCamera extends ActivityBase
             if (whiteBalance == null) {
                 whiteBalance = Parameters.WHITE_BALANCE_AUTO;
             }
+        }
+
+        // Mechanical Misalignment Correction
+        String mechanicalMisalignmentCorrection = mPreferences.getString(
+                    CameraSettings.KEY_MECHANICAL_MISALIGNMENT_CORRECTION_MENU,
+                    getString(R.string.pref_camera_mechanical_misalignment_correction_default));
+
+        if( !mechanicalMisalignmentCorrection.equals(mMechanicalMisalignmentCorrection)) {
+            mParameters.set(CameraSettings.KEY_MECHANICAL_MISALIGNMENT_CORRECTION, mechanicalMisalignmentCorrection);
+            mMechanicalMisalignmentCorrection = mechanicalMisalignmentCorrection;
         }
 
         // Set zoom.

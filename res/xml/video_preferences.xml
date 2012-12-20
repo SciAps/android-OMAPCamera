@@ -165,4 +165,10 @@
             camera:largeIcons="@array/camera_recordlocation_largeicons"
             camera:entries="@array/pref_camera_recordlocation_entries"
             camera:entryValues="@array/pref_camera_recordlocation_entryvalues" />
+    <ListPreference
+            camera:key="pref_camera_mechanical_misalignment_correction_key"
+            camera:defaultValue="@string/pref_camera_mechanical_misalignment_correction_default"
+            camera:title="@string/pref_camera_mechanical_misalignment_correction_title"
+            camera:entries="@array/pref_camera_mechanical_misalignment_correction_entries"
+            camera:entryValues="@array/pref_camera_mechanical_misalignment_correction_entryvalues" />
 </PreferenceGroup>
