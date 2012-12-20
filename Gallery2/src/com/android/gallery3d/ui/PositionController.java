@@ -36,7 +36,9 @@ class PositionController {
     public static final int IMAGE_AT_BOTTOM_EDGE = 8;
 
     public static final int CAPTURE_ANIMATION_TIME = 700;
-    public static final int SNAPBACK_ANIMATION_TIME = 600;
+    // To avoid settings panel temporary disappearance when preview size is
+    // changed in Camera app - snapback animation time set to 0
+    public static final int SNAPBACK_ANIMATION_TIME = 0;
 
     // Special values for animation time.
     private static final long NO_ANIMATION = -1;
