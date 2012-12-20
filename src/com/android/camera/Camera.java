@@ -2504,8 +2504,10 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             setCameraParameters(UPDATE_PARAM_MODE);
         }
 
-        if (mSurfaceTexture == null) {
-            Size size = mParameters.getPreviewSize();
+        Size size = mParameters.getPreviewSize();
+        if ((mSurfaceTexture == null)
+                || (size.width != mCameraScreenNail.getWidth())
+                || (size.height != mCameraScreenNail.getHeight())) {
             if (mCameraDisplayOrientation % 180 == 0) {
                 mCameraScreenNail.setSize(size.width, size.height);
             } else {
@@ -2947,6 +2949,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             supported = CameraSettings.sizeListToStringList(mParameters.getSupportedPreviewSizes());
             CameraSettings.setCameraPreviewSize(previewSize, supported, mParameters);
             mPreviewSize = previewSize;
+            restartNeeded = true;
             stopFaceDetection();
         }
 
