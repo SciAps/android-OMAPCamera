@@ -606,6 +606,19 @@
         <item>macro</item>
     </string-array>
 
+    <!-- Camera Preferences Picture Format  -->
+    <string-array name="pref_camera_picture_format_entries" translatable="false">
+       <item>@string/pref_camera_picture_format_jpeg</item>
+       <item>@string/pref_camera_picture_format_jps</item>
+       <item>@string/pref_camera_picture_format_mpo</item>
+    </string-array>
+
+    <string-array name="pref_camera_picture_format_entryvalues" translatable="false">
+       <item>jpeg</item>
+       <item>jps</item>
+       <item>mpo</item>
+    </string-array>
+
     <!-- Camera Preferences flash mode dialog box entries -->
     <string-array name="pref_camera_flashmode_entries" translatable="false">
         <item>@string/pref_camera_flashmode_entry_auto</item>

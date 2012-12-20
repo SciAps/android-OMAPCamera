@@ -128,6 +128,10 @@ public class CameraSettings {
     public static final String KEY_SHOTPARAMS_BURST = "burst-capture";
     public static final String KEY_SHOTPARAMS_EXP_GAIN_PAIRS = "exp-gain-pairs";
 
+    public static final String KEY_PICTURE_FORMAT_MENU = "pref_camera_picture_format_key";
+    public static final String KEY_PICTURE_FORMAT = "picture-format";
+    public static final String KEY_SUPPORTED_PICTURE_FORMATS = "picture-format-values";
+
     public static final int CURRENT_VERSION = 5;
     public static final int CURRENT_LOCAL_VERSION = 2;
 
@@ -420,6 +424,7 @@ public class CameraSettings {
         ListPreference colorEffect = group.findPreference(KEY_COLOR_EFFECT);
         ListPreference contrastEnhancement = group.findPreference(KEY_GBCE);
         ListPreference exposureMode = group.findPreference(KEY_EXPOSURE_MODE_MENU);
+        ListPreference pictureFormat = group.findPreference(KEY_PICTURE_FORMAT_MENU);
         ListPreference previewFramerate = group.findPreference(KEY_PREVIEW_FRAMERATE);
         ListPreference cpcam_manual_exp_gain = group.findPreference(KEY_SHOTPARAMS_MANUAL_EXPOSURE_GAIN_POPUP_SLIDERS);
 
@@ -763,6 +768,17 @@ public class CameraSettings {
                 }
                 filterUnsupportedOptions(group,previewLayout,suppLayout);
             }
+        }
+
+        if (pictureFormat != null) {
+            ArrayList<String> suppPictureFormat = new ArrayList<String>();
+            String pictureFormatValues = mParameters.get(KEY_SUPPORTED_PICTURE_FORMATS);
+            if (pictureFormatValues != null && !pictureFormatValues.equals("")) {
+                for (String item : pictureFormatValues.split(",")) {
+                    suppPictureFormat.add(item);
+                }
+            }
+            filterUnsupportedOptions(group, pictureFormat, suppPictureFormat);
         }
     }
 
