@@ -227,7 +227,7 @@ public class VideoCamera extends ActivityBase
     private ZoomControl mZoomControl;
     private boolean mRestoreFlash;  // This is used to check if we need to restore the flash
                                     // status when going back from gallery.
-
+    private String mPreviewLayout = "";
     // This Handler is used to post message back onto the main thread of the
     // application
     private class MainHandler extends Handler {
@@ -469,6 +469,7 @@ public class VideoCamera extends ActivityBase
                     CameraSettings.KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL};
                     //CameraSettings.KEY_VIDEO_QUALITY}; //Disabling redundant Video Qualily Menu
         final String[] OTHER_SETTING_KEYS = {
+                    CameraSettings.KEY_VIDEO_PREVIEW_LAYOUT,
                     CameraSettings.KEY_RECORD_LOCATION,
                     CameraSettings.KEY_VIDEO_MODE,
                     CameraSettings.KEY_VIDEO_FORMAT,
@@ -802,6 +803,11 @@ public class VideoCamera extends ActivityBase
         super.onResume();
         if (mOpenCameraFail || mCameraDisabled) return;
 
+        if (mPaused) {
+            mPreviewLayout = null;
+        }
+
+        mPaused = false;
         mZoomValue = 0;
 
         showVideoSnapshotUI(false);
@@ -1899,6 +1905,27 @@ public class VideoCamera extends ActivityBase
 
     @SuppressWarnings("deprecation")
     private void setCameraParameters() {
+        String previewLayout = null;
+        if (is2DMode()) {
+            previewLayout = "none";
+        } else {
+            previewLayout = mPreferences.getString(
+                    CameraSettings.KEY_VIDEO_PREVIEW_LAYOUT,
+                    getString(R.string.pref_video_preview_layout_default));
+        }
+        if (previewLayout != null  && !previewLayout.equals(mPreviewLayout)) {
+            String captureLayout = previewLayout;
+            // We support only full 3D layouts when capturing
+            if (captureLayout.equals(CameraSettings.TB_SUB_S3D_LAYOUT)) {
+                captureLayout = CameraSettings.TB_FULL_S3D_LAYOUT;
+            } else if (captureLayout.equals(CameraSettings.SS_SUB_S3D_LAYOUT)) {
+                captureLayout = CameraSettings.SS_FULL_S3D_LAYOUT;
+            }
+            mParameters.set(CameraSettings.KEY_S3D_PRV_FRAME_LAYOUT, previewLayout);
+            mParameters.set(CameraSettings.KEY_S3D_CAP_FRAME_LAYOUT, captureLayout);
+            mPreviewLayout = previewLayout;
+        }
+
         //Set Video Resolution
 
         String vidFormat = mPreferences.getString(CameraSettings.KEY_VIDEO_FORMAT, (getString(R.string.pref_camera_video_format_default)));
@@ -2365,6 +2392,19 @@ public class VideoCamera extends ActivityBase
         }
     }
 
+    private boolean is2DMode(){
+        if (mParameters == null) mParameters = mCameraDevice.getParameters();
+        String currentPreviewLayout = mParameters.get(CameraSettings.KEY_S3D_PRV_FRAME_LAYOUT);
+        // if there isn't selected layout  -> 2d mode
+        if (currentPreviewLayout == null ||
+                currentPreviewLayout.equals("") ||
+                currentPreviewLayout.equals("none")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     private boolean videoPreferencesChanged() {
         Log.v(TAG, "videoPreferencesChanged +");
 
@@ -2376,6 +2416,14 @@ public class VideoCamera extends ActivityBase
         String vnf = mPreferences.getString(CameraSettings.KEY_VNF,
                                             (getString(R.string.pref_camera_vnf_default)));
         boolean enableVnf = vnf.equals(mVNFEnable);
+
+        boolean layoutChanged = false;
+        if (!is2DMode()) {
+            String previewLayout = mPreferences.getString(
+                    CameraSettings.KEY_VIDEO_PREVIEW_LAYOUT,
+                    getString(R.string.pref_camera_preview_layout_default));
+            layoutChanged = !mPreviewLayout.equals(previewLayout) ? true : false;
+        }
 
         boolean isVstabEnabled = mParameters.getVideoStabilization();
         boolean isVnfEnabled = mVNFEnable.equals(mParameters.get(PARM_VNF));

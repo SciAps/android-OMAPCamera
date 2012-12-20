@@ -400,6 +400,20 @@
          <item>256x96</item>
     </string-array>
 
+    <string-array name="pref_video_preview_layout_entries" translatable="false">
+        <item>@string/pref_camera_layout_entry_ss_subsampled</item>
+        <!-- item>@string/pref_camera_layout_entry_ss_full</item-->
+        <item>@string/pref_camera_layout_entry_tb_subsampled</item>
+        <!-- item>@string/pref_camera_layout_entry_tb_full</item-->
+    </string-array>
+
+    <string-array name="pref_video_preview_layout_entryvalues" translatable="false">
+        <item>ss-subsampled</item>
+        <!-- item>ss-full</item-->
+        <item>tb-subsampled</item>
+        <!-- item>tb-full</item-->
+    </string-array>
+
     <string-array name="pref_camera_capture_layout_entries" translatable="false">
         <item>@string/pref_camera_layout_entry_ss_subsampled</item>
         <item>@string/pref_camera_layout_entry_ss_full</item>
