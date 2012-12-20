@@ -60,8 +60,6 @@ LOCAL_CFLAGS := $(COMMON_CFLAGS)
 LOCAL_SRC_FILES := $(COMMON_SRC_FILES)
 LOCAL_SHARED_LIBRARIES := $(COMMON_SHARED_LIBRARIES) libandroid liblog libbinder libutils libgui libui
 LOCAL_MODULE_TAGS := optional
-LOCAL_MODULE_TAGS := optional
-LOCAL_MODULE    := libjni_msc
 #LOCAL_SRC_FILES += process_jni.cpp 
 
 LOCAL_MODULE    := libjni_process
