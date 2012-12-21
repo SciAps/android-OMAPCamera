@@ -396,6 +396,8 @@ public class VideoCamera extends ActivityBase
             // ignore
         }
 
+        mTouchManager = new TouchManager();
+
         Thread startPreviewThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -412,8 +414,6 @@ public class VideoCamera extends ActivityBase
         mQuickCapture = getIntent().getBooleanExtra(EXTRA_QUICK_CAPTURE, false);
         mOrientationListener = new MyOrientationEventListener(this);
         mLocationManager = new LocationManager(this, null);
-
-        mTouchManager = new TouchManager();
 
         // Make sure preview is started.
         try {
