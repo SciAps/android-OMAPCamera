@@ -145,7 +145,8 @@ public class IndicatorControlBarContainer extends IndicatorControlContainer {
 
     @Override
     public void reloadPreferences() {
-        mIndicatorControlBar.reloadPreferences();
+	if (mIndicatorControlBar != null)
+            mIndicatorControlBar.reloadPreferences();
         mSecondLevelIndicatorControlBar.reloadPreferences();
     }
 
